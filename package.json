@@ -3,7 +3,14 @@
     "husky": "^9.1.7"
   },
   "scripts": {
-    "prepare": "husky",
+    "prepare": "husky install",
+    "scriptname": "cmd",
+    "build": "cd client && npm run build",
+    "install": "cd client && npm install --legacy-peer-deps && cd ../server && npm install",
+    "start": "concurrently \"cd client && yarn start\" \"cd server && yarn serve:watch\"",
     "test": "echo \"No tests specified\" && exit 0"
+  },
+  "dependencies": {
+    "concurrently": "^9.1.2"
   }
 }
