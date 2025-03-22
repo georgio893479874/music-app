@@ -1,0 +1,103 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum PlaylistAccess {
+  PUBLIC
+  PRIVATE
+}
+
+model User {
+  id               String             @id @default(uuid())
+  createdAt        DateTime           @default(now())
+  email            String             @unique
+  password         String
+  firstname        String
+  lastname         String?
+  role             Role?
+  playlists        Playlist[]
+  tracks           Track[]
+  favorites        Favorite[]
+  listeningHistory ListeningHistory[]
+}
+
+model Playlist {
+  id         String         @id @default(uuid())
+  createdAt  DateTime       @default(now())
+  name       String
+  userId     String
+  user       User           @relation(fields: [userId], references: [id])
+  tracks     Track[]
+  access     PlaylistAccess @default(PRIVATE)
+  coverPhoto String?
+}
+
+model Track {
+  id               String             @id @default(uuid())
+  createdAt        DateTime           @default(now())
+  title            String
+  duration         Int
+  albumId          String
+  authorId         String?
+  album            Album              @relation(fields: [albumId], references: [id])
+  audioFilePath    String
+  coverImagePath   String
+  users            User[]
+  playlists        Playlist[]
+  favorites        Favorite[]
+  ListeningHistory ListeningHistory[]
+}
+
+model Album {
+  id          String   @id @default(uuid())
+  createdAt   DateTime @default(now())
+  title       String
+  releaseDate DateTime
+  artistId    String
+  artist      Artist   @relation(fields: [artistId], references: [id])
+  tracks      Track[]
+  genreId     String
+  genre       Genre    @relation(fields: [genreId], references: [id])
+  coverUrl    String?
+}
+
+model Artist {
+  id         String   @id @default(uuid())
+  createdAt  DateTime @default(now())
+  name       String   @unique
+  coverPhoto String?
+  albums     Album[]
+}
+
+model Genre {
+  id     String  @id @default(uuid())
+  name   String  @unique
+  albums Album[]
+}
+
+model Favorite {
+  id      String @id @default(uuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  trackId String
+  track   Track  @relation(fields: [trackId], references: [id])
+}
+
+model ListeningHistory {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  trackId    String
+  track      Track    @relation(fields: [trackId], references: [id])
+  listenedAt DateTime @default(now())
+}
