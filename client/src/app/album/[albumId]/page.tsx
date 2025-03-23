@@ -77,7 +77,7 @@ export default function AlbumPage() {
     const fetchAlbum = async () => {
       try {
         const response = await axios.get<Album>(
-          `http://localhost:4521/album/${albumId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/album/${albumId}`
         );
         setAlbum(response.data);
         setTrack(response.data.tracks[0]);
@@ -98,7 +98,7 @@ export default function AlbumPage() {
     setIsPlaying(true);
     try {
       const response = await axios.get<Track>(
-        `http://localhost:4521/track/${album?.tracks[trackIndex].id}`
+        `${process.env.NEXT_PUBLIC_API_URL}/track/${album?.tracks[trackIndex].id}`
       );
       setTrack(response.data);
     } catch (error) {

@@ -11,7 +11,7 @@ interface SignUpFormValues {
 
 export default function SignUpPage() {
   const handleSignUpSubmit = async (values: SignUpFormValues) => {
-    await axios.post('http://localhost:4521/auth/signup', {
+    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
       firstname: values.fullName.split(' ')[0],
       lastname: values.fullName.split(' ')[1],
       email: values.email,

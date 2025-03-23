@@ -31,12 +31,12 @@ const ArtistPage = () => {
     const fetchArtistData = async () => {
       try {
         const { data: artistData } = await axios.get(
-          `http://localhost:4521/performer/${artistId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/performer/${artistId}`
         );
         setArtist(artistData);
 
         const { data: albumData } = await axios.get(
-          `http://localhost:4521/album?artistId=${artistId}`
+          `${process.env.NEXT_PUBLIC_API_URL}/album?artistId=${artistId}`
         );
         setAlbums(albumData);
       } catch (error) {
@@ -49,7 +49,7 @@ const ArtistPage = () => {
   const handlePlay = async () => {
     try {
       const { data: songs } = await axios.get(
-        `http://localhost:4521/track?artistId=${artistId}`
+        `${process.env.NEXT_PUBLIC_API_URL}/track?artistId=${artistId}`
       );
       if (songs.length > 0) {
         setPlaying(true);

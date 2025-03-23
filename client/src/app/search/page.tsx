@@ -45,7 +45,7 @@ export default function SearchPage() {
     if (query.trim() === "") return;
 
     try {
-      const { data } = await axios.get(`http://localhost:4521/search`, {
+      const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/search`, {
         params: { query },
       });
 

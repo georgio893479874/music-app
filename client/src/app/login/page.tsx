@@ -14,7 +14,7 @@ export default function LoginPage() {
 
   const handleLoginSubmit = async (values: LoginFormValues) => {
     try {
-      await axios.post("http://localhost:4521/auth/login", {
+      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         email: values.email,
         password: values.password,
       });
