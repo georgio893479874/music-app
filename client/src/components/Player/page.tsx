@@ -1,8 +1,18 @@
 import { RefObject, useState } from "react";
-import { BsFillPauseCircleFill, BsFillPlayCircleFill, BsFillSkipStartCircleFill, BsSkipEndCircleFill } from "react-icons/bs";
+import {
+  BsFillPauseCircleFill,
+  BsFillPlayCircleFill,
+  BsFillSkipStartCircleFill,
+  BsSkipEndCircleFill,
+} from "react-icons/bs";
 import { Album } from "@/app/album/[albumId]/page";
 import { PiDotsThreeOutlineFill } from "react-icons/pi";
-import { IoArrowUpOutline, IoLaptopOutline, IoVolumeHighOutline } from "react-icons/io5";
+import {
+  IoArrowUpOutline,
+  IoLaptopOutline,
+  IoVolumeHighOutline,
+  IoVolumeMuteOutline,
+} from "react-icons/io5";
 
 interface PlayerProps {
   track: Track | null;
@@ -38,21 +48,28 @@ const Player: React.FC<PlayerProps> = ({
   currentTime,
   duration,
 }) => {
-  const [showVolumeSlider, setShowVolumeSlider] = useState(false);
   const [volume, setVolume] = useState(1);
-
-  const toggleVolumeSlider = () => {
-    setShowVolumeSlider((prev) => !prev);
-  };
+  const [isMuted, setIsMuted] = useState(false);
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const volumeValue = Number(e.target.value);
-
     setVolume(volumeValue);
 
-    if (audioPlayer.current) {
+    if (audioPlayer.current && !isMuted) {
       audioPlayer.current.volume = volumeValue;
     }
+  };
+
+  const toggleMute = () => {
+    if (audioPlayer.current) {
+      if (isMuted) {
+        audioPlayer.current.volume = volume;
+      } else {
+        setVolume(audioPlayer.current.volume);
+        audioPlayer.current.volume = 0;
+      }
+    }
+    setIsMuted(!isMuted);
   };
 
   return (
@@ -67,9 +84,11 @@ const Player: React.FC<PlayerProps> = ({
             />
             <div className="flex flex-col text-start">
               <div className="flex gap-2">
-                <span className="text-base font-bold">{track?.album?.artist?.name}</span>
+                <span className="text-base font-bold">
+                  {track?.album?.artist?.name}
+                </span>
                 <div className="flex gap-2">
-                  <PiDotsThreeOutlineFill className="text-white cursor-pointer hidden sm:flex"/>
+                  <PiDotsThreeOutlineFill className="text-white cursor-pointer hidden sm:flex" />
                 </div>
               </div>
               <span className="text-xs text-gray-400">{track.title}</span>
@@ -126,21 +145,27 @@ const Player: React.FC<PlayerProps> = ({
       </div>
       <div className="fixed right-4 gap-4 items-center lg:mt-5 lg:flex hidden">
         <div className="flex gap-4 items-center">
-          {showVolumeSlider && (
-            <input
-              type="range"
-              min="0"
-              max="1"
-              step="0.01"
-              value={volume}
-              onChange={handleVolumeChange}
-              className="w-24 h-1 bg-gray-500 rounded-full appearance-none cursor-pointer"
+          {isMuted ? (
+            <IoVolumeMuteOutline
+              onClick={toggleMute}
+              className="text-xl cursor-pointer text-gray-200"
+              size={24}
+            />
+          ) : (
+            <IoVolumeHighOutline
+              onClick={toggleMute}
+              className="text-xl cursor-pointer text-gray-200"
+              size={24}
             />
           )}
-          <IoVolumeHighOutline
-            className="text-xl cursor-pointer text-gray-200"
-            size={24}
-            onClick={toggleVolumeSlider}
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={isMuted ? 0 : volume}
+            onChange={handleVolumeChange}
+            className="w-24 h-1 bg-gray-500 rounded-full appearance-none cursor-pointer"
           />
           <IoLaptopOutline
             className="text-xl cursor-pointer text-gray-200"
