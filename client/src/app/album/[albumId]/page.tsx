@@ -49,8 +49,11 @@ export default function AlbumPage() {
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [currentSongIndex, setCurrentSongIndex] = useState<number>(0);
   const totalDuration = album?.tracks.reduce((total, track) => {
-    const [minutes, seconds] = track.duration.split(":").map(Number);
-    return total + minutes * 60 + seconds;
+    if (typeof track.duration === "string") {
+      const [minutes, seconds] = track.duration.split(":").map(Number);
+      return total + minutes * 60 + seconds;
+    }
+    return total;
   }, 0);
 
   const formattedTotalDuration = totalDuration
@@ -158,7 +161,7 @@ export default function AlbumPage() {
                 <span className="font-medium">
                   {index + 1}. {track.title}
                 </span>
-                <span className="text-gray-400">{duration}</span>
+                <span className="text-gray-400">{durationFormatted}</span>
               </li>
             ))}
           </ul>
