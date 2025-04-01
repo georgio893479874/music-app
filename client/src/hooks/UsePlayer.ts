@@ -29,27 +29,14 @@ const usePlayer = ({
   const progressBar = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      audioPlayer.current = new Audio();
-    }
-  }, []);
-
-  useEffect(() => {
     const audio = audioPlayer.current;
 
     const handleTimeUpdate = () => {
       setCurrentTime(audio.currentTime);
-      if (progressBar.current) {
-        progressBar.current.value = String(audio.currentTime);
-        setDuration(audioPlayer.current.duration);
-      }
     };
 
     const handleLoadedMetadata = () => {
       setDuration(audio.duration);
-      if (progressBar.current) {
-        progressBar.current.max = String(audio.duration);
-      }
     };
 
     audio.addEventListener("timeupdate", handleTimeUpdate);
@@ -122,18 +109,15 @@ const usePlayer = ({
     const loadSong = async () => {
       if (songs.length > 0) {
         const song = songs[currentSongIndex];
-        audioPlayer.current.pause();
         const previousTime = audioPlayer.current.currentTime;
         audioPlayer.current.src = song.audioFilePath;
         audioPlayer.current.load();
         audioPlayer.current.currentTime = previousTime;
-
         if (isPlaying) {
           audioPlayer.current.play();
         }
       }
     };
-
     loadSong();
   }, [currentSongIndex, songs, isPlaying]);
 
@@ -181,20 +165,23 @@ const usePlayer = ({
   const formatTime = (time: number) => {
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
-    return `${minutes}:${seconds < 10 ? "0" + seconds : seconds}`;
+    return `${minutes}:${seconds}`;
   };
-
+  
   const handleProgressChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = Number(e.target.value);
     if (audioPlayer.current) {
-      audioPlayer.current.currentTime = value;
+      const newTime = Number(e.target.value);
+      audioPlayer.current.currentTime = newTime;
+      if (progressBar.current) {
+        progressBar.current.value = String(newTime);
+      }
+      setCurrentTime(newTime);
     }
-    setCurrentTime(value);
   };
 
   const skipBegin = () => {
     if (currentSongIndex > 0) {
-      setCurrentSongIndex(currentSongIndex - 1);
+       setCurrentSongIndex(currentSongIndex - 1);
     }
     audioPlayer.current.currentTime = 0;
   };

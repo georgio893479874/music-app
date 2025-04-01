@@ -3,6 +3,8 @@ import {
   BsFillPauseCircleFill,
   BsFillPlayCircleFill,
   BsFillSkipStartCircleFill,
+  BsRepeat,
+  BsShuffle,
   BsSkipEndCircleFill,
 } from "react-icons/bs";
 import { Album } from "@/app/album/[albumId]/page";
@@ -13,9 +15,10 @@ import {
   IoVolumeHighOutline,
   IoVolumeMuteOutline,
 } from "react-icons/io5";
+import { FaHeart, FaRegHeart } from "react-icons/fa";
 
 interface PlayerProps {
-  track: Track | null;
+  track: Track;
   isPlaying: boolean;
   onPlayPauseToggle: () => void;
   onSkipNext: () => void;
@@ -25,6 +28,9 @@ interface PlayerProps {
   audioPlayer: RefObject<HTMLAudioElement>;
   currentTime: number;
   duration: number;
+  durationFormatted: string;
+  currentFormatted: string;
+  repeatMode: "off" | "one" | "all";
 }
 
 interface Track {
@@ -47,9 +53,13 @@ const Player: React.FC<PlayerProps> = ({
   audioPlayer,
   currentTime,
   duration,
+  durationFormatted,
+  currentFormatted,
+  repeatMode,
 }) => {
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(false);
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const volumeValue = Number(e.target.value);
@@ -72,6 +82,12 @@ const Player: React.FC<PlayerProps> = ({
     setIsMuted(!isMuted);
   };
 
+  const toggleRepeatMode = () => {};
+
+  const toggleFavorite = async () => {
+    setIsFavorite(!isFavorite);
+  };
+
   return (
     <div className="lg:h-24 h-20 flex flex-col items-center justify-between p-4 bg-[#212121] text-white fixed lg:bottom-0 bottom-14 left-0 right-0 shadow-lg z-10">
       {track && (
@@ -88,6 +104,17 @@ const Player: React.FC<PlayerProps> = ({
                   {track?.album?.artist?.name}
                 </span>
                 <div className="flex gap-2">
+                {isFavorite ? (
+                    <FaHeart
+                      className="text-white cursor-pointer"
+                      onClick={toggleFavorite}
+                    />
+                  ) : (
+                    <FaRegHeart
+                      className="text-white cursor-pointer"
+                      onClick={toggleFavorite}
+                    />
+                  )}
                   <PiDotsThreeOutlineFill className="text-white cursor-pointer hidden sm:flex" />
                 </div>
               </div>
@@ -106,7 +133,8 @@ const Player: React.FC<PlayerProps> = ({
         </>
       )}
       <div className="flex items-center gap-4 fixed right-8 bottom-20 sm:right-auto sm:bottom-auto">
-        <p className="md:flex hidden">{currentTime}</p>
+        <p className="md:flex hidden">{currentFormatted}</p>
+        <BsShuffle className="text-xl cursor-pointer text-gray-400 sm:flex hidden"/>
         <BsFillSkipStartCircleFill
           onClick={onSkipPrev}
           className="text-2xl cursor-pointer text-gray-200"
@@ -126,7 +154,13 @@ const Player: React.FC<PlayerProps> = ({
           onClick={onSkipNext}
           className="text-2xl cursor-pointer text-gray-200"
         />
-        <p className="md:flex hidden">{duration}</p>
+        <BsRepeat
+          onClick={toggleRepeatMode}
+          className={`text-xl cursor-pointer sm:flex hidden ${
+            repeatMode === 'off' ? 'text-gray-400' : 'text-gray-200'
+          }`}
+        />
+        <p className="md:flex hidden">{durationFormatted}</p>
       </div>
       <div className="flex-col items-center lg:mb-2 w-full max-w-md md:flex hidden">
         <input

@@ -8,6 +8,7 @@ import Sidebar from "@/components/Sidebar/page";
 import Link from "next/link";
 import Player from "@/components/Player/page";
 import usePlayer from "@/hooks/UsePlayer";
+import { Helmet } from "react-helmet";
 
 interface Artist {
   id: string;
@@ -47,6 +48,14 @@ export default function AlbumPage() {
   const [track, setTrack] = useState<Track | null>(null);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
   const [currentSongIndex, setCurrentSongIndex] = useState<number>(0);
+  const totalDuration = album?.tracks.reduce((total, track) => {
+    const [minutes, seconds] = track.duration.split(":").map(Number);
+    return total + minutes * 60 + seconds;
+  }, 0);
+
+  const formattedTotalDuration = totalDuration
+    ? `${Math.floor(totalDuration / 60)}:${String(totalDuration % 60).padStart(2, "0")}`
+    : "0:00";
   const {
     setIsPlaying,
     isPlaying,
@@ -57,19 +66,16 @@ export default function AlbumPage() {
     currentTime,
     duration,
     skipBegin,
+    togglePlayPause,
+    currentFormatted,
+    durationFormatted,
+    repeatMode,
   } = usePlayer({
     songs: album?.tracks || [],
     currentSongIndex,
     setCurrentSongIndex,
     repeatMode: "off",
   });
-
-  useEffect(() => {
-    if (album && album.tracks.length > 0 && currentSongIndex === 0) {
-      setCurrentSongIndex(0);
-      setTrack(album.tracks[0]);
-    }
-  }, [album]);
 
   useEffect(() => {
     if (!albumId) return;
@@ -80,7 +86,6 @@ export default function AlbumPage() {
           `${process.env.NEXT_PUBLIC_API_URL}/album/${albumId}`
         );
         setAlbum(response.data);
-        setTrack(response.data.tracks[0]);
       } catch (error) {
         console.error(error);
       }
@@ -106,54 +111,76 @@ export default function AlbumPage() {
     }
   };
 
-  if (!album) return <div className="text-center text-white mt-20">Loading...</div>;
+  if (!album)
+    return <div className="text-center text-white mt-20">Loading...</div>;
 
   return (
-    <div className="flex min-h-screen bg-[#323131] text-white">
-      <Sidebar />
-      <div className="flex flex-col items-center flex-1 py-12 px-4 lg:ml-64">
-        <img
-          src={album.coverUrl}
-          alt={album.title}
-          className="rounded-lg border border-gray-700 mb-6 object-cover w-64 h-64 shadow-lg transition-transform transform hover:scale-105"
-        />
-        <h1 className="text-4xl font-extrabold text-center mb-2">{album.title}</h1>
-        <Link href={`/artist/${album.artist.id}`} passHref>
+    <>
+      <Helmet>
+        <title>{`${album.title} - Album by ${album.artist.name} | Notent`}</title>
+      </Helmet>
+      <div className="flex min-h-screen bg-[#323131] text-white">
+        <Sidebar />
+        <div className="flex flex-col items-center flex-1 py-12 px-4 lg:ml-64">
+          <img
+            src={album.coverUrl}
+            alt={album.title}
+            className="rounded-lg border border-gray-700 mb-6 object-cover w-64 h-64 shadow-lg transition-transform transform hover:scale-105"
+          />
+          <h1 className="text-4xl font-extrabold text-center mb-2">
+            {album.title}
+          </h1>
           <p className="text-lg text-gray-400 hover:text-white transition-colors cursor-pointer">
-            {album.artist.name} · {new Date(album.releaseDate).toLocaleDateString()}
+            <Link href={`/artist/${album.artist.id}`} passHref>
+              {album.artist.name} 
+            </Link>
+            · {new Date(album.releaseDate).toLocaleDateString()}
+            · {album.tracks.length} songs
+            · {formattedTotalDuration}
           </p>
-        </Link>
-        <button 
-          onClick={toggleFavorite} 
-          className="mt-4 p-2 rounded-full bg-[#2e2c2c] hover:bg-[#312e2e] transition-colors"
-        >
-          <Heart className={`w-8 h-8 ${isFavorite ? "text-red-600 fill-red-600" : "text-gray-400"}`} />
-        </button>
-        <ul className="mt-6 w-full max-w-md divide-y divide-gray-700">
-          {album.tracks?.map((track, index) => (
-            <li
-              key={track.id}
-              className="py-3 px-4 flex justify-between items-center cursor-pointer hover:bg-[#2e2c2c] rounded-lg transition-colors"
-              onClick={() => handleTrackClick(index)}
-            >
-              <span className="font-medium">{index + 1}. {track.title}</span>
-              <span className="text-gray-400">{track.duration}</span>
-            </li>
-          ))}
-        </ul>
+          <button
+            onClick={toggleFavorite}
+            className="mt-4 p-2 rounded-full bg-[#2e2c2c] hover:bg-[#312e2e] transition-colors"
+          >
+            <Heart
+              className={`w-8 h-8 ${
+                isFavorite ? "text-red-600 fill-red-600" : "text-gray-400"
+              }`}
+            />
+          </button>
+          <ul className="mt-6 w-full max-w-md divide-y divide-gray-700">
+            {album.tracks?.map((track, index) => (
+              <li
+                key={track.id}
+                className="py-3 px-4 flex justify-between items-center cursor-pointer hover:bg-[#2e2c2c] rounded-lg transition-colors"
+                onClick={() => handleTrackClick(index)}
+              >
+                <span className="font-medium">
+                  {index + 1}. {track.title}
+                </span>
+                <span className="text-gray-400">{duration}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+        {track && (
+          <Player
+            isPlaying={isPlaying}
+            track={track}
+            onPlayPauseToggle={togglePlayPause}
+            onSkipNext={skipEnd}
+            onSkipPrev={skipBegin}
+            handleProgressChange={handleProgressChange}
+            progressBar={progressBar}
+            audioPlayer={audioPlayer}
+            currentTime={currentTime}
+            duration={duration}
+            currentFormatted={currentFormatted}
+            durationFormatted={durationFormatted}
+            repeatMode={repeatMode}
+          />
+        )}
       </div>
-      <Player
-        isPlaying={isPlaying}
-        track={track}
-        onPlayPauseToggle={() => setIsPlaying(!isPlaying)}
-        onSkipNext={skipEnd}
-        onSkipPrev={skipBegin}
-        handleProgressChange={handleProgressChange}
-        progressBar={progressBar}
-        audioPlayer={audioPlayer}
-        currentTime={currentTime}
-        duration={duration}
-      />
-    </div>
+    </>
   );
 }
