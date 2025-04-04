@@ -1,4 +1,7 @@
-import { RefObject, useState } from "react";
+"use client";
+
+import { useEffect, useState } from "react";
+import axios from "axios";
 import {
   BsFillPauseCircleFill,
   BsFillPlayCircleFill,
@@ -7,7 +10,6 @@ import {
   BsShuffle,
   BsSkipEndCircleFill,
 } from "react-icons/bs";
-import { Album } from "@/app/album/[albumId]/page";
 import { PiDotsThreeOutlineFill } from "react-icons/pi";
 import {
   IoArrowUpOutline,
@@ -16,55 +18,91 @@ import {
   IoVolumeMuteOutline,
 } from "react-icons/io5";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
+import { usePlayerContext } from "@/contexts/PlayerContext";
+import usePlayer, { Track } from "@/hooks/UsePlayer";
 
-interface PlayerProps {
-  track: Track;
-  isPlaying: boolean;
-  onPlayPauseToggle: () => void;
-  onSkipNext: () => void;
-  onSkipPrev: () => void;
-  handleProgressChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  progressBar: React.RefObject<HTMLInputElement | null>;
-  audioPlayer: RefObject<HTMLAudioElement>;
-  currentTime: number;
-  duration: number;
-  durationFormatted: string;
-  currentFormatted: string;
-  repeatMode: "off" | "one" | "all";
-}
-
-interface Track {
-  id: string;
-  title: string;
-  audioFilePath: string;
-  duration: string;
-  coverImagePath: string;
-  album: Album;
-}
-
-const Player: React.FC<PlayerProps> = ({
-  track,
-  isPlaying,
-  onPlayPauseToggle,
-  onSkipNext,
-  onSkipPrev,
-  handleProgressChange,
-  progressBar,
-  audioPlayer,
-  currentTime,
-  duration,
-  durationFormatted,
-  currentFormatted,
-  repeatMode,
-}) => {
+const Player = () => {
+  const { selectedSong } = usePlayerContext();
+  const [songs, setSongs] = useState<Track[]>([]);
+  const [currentSongIndex, setCurrentSongIndex] = useState<number>(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [repeatMode, setRepeatMode] = useState<"off" | "one" | "all">("off");
+  const {
+    isPlaying,
+    togglePlayPause,
+    audioPlayer,
+    progressBar,
+    currentTime,
+    duration,
+    currentFormatted,
+    durationFormatted,
+    skipBegin,
+    skipEnd,
+    handleProgressChange,
+  } = usePlayer({
+    songs,
+    currentSongIndex,
+    setCurrentSongIndex,
+    repeatMode,
+  });
+
+  useEffect(() => {
+    if (selectedSong?.album?.id) {
+      fetchSongs(selectedSong.album.id);
+    }
+  }, [selectedSong]);
+
+  useEffect(() => {
+    if (selectedSong && audioPlayer.current) {
+      audioPlayer.current.src = selectedSong.audioFilePath;
+      audioPlayer.current.load();
+      audioPlayer.current.play().catch((error) => {
+        console.error("Failed to play audio:", error);
+      });
+    }
+  }, [selectedSong]);
+
+  useEffect(() => {
+    if (selectedSong?.album?.id) {
+      const isAlbumLoaded = songs.some((song) => song.album?.id === selectedSong.album?.id);
+      if (!isAlbumLoaded) {
+        fetchSongs(selectedSong.album.id);
+      }
+    }
+  }, [selectedSong, songs]);
+  
+  useEffect(() => {
+    if (selectedSong) {
+      const isAlbumLoaded = songs.some((song) => song.album?.id === selectedSong.album?.id);
+      if (!isAlbumLoaded && selectedSong.album?.id) {
+        fetchSongs(selectedSong.album.id);
+      }
+  
+      const index = songs.findIndex((s) => s.id === selectedSong.id);
+      if (index !== -1) {
+        setCurrentSongIndex(index);
+      }
+    }
+  }, [selectedSong, songs]);
+
+  const fetchSongs = async (albumId: string) => {
+    try {
+      const { data } = await axios.get(
+        `${process.env.NEXT_PUBLIC_API_URL}/album/${albumId}`
+      );
+      if (data?.tracks?.length > 0) {
+        setSongs(data.tracks);
+      }
+    } catch (error) {
+      console.error("Failed to load songs:", error);
+    }
+  };
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const volumeValue = Number(e.target.value);
     setVolume(volumeValue);
-
     if (audioPlayer.current && !isMuted) {
       audioPlayer.current.volume = volumeValue;
     }
@@ -82,82 +120,67 @@ const Player: React.FC<PlayerProps> = ({
     setIsMuted(!isMuted);
   };
 
-  const toggleRepeatMode = () => {};
-
-  const toggleFavorite = async () => {
-    setIsFavorite(!isFavorite);
+  const toggleRepeatMode = () => {
+    setRepeatMode((prev) =>
+      prev === "off" ? "one" : prev === "one" ? "all" : "off"
+    );
   };
+
+  const toggleFavorite = () => {
+    setIsFavorite((prev) => !prev);
+  };
+
+  console.log(selectedSong)
 
   return (
     <div className="lg:h-24 h-20 flex flex-col items-center justify-between p-4 bg-[#212121] text-white fixed lg:bottom-0 bottom-14 left-0 right-0 shadow-lg z-10">
-      {track && (
-        <>
-          <div className="left-4 flex items-center gap-4 z-5 w-full">
-            <img
-              src={track.coverImagePath}
-              className="lg:w-16 lg:h-16 w-12 h-12 rounded-sm"
-              alt="cover image"
-            />
-            <div className="flex flex-col text-start">
-              <div className="flex gap-2">
-                <span className="text-base font-bold">
-                  {track?.album?.artist?.name}
-                </span>
-                <div className="flex gap-2">
-                {isFavorite ? (
-                    <FaHeart
-                      className="text-white cursor-pointer"
-                      onClick={toggleFavorite}
-                    />
-                  ) : (
-                    <FaRegHeart
-                      className="text-white cursor-pointer"
-                      onClick={toggleFavorite}
-                    />
-                  )}
-                  <PiDotsThreeOutlineFill className="text-white cursor-pointer hidden sm:flex" />
-                </div>
-              </div>
-              <span className="text-xs text-gray-400">{track.title}</span>
-              <span className="text-xs text-gray-500 lg:flex hidden">
-                PLAYING FROM: {track?.album?.title}
-              </span>
+      <div className="left-4 flex items-center gap-4 z-5 w-full">
+        <img
+          src={selectedSong?.coverImagePath}
+          className="lg:w-16 lg:h-16 w-12 h-12 rounded-sm"
+          alt="cover"
+        />
+        <div className="flex flex-col text-start">
+          <div className="flex gap-2">
+            <span className="text-base font-bold">
+              {selectedSong?.album?.artist.name}
+            </span>
+            <div className="flex gap-2">
+              {isFavorite ? (
+                <FaHeart className="text-white cursor-pointer" onClick={toggleFavorite} />
+              ) : (
+                <FaRegHeart className="text-white cursor-pointer" onClick={toggleFavorite} />
+              )}
+              <PiDotsThreeOutlineFill className="text-white cursor-pointer hidden sm:flex" />
             </div>
           </div>
-          <audio
-            ref={audioPlayer}
-            src={track.audioFilePath}
-            onEnded={onSkipNext}
-            preload="metadata"
-          />
-        </>
-      )}
+          <span className="text-xs text-gray-400">{selectedSong?.title}</span>
+          <span className="text-xs text-gray-500 lg:flex hidden">
+            PLAYING FROM: {selectedSong?.album?.title}
+          </span>
+        </div>
+      </div>
+      <audio ref={audioPlayer} preload="metadata" />
       <div className="flex items-center gap-4 fixed right-8 bottom-20 sm:right-auto sm:bottom-auto">
         <p className="md:flex hidden">{currentFormatted}</p>
-        <BsShuffle className="text-xl cursor-pointer text-gray-400 sm:flex hidden"/>
-        <BsFillSkipStartCircleFill
-          onClick={onSkipPrev}
-          className="text-2xl cursor-pointer text-gray-200"
-        />
+        <BsShuffle className="text-xl cursor-pointer text-gray-400 sm:flex hidden" />
+        <BsFillSkipStartCircleFill onClick={skipBegin} className="text-2xl cursor-pointer text-gray-200" />
         {isPlaying ? (
           <BsFillPauseCircleFill
-            onClick={onPlayPauseToggle}
+            onClick={togglePlayPause}
             className="text-3xl cursor-pointer text-gray-200"
           />
         ) : (
           <BsFillPlayCircleFill
-            onClick={onPlayPauseToggle}
+            onClick={togglePlayPause}
             className="text-3xl cursor-pointer text-gray-200"
           />
         )}
-        <BsSkipEndCircleFill
-          onClick={onSkipNext}
-          className="text-2xl cursor-pointer text-gray-200"
-        />
+        <BsSkipEndCircleFill onClick={skipEnd} className="text-2xl cursor-pointer text-gray-200" />
         <BsRepeat
           onClick={toggleRepeatMode}
           className={`text-xl cursor-pointer sm:flex hidden ${
-            repeatMode === 'off' ? 'text-gray-400' : 'text-gray-200'
+            repeatMode === "off" ? "text-gray-400" : "text-gray-200"
           }`}
         />
         <p className="md:flex hidden">{durationFormatted}</p>
@@ -180,17 +203,9 @@ const Player: React.FC<PlayerProps> = ({
       <div className="fixed right-4 gap-4 items-center lg:mt-5 lg:flex hidden">
         <div className="flex gap-4 items-center">
           {isMuted ? (
-            <IoVolumeMuteOutline
-              onClick={toggleMute}
-              className="text-xl cursor-pointer text-gray-200"
-              size={24}
-            />
+            <IoVolumeMuteOutline onClick={toggleMute} className="text-xl cursor-pointer text-gray-200" />
           ) : (
-            <IoVolumeHighOutline
-              onClick={toggleMute}
-              className="text-xl cursor-pointer text-gray-200"
-              size={24}
-            />
+            <IoVolumeHighOutline onClick={toggleMute} className="text-xl cursor-pointer text-gray-200" />
           )}
           <input
             type="range"
@@ -201,14 +216,8 @@ const Player: React.FC<PlayerProps> = ({
             onChange={handleVolumeChange}
             className="w-24 h-1 bg-gray-500 rounded-full appearance-none cursor-pointer"
           />
-          <IoLaptopOutline
-            className="text-xl cursor-pointer text-gray-200"
-            size={24}
-          />
-          <IoArrowUpOutline
-            className="text-xl cursor-pointer text-gray-200"
-            size={24}
-          />
+          <IoLaptopOutline className="text-xl cursor-pointer text-gray-200" />
+          <IoArrowUpOutline className="text-xl cursor-pointer text-gray-200" />
         </div>
       </div>
     </div>

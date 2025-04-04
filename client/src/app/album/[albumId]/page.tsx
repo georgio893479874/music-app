@@ -3,12 +3,12 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { Heart } from "lucide-react";
+import { MoreVertical } from "lucide-react";
 import Sidebar from "@/components/Sidebar/page";
 import Link from "next/link";
 import Player from "@/components/Player/page";
-import usePlayer from "@/hooks/UsePlayer";
 import { Helmet } from "react-helmet";
+import { usePlayerContext } from "@/contexts/PlayerContext";
 
 interface Artist {
   id: string;
@@ -25,9 +25,8 @@ interface Track {
   id: string;
   title: string;
   audioFilePath: string;
-  duration: string;
   coverImagePath: string;
-  album: Album;
+  album?: Album;
 }
 
 export interface Album {
@@ -45,40 +44,7 @@ export interface Album {
 export default function AlbumPage() {
   const { albumId } = useParams();
   const [album, setAlbum] = useState<Album | null>(null);
-  const [track, setTrack] = useState<Track | null>(null);
-  const [isFavorite, setIsFavorite] = useState<boolean>(false);
-  const [currentSongIndex, setCurrentSongIndex] = useState<number>(0);
-  const totalDuration = album?.tracks.reduce((total, track) => {
-    if (typeof track.duration === "string") {
-      const [minutes, seconds] = track.duration.split(":").map(Number);
-      return total + minutes * 60 + seconds;
-    }
-    return total;
-  }, 0);
-
-  const formattedTotalDuration = totalDuration
-    ? `${Math.floor(totalDuration / 60)}:${String(totalDuration % 60).padStart(2, "0")}`
-    : "0:00";
-  const {
-    setIsPlaying,
-    isPlaying,
-    handleProgressChange,
-    progressBar,
-    skipEnd,
-    audioPlayer,
-    currentTime,
-    duration,
-    skipBegin,
-    togglePlayPause,
-    currentFormatted,
-    durationFormatted,
-    repeatMode,
-  } = usePlayer({
-    songs: album?.tracks || [],
-    currentSongIndex,
-    setCurrentSongIndex,
-    repeatMode: "off",
-  });
+  const { setSelectedSong } = usePlayerContext();
 
   useEffect(() => {
     if (!albumId) return;
@@ -90,32 +56,14 @@ export default function AlbumPage() {
         );
         setAlbum(response.data);
       } catch (error) {
-        console.error(error);
+        console.error("Error fetching album:", error);
       }
     };
 
     fetchAlbum();
   }, [albumId]);
 
-  const toggleFavorite = () => {
-    setIsFavorite((prev) => !prev);
-  };
-
-  const handleTrackClick = async (trackIndex: number) => {
-    setCurrentSongIndex(trackIndex);
-    setIsPlaying(true);
-    try {
-      const response = await axios.get<Track>(
-        `${process.env.NEXT_PUBLIC_API_URL}/track/${album?.tracks[trackIndex].id}`
-      );
-      setTrack(response.data);
-    } catch (error) {
-      console.error(error);
-    }
-  };
-
-  if (!album)
-    return <div className="text-center text-white mt-20">Loading...</div>;
+  if (!album) return <div className="text-center text-white mt-20">Loading...</div>;
 
   return (
     <>
@@ -130,59 +78,30 @@ export default function AlbumPage() {
             alt={album.title}
             className="rounded-lg border border-gray-700 mb-6 object-cover w-64 h-64 shadow-lg transition-transform transform hover:scale-105"
           />
-          <h1 className="text-4xl font-extrabold text-center mb-2">
-            {album.title}
-          </h1>
+          <h1 className="text-4xl font-extrabold text-center mb-2">{album.title}</h1>
           <p className="text-lg text-gray-400 hover:text-white transition-colors cursor-pointer">
             <Link href={`/artist/${album.artist.id}`} passHref>
-              {album.artist.name} 
-            </Link>
-            · {new Date(album.releaseDate).toLocaleDateString()}
+              {album.artist.name}
+            </Link>{" "}
+            · {new Date(album.releaseDate).toLocaleDateString()}{" "}
             · {album.tracks.length} songs
-            · {formattedTotalDuration}
           </p>
-          <button
-            onClick={toggleFavorite}
-            className="mt-4 p-2 rounded-full bg-[#2e2c2c] hover:bg-[#312e2e] transition-colors"
-          >
-            <Heart
-              className={`w-8 h-8 ${
-                isFavorite ? "text-red-600 fill-red-600" : "text-gray-400"
-              }`}
-            />
-          </button>
           <ul className="mt-6 w-full max-w-md divide-y divide-gray-700">
             {album.tracks?.map((track, index) => (
               <li
                 key={track.id}
                 className="py-3 px-4 flex justify-between items-center cursor-pointer hover:bg-[#2e2c2c] rounded-lg transition-colors"
-                onClick={() => handleTrackClick(index)}
+                onClick={() => setSelectedSong(track)}
               >
                 <span className="font-medium">
                   {index + 1}. {track.title}
                 </span>
-                <span className="text-gray-400">{durationFormatted}</span>
+                <MoreVertical className="w-5 h-5 text-gray-400 hover:text-white transition-colors cursor-pointer" />
               </li>
             ))}
           </ul>
         </div>
-        {track && (
-          <Player
-            isPlaying={isPlaying}
-            track={track}
-            onPlayPauseToggle={togglePlayPause}
-            onSkipNext={skipEnd}
-            onSkipPrev={skipBegin}
-            handleProgressChange={handleProgressChange}
-            progressBar={progressBar}
-            audioPlayer={audioPlayer}
-            currentTime={currentTime}
-            duration={duration}
-            currentFormatted={currentFormatted}
-            durationFormatted={durationFormatted}
-            repeatMode={repeatMode}
-          />
-        )}
+        <Player/>
       </div>
     </>
   );

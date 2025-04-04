@@ -110,7 +110,6 @@ const ArtistPage = () => {
                         <button className="p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition">
                           <FaPlay size={16} />
                         </button>
-                        <ShareButton />
                       </div>
                     </div>
                     <h3 className="mt-2 text-xl font-semibold transition duration-300 group-hover:underline">

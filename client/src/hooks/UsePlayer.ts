@@ -1,3 +1,4 @@
+import { Album } from "@/app/album/[albumId]/page";
 import { useRef, useState, useEffect } from "react";
 
 export interface Track {
@@ -5,8 +6,8 @@ export interface Track {
   title: string;
   audioFilePath: string;
   authorId?: string;
-  duration: string;
   coverImagePath: string;
+  album?: Album;
 }
 
 interface IControlsService {
