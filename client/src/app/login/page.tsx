@@ -14,11 +14,11 @@ export default function LoginPage() {
 
   const handleLoginSubmit = async (values: LoginFormValues) => {
     try {
-      await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
         email: values.email,
         password: values.password,
       });
-
+      document.cookie = `authToken=${response.data.token}; path=/`;
       router.push("/dashboard");
     } 
     

@@ -6,8 +6,6 @@ import {
   BsFillPauseCircleFill,
   BsFillPlayCircleFill,
   BsFillSkipStartCircleFill,
-  BsRepeat,
-  BsShuffle,
   BsSkipEndCircleFill,
 } from "react-icons/bs";
 import { PiDotsThreeOutlineFill } from "react-icons/pi";
@@ -20,6 +18,7 @@ import {
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import usePlayer, { Track } from "@/hooks/UsePlayer";
+import { Repeat, Repeat1, Shuffle } from "lucide-react";
 
 const Player = () => {
   const { selectedSong } = usePlayerContext();
@@ -29,6 +28,7 @@ const Player = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [repeatMode, setRepeatMode] = useState<"off" | "one" | "all">("off");
+  const [isShuffling, setIsShuffling] = useState(false);
   const {
     isPlaying,
     togglePlayPause,
@@ -126,6 +126,17 @@ const Player = () => {
     );
   };
 
+  const shuffleSongs = () => {
+    if (!isShuffling) {
+      const shuffledSongs = [...songs].sort(() => Math.random() - 0.5);
+      setSongs(shuffledSongs);
+      setCurrentSongIndex(0);
+    } else {
+      fetchSongs(selectedSong?.album?.id || "");
+    }
+    setIsShuffling(!isShuffling);
+  };
+
   const toggleFavorite = () => {
     setIsFavorite((prev) => !prev);
   };
@@ -161,7 +172,12 @@ const Player = () => {
       <audio ref={audioPlayer} preload="metadata" />
       <div className="flex items-center gap-4 fixed right-8 bottom-20 sm:right-auto sm:bottom-auto">
         <p className="md:flex hidden">{currentFormatted}</p>
-        <BsShuffle className="text-xl cursor-pointer text-gray-400 sm:flex hidden" />
+        <Shuffle
+          onClick={shuffleSongs}
+          className={`text-xl cursor-pointer ${
+            isShuffling ? "text-blue-400" : "text-gray-400"
+          } sm:flex hidden`}
+        />
         <BsFillSkipStartCircleFill onClick={skipBegin} className="text-2xl cursor-pointer text-gray-200" />
         {isPlaying ? (
           <BsFillPauseCircleFill
@@ -175,12 +191,11 @@ const Player = () => {
           />
         )}
         <BsSkipEndCircleFill onClick={skipEnd} className="text-2xl cursor-pointer text-gray-200" />
-        <BsRepeat
-          onClick={toggleRepeatMode}
-          className={`text-xl cursor-pointer sm:flex hidden ${
-            repeatMode === "off" ? "text-gray-400" : "text-gray-200"
-          }`}
-        />
+        <div onClick={toggleRepeatMode} className="cursor-pointer">
+          {repeatMode === "off" && <Repeat className="text-gray-400" />}
+          {repeatMode === "one" && <Repeat1 className="text-blue-400" />}
+          {repeatMode === "all" && <Repeat className="text-blue-400" />}
+        </div>
         <p className="md:flex hidden">{durationFormatted}</p>
       </div>
       <div className="flex-col items-center lg:mb-2 w-full max-w-md md:flex hidden">
@@ -200,7 +215,7 @@ const Player = () => {
       </div>
       <div className="fixed right-4 gap-4 items-center lg:mt-5 lg:flex hidden">
         <div className="flex gap-4 items-center">
-          {isMuted ? (
+          {isMuted || volume == 0 ? (
             <IoVolumeMuteOutline onClick={toggleMute} className="text-xl cursor-pointer text-gray-200" />
           ) : (
             <IoVolumeHighOutline onClick={toggleMute} className="text-xl cursor-pointer text-gray-200" />
