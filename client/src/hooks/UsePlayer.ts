@@ -1,4 +1,5 @@
 import { Album } from "@/app/album/[albumId]/page";
+import { usePlayerContext } from "@/contexts/PlayerContext";
 import { useRef, useState, useEffect } from "react";
 
 export interface Track {
@@ -28,6 +29,7 @@ const usePlayer = ({
   const [duration, setDuration] = useState(0);
   const audioPlayer = useRef<HTMLAudioElement>(new Audio());
   const progressBar = useRef<HTMLInputElement>(null);
+  const { setSelectedSong } = usePlayerContext();
 
   useEffect(() => {
     const audio = audioPlayer.current;
@@ -132,6 +134,7 @@ const usePlayer = ({
       } else if (repeatMode === "all") {
         if (currentSongIndex < songs.length - 1) {
           setCurrentSongIndex(currentSongIndex + 1);
+          setSelectedSong(songs[currentSongIndex + 1]);
         } else {
           setCurrentSongIndex(0);
         }
@@ -139,8 +142,10 @@ const usePlayer = ({
       } else {
         if (currentSongIndex < songs.length - 1) {
           setCurrentSongIndex(currentSongIndex + 1);
+          setSelectedSong(songs[currentSongIndex + 1]);
         } else {
           setCurrentSongIndex(0);
+          setSelectedSong(songs[0]);
         }
         audio.currentTime = 0;
       }
@@ -182,14 +187,18 @@ const usePlayer = ({
 
   const skipBegin = () => {
     if (currentSongIndex > 0) {
-       setCurrentSongIndex(currentSongIndex - 1);
+      const prevIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+      setCurrentSongIndex(prevIndex);
+      setSelectedSong(songs[prevIndex]);
     }
     audioPlayer.current.currentTime = 0;
   };
 
   const skipEnd = () => {
     if (currentSongIndex < songs.length - 1) {
-      setCurrentSongIndex(currentSongIndex + 1);
+      const nextIndex = (currentSongIndex + 1) % songs.length;
+      setCurrentSongIndex(nextIndex);
+      setSelectedSong(songs[nextIndex]);
     }
     audioPlayer.current.currentTime = 0;
   };

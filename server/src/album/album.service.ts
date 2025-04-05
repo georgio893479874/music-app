@@ -9,13 +9,13 @@ export class AlbumService {
 
   async create(createAlbumDto: CreateAlbumDto) {
     return this.prisma.album.create({
-        data: {
-          title: createAlbumDto.title,
-          releaseDate: createAlbumDto.releaseDate,
-          artistId: createAlbumDto.artistId,
-          genreId: createAlbumDto.genreId,
-          coverUrl: createAlbumDto.coverUrl,
-        },
+      data: {
+        title: createAlbumDto.title,
+        releaseDate: createAlbumDto.releaseDate,
+        artistId: createAlbumDto.artistId,
+        genreId: createAlbumDto.genreId,
+        coverUrl: createAlbumDto.coverUrl,
+      },
     });
   }
 
@@ -38,10 +38,17 @@ export class AlbumService {
       include: {
         artist: true,
         genre: true,
-        tracks: true,
+        tracks: {
+          include: {
+            album: {
+              include: {
+                artist: true,
+              },
+            },
+          },
+        },
       },
     });
-
     return album;
   }
 

@@ -130,8 +130,6 @@ const Player = () => {
     setIsFavorite((prev) => !prev);
   };
 
-  console.log(selectedSong)
-
   return (
     <div className="lg:h-24 h-20 flex flex-col items-center justify-between p-4 bg-[#212121] text-white fixed lg:bottom-0 bottom-14 left-0 right-0 shadow-lg z-10">
       <div className="left-4 flex items-center gap-4 z-5 w-full">
@@ -145,7 +143,7 @@ const Player = () => {
             <span className="text-base font-bold">
               {selectedSong?.album?.artist.name}
             </span>
-            <div className="flex gap-2">
+            <div className="gap-2 hidden sm:flex">
               {isFavorite ? (
                 <FaHeart className="text-white cursor-pointer" onClick={toggleFavorite} />
               ) : (

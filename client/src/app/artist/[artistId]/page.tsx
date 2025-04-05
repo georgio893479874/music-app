@@ -9,7 +9,7 @@ import Link from "next/link";
 import ShareButton from "@/components/ShareButton/page";
 import { Helmet } from "react-helmet";
 
-interface Artist {
+export interface Artist {
   id: string;
   name: string;
   coverPhoto: string;
