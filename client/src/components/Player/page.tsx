@@ -9,16 +9,11 @@ import {
   BsSkipEndCircleFill,
 } from "react-icons/bs";
 import { PiDotsThreeOutlineFill } from "react-icons/pi";
-import {
-  IoArrowUpOutline,
-  IoLaptopOutline,
-  IoVolumeHighOutline,
-  IoVolumeMuteOutline,
-} from "react-icons/io5";
+import { IoVolumeHighOutline, IoVolumeMuteOutline } from "react-icons/io5";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import usePlayer, { Track } from "@/hooks/UsePlayer";
-import { Repeat, Repeat1, Shuffle } from "lucide-react";
+import { Expand, List, Repeat, Repeat1, Shuffle, X } from "lucide-react";
 
 const Player = () => {
   const { selectedSong } = usePlayerContext();
@@ -29,6 +24,7 @@ const Player = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [repeatMode, setRepeatMode] = useState<"off" | "one" | "all">("off");
   const [isShuffling, setIsShuffling] = useState(false);
+  const [isQueueVisible, setIsQueueVisible] = useState(false);
   const {
     isPlaying,
     togglePlayPause,
@@ -66,20 +62,24 @@ const Player = () => {
 
   useEffect(() => {
     if (selectedSong?.album?.id) {
-      const isAlbumLoaded = songs.some((song) => song.album?.id === selectedSong.album?.id);
+      const isAlbumLoaded = songs.some(
+        (song) => song.album?.id === selectedSong.album?.id
+      );
       if (!isAlbumLoaded) {
         fetchSongs(selectedSong.album.id);
       }
     }
   }, [selectedSong, songs]);
-  
+
   useEffect(() => {
     if (selectedSong) {
-      const isAlbumLoaded = songs.some((song) => song.album?.id === selectedSong.album?.id);
+      const isAlbumLoaded = songs.some(
+        (song) => song.album?.id === selectedSong.album?.id
+      );
       if (!isAlbumLoaded && selectedSong.album?.id) {
         fetchSongs(selectedSong.album.id);
       }
-  
+
       const index = songs.findIndex((s) => s.id === selectedSong.id);
       if (index !== -1) {
         setCurrentSongIndex(index);
@@ -126,6 +126,10 @@ const Player = () => {
     );
   };
 
+  const toggleQueue = () => {
+    setIsQueueVisible((prev) => !prev);
+  };
+
   const shuffleSongs = () => {
     if (!isShuffling) {
       const shuffledSongs = [...songs].sort(() => Math.random() - 0.5);
@@ -142,98 +146,160 @@ const Player = () => {
   };
 
   return (
-    <div className="lg:h-24 h-20 flex flex-col items-center justify-between p-4 bg-[#212121] text-white fixed lg:bottom-0 bottom-14 left-0 right-0 shadow-lg z-10">
-      <div className="left-4 flex items-center gap-4 z-5 w-full">
-        <img
-          src={selectedSong?.coverImagePath}
-          className="lg:w-16 lg:h-16 w-12 h-12 rounded-sm"
-          alt="cover"
-        />
-        <div className="flex flex-col text-start">
-          <div className="flex gap-2">
-            <span className="text-base font-bold">
-              {selectedSong?.album?.artist.name}
-            </span>
-            <div className="gap-2 hidden sm:flex">
-              {isFavorite ? (
-                <FaHeart className="text-white cursor-pointer" onClick={toggleFavorite} />
-              ) : (
-                <FaRegHeart className="text-white cursor-pointer" onClick={toggleFavorite} />
-              )}
-              <PiDotsThreeOutlineFill className="text-white cursor-pointer hidden sm:flex" />
+    <>
+      <div className="lg:h-24 h-20 flex flex-col items-center justify-between p-4 bg-[#212121] text-white fixed lg:bottom-0 bottom-14 left-0 right-0 shadow-lg z-10">
+        <div className="left-4 flex items-center gap-4 z-5 w-full">
+          <img
+            src={selectedSong?.coverImagePath}
+            className="lg:w-16 lg:h-16 w-12 h-12 rounded-sm"
+            alt="cover"
+          />
+          <div className="flex flex-col text-start">
+            <div className="flex gap-2">
+              <span className="text-base font-bold">
+                {selectedSong?.album?.artist.name}
+              </span>
+              <div className="gap-2 hidden sm:flex">
+                {isFavorite ? (
+                  <FaHeart
+                    className="text-white cursor-pointer"
+                    onClick={toggleFavorite}
+                  />
+                ) : (
+                  <FaRegHeart
+                    className="text-white cursor-pointer"
+                    onClick={toggleFavorite}
+                  />
+                )}
+                <PiDotsThreeOutlineFill className="text-white cursor-pointer hidden sm:flex" />
+              </div>
             </div>
+            <span className="text-xs text-gray-400">{selectedSong?.title}</span>
+            <span className="text-xs text-gray-500 lg:flex hidden">
+              PLAYING FROM: {selectedSong?.album?.title}
+            </span>
           </div>
-          <span className="text-xs text-gray-400">{selectedSong?.title}</span>
-          <span className="text-xs text-gray-500 lg:flex hidden">
-            PLAYING FROM: {selectedSong?.album?.title}
-          </span>
         </div>
-      </div>
-      <audio ref={audioPlayer} preload="metadata" />
-      <div className="flex items-center gap-4 fixed right-8 bottom-20 sm:right-auto sm:bottom-auto">
-        <p className="md:flex hidden">{currentFormatted}</p>
-        <Shuffle
-          onClick={shuffleSongs}
-          className={`text-xl cursor-pointer ${
-            isShuffling ? "text-blue-400" : "text-gray-400"
-          } sm:flex hidden`}
-        />
-        <BsFillSkipStartCircleFill onClick={skipBegin} className="text-2xl cursor-pointer text-gray-200" />
-        {isPlaying ? (
-          <BsFillPauseCircleFill
-            onClick={togglePlayPause}
-            className="text-3xl cursor-pointer text-gray-200"
+        <audio ref={audioPlayer} preload="metadata" />
+        <div className="flex items-center gap-4 fixed right-8 bottom-20 sm:right-auto sm:bottom-auto">
+          <p className="md:flex hidden">{currentFormatted}</p>
+          <Shuffle
+            onClick={shuffleSongs}
+            className={`text-xl cursor-pointer ${
+              isShuffling ? "text-blue-400" : "text-gray-400"
+            } sm:flex hidden`}
           />
-        ) : (
-          <BsFillPlayCircleFill
-            onClick={togglePlayPause}
-            className="text-3xl cursor-pointer text-gray-200"
+          <BsFillSkipStartCircleFill
+            onClick={skipBegin}
+            className="text-2xl cursor-pointer text-gray-200"
           />
-        )}
-        <BsSkipEndCircleFill onClick={skipEnd} className="text-2xl cursor-pointer text-gray-200" />
-        <div onClick={toggleRepeatMode} className="cursor-pointer">
-          {repeatMode === "off" && <Repeat className="text-gray-400" />}
-          {repeatMode === "one" && <Repeat1 className="text-blue-400" />}
-          {repeatMode === "all" && <Repeat className="text-blue-400" />}
-        </div>
-        <p className="md:flex hidden">{durationFormatted}</p>
-      </div>
-      <div className="flex-col items-center lg:mb-2 w-full max-w-md md:flex hidden">
-        <input
-          type="range"
-          min={0}
-          max={duration}
-          value={currentTime}
-          onChange={handleProgressChange}
-          ref={progressBar}
-          className="w-full h-1 bg-gray-500 rounded-full appearance-none cursor-pointer"
-          style={{
-            backgroundSize: `${(currentTime / (duration || 1)) * 100}% 100%`,
-            backgroundImage: "linear-gradient(to right, white, white)",
-          }}
-        />
-      </div>
-      <div className="fixed right-4 gap-4 items-center lg:mt-5 lg:flex hidden">
-        <div className="flex gap-4 items-center">
-          {isMuted || volume == 0 ? (
-            <IoVolumeMuteOutline onClick={toggleMute} className="text-xl cursor-pointer text-gray-200" />
+          {isPlaying ? (
+            <BsFillPauseCircleFill
+              onClick={togglePlayPause}
+              className="text-3xl cursor-pointer text-gray-200"
+            />
           ) : (
-            <IoVolumeHighOutline onClick={toggleMute} className="text-xl cursor-pointer text-gray-200" />
+            <BsFillPlayCircleFill
+              onClick={togglePlayPause}
+              className="text-3xl cursor-pointer text-gray-200"
+            />
           )}
+          <BsSkipEndCircleFill
+            onClick={skipEnd}
+            className="text-2xl cursor-pointer text-gray-200"
+          />
+          <div onClick={toggleRepeatMode} className="cursor-pointer">
+            {repeatMode === "off" && <Repeat className="text-gray-400" />}
+            {repeatMode === "one" && <Repeat1 className="text-blue-400" />}
+            {repeatMode === "all" && <Repeat className="text-blue-400" />}
+          </div>
+          <p className="md:flex hidden">{durationFormatted}</p>
+        </div>
+        <div className="flex-col items-center lg:mb-2 w-full max-w-md md:flex hidden">
           <input
             type="range"
-            min="0"
-            max="1"
-            step="0.01"
-            value={isMuted ? 0 : volume}
-            onChange={handleVolumeChange}
-            className="w-24 h-1 bg-gray-500 rounded-full appearance-none cursor-pointer"
+            min={0}
+            max={duration}
+            value={currentTime}
+            onChange={handleProgressChange}
+            ref={progressBar}
+            className="w-full h-1 bg-gray-500 rounded-full appearance-none cursor-pointer"
+            style={{
+              backgroundSize: `${(currentTime / (duration || 1)) * 100}% 100%`,
+              backgroundImage: "linear-gradient(to right, white, white)",
+            }}
           />
-          <IoLaptopOutline className="text-xl cursor-pointer text-gray-200" />
-          <IoArrowUpOutline className="text-xl cursor-pointer text-gray-200" />
+        </div>
+        <div className="fixed right-4 gap-4 items-center lg:mt-5 lg:flex hidden">
+          <div className="flex gap-4 items-center">
+            {isMuted || volume == 0 ? (
+              <IoVolumeMuteOutline
+                onClick={toggleMute}
+                className="text-xl cursor-pointer text-gray-200"
+              />
+            ) : (
+              <IoVolumeHighOutline
+                onClick={toggleMute}
+                className="text-xl cursor-pointer text-gray-200"
+              />
+            )}
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={isMuted ? 0 : volume}
+              onChange={handleVolumeChange}
+              className="w-24 h-1 bg-gray-500 rounded-full appearance-none cursor-pointer"
+            />
+            <List
+              className="text-xl cursor-pointer text-gray-200"
+              onClick={toggleQueue}
+            />
+            <Expand className="text-xl cursor-pointer text-gray-200" />
+          </div>
         </div>
       </div>
-    </div>
+      {isQueueVisible && (
+        <div className="fixed top-0 right-0 w-80 h-full bg-[#212121] text-white shadow-lg overflow-y-auto">
+          <div className="relative p-4 border-b border-gray-700">
+            <h2 className="text-lg font-bold">Up Next</h2>
+            <button
+              onClick={() => setIsQueueVisible(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl"
+            >
+              <X className="cursor-pointer" />
+            </button>
+          </div>
+          <div className="p-4">
+            <div className="mb-4">
+              <h3 className="text-sm text-gray-400">Playing</h3>
+              <div className="py-2 px-4 bg-[#1e1e1e] rounded-md">
+                <span className="text-blue-400 font-bold">
+                  {songs[currentSongIndex]?.title}
+                </span>
+                <br />
+                <span className="text-sm text-gray-400">
+                  {songs[currentSongIndex]?.album?.artist.name}
+                </span>
+              </div>
+            </div>
+            <div>
+              <h3 className="text-sm text-gray-400">Next</h3>
+              <ul>
+                {songs.slice(currentSongIndex + 1).map((song) => (
+                  <li key={song.id} className="py-2 border-b border-gray-700">
+                    <span className="font-bold">{song.title}</span>
+                    <br />
+                    <span className="text-sm text-gray-400">{song.album?.artist.name}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

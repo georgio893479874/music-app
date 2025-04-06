@@ -29,6 +29,7 @@ model User {
   tracks           Track[]
   favorites        Favorite[]
   listeningHistory ListeningHistory[]
+  recommendations  Recommendation[]
 }
 
 model Playlist {
@@ -56,6 +57,8 @@ model Track {
   playlists        Playlist[]
   favorites        Favorite[]
   ListeningHistory ListeningHistory[]
+
+  Recommendation Recommendation[]
 }
 
 model Album {
@@ -100,4 +103,13 @@ model ListeningHistory {
   trackId    String
   track      Track    @relation(fields: [trackId], references: [id])
   listenedAt DateTime @default(now())
+}
+
+model Recommendation {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  trackId   String
+  track     Track    @relation(fields: [trackId], references: [id])
+  createdAt DateTime @default(now())
 }

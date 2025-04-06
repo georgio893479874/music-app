@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import Image from "next/image"; 
 
 interface AuthFormProps {
   title: string;
@@ -79,11 +78,10 @@ const AuthForm: React.FC<AuthFormProps> = ({
           }}
         />
         <div className="border-none flex items-center justify-center lg:hidden w-full lg:w-1/2 bg-gray-900 text-white">
-          <Image
+          <img
             src="/login-icon.png"
             alt="Login Icon"
-            width={384}
-            height={384}
+            className="w-[384px] h-[384px]"
           />
         </div>
         <div className="lg:w-full flex items-center justify-center px-6 bg-gray-900 text-white lg:px-8 pb-8">

@@ -1,3 +1,5 @@
+'use client'
+
 import Sidebar from "@/components/Sidebar/page";
 import Head from "next/head";
 

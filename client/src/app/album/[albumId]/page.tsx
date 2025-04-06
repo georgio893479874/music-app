@@ -7,8 +7,8 @@ import { MoreVertical } from "lucide-react";
 import Sidebar from "@/components/Sidebar/page";
 import Link from "next/link";
 import Player from "@/components/Player/page";
-import { Helmet } from "react-helmet";
 import { usePlayerContext } from "@/contexts/PlayerContext";
+import Head from "next/head";
 
 interface Artist {
   id: string;
@@ -67,10 +67,10 @@ export default function AlbumPage() {
 
   return (
     <>
-      <Helmet>
+      <Head>
         <title>{`${album.title} - Album by ${album.artist.name} | Notent`}</title>
-      </Helmet>
-      <div className="flex min-h-screen bg-[#323131] text-white">
+      </Head>
+      <div className="flex min-h-screen bg-[#323131] text-white pb-24">
         <Sidebar />
         <div className="flex flex-col items-center flex-1 py-12 px-4 lg:ml-64">
           <img

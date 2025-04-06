@@ -7,7 +7,7 @@ import Sidebar from "@/components/Sidebar/page";
 import { FaPlay, FaPause } from "react-icons/fa";
 import Link from "next/link";
 import ShareButton from "@/components/ShareButton/page";
-import { Helmet } from "react-helmet";
+import Head from "next/head";
 
 export interface Artist {
   id: string;
@@ -67,9 +67,9 @@ const ArtistPage = () => {
 
   return (
     <>
-      <Helmet>
+      <Head>
         <title>{artist.name} | Notent</title>
-      </Helmet>
+      </Head>
       <div className="flex min-h-screen bg-[#323131] text-white pb-10">
         <Sidebar />
         <div className="flex-1 lg:ml-64">
