@@ -94,7 +94,7 @@ export default function Home() {
       <section className="relative bg-gray-950 min-h-screen flex items-center justify-center text-white">
         <Image
           src="/hero-icon.jpg"
-          alt=""
+          alt="hero"
           className="absolute inset-0 w-full h-full object-cover opacity-20"
         />
         <div className="relative z-10 text-center p-8">
@@ -165,7 +165,9 @@ export default function Home() {
               <Image
                 src={artist.image}
                 alt={artist.name}
-                className="rounded-full mb-4 w-32 h-32 mx-auto object-cover shadow-lg"
+                className="rounded-full mb-4 mx-auto object-cover shadow-lg"
+                width={128}
+                height={128}
               />
               <h4 className="text-lg font-semibold">{artist.name}</h4>
               <p className="text-gray-300 text-sm">{artist.genre}</p>
@@ -215,7 +217,9 @@ export default function Home() {
                     <Image
                       src={track.imgSrc}
                       alt={track.title}
-                      className="w-8 h-8 md:w-10 md:h-10 rounded-lg mr-3 border-2 border-gray-700"
+                      className="md:w-10 md:h-10 rounded-lg mr-3 border-2 border-gray-700"
+                      width={32}
+                      height={32}
                     />
                     <div>
                       <span className="block text-sm md:text-base font-medium">

@@ -271,10 +271,11 @@ const Player = () => {
               <X className="cursor-pointer" />
             </button>
           </div>
-          <div className="p-4">
+          <div className="p-4 pb-14">
             <div className="mb-4">
               <h3 className="text-sm text-gray-400">Playing</h3>
-              <div className="py-2 px-4 bg-[#1e1e1e] rounded-md">
+              <div className="py-2 px-4 bg-[#1e1e1e] rounded-md flex items-center gap-4">
+                <img src={songs[currentSongIndex]?.coverImagePath} className="w-[40px] h-[40px]" alt="cover" />
                 <span className="text-blue-400 font-bold">
                   {songs[currentSongIndex]?.title}
                 </span>
@@ -288,10 +289,13 @@ const Player = () => {
               <h3 className="text-sm text-gray-400">Next</h3>
               <ul>
                 {songs.slice(currentSongIndex + 1).map((song) => (
-                  <li key={song.id} className="py-2 border-b border-gray-700">
-                    <span className="font-bold">{song.title}</span>
-                    <br />
-                    <span className="text-sm text-gray-400">{song.album?.artist.name}</span>
+                  <li key={song.id} className="py-2 border-b border-gray-700 flex items-center gap-4">
+                    <img src={song.coverImagePath} className="w-[40px] h-[40px]" alt="cover" />
+                    <div>
+                      <span className="font-bold">{song.title}</span>
+                      <br />
+                      <span className="text-sm text-gray-400">{song.album?.artist.name}</span>
+                    </div>
                   </li>
                 ))}
               </ul>

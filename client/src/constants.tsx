@@ -7,31 +7,31 @@ import { ImHeart } from "react-icons/im";
 export const artists = [
   {
     name: "Justin Bieber",
-    image: "justin-bieber.png",
+    image: "/justin-bieber.png",
     genre: "Pop",
     topSong: "Sorry",
   },
   {
     name: "Taylor Swift",
-    image: "taylor-swift.png",
+    image: "/taylor-swift.png",
     genre: "Country/Pop",
     topSong: "Love Story",
   },
   {
     name: "Lisa",
-    image: "lisa.png",
+    image: "/lisa.png",
     genre: "K-Pop",
     topSong: "LALISA",
   },
   {
     name: "Ed Sheeran",
-    image: "ed-sheeran.png",
+    image: "/ed-sheeran.png",
     genre: "Pop",
     topSong: "Shape of You",
   },
   {
     name: "Rihanna",
-    image: "rihanna.png",
+    image: "/rihanna.png",
     genre: "Pop/R&B",
     topSong: "Umbrella",
   },

@@ -8,6 +8,8 @@ import { FaPlay, FaPause } from "react-icons/fa";
 import Link from "next/link";
 import ShareButton from "@/components/ShareButton/page";
 import Head from "next/head";
+import Player from "@/components/Player/page";
+import { usePlayerContext } from "@/contexts/PlayerContext";
 
 export interface Artist {
   id: string;
@@ -27,6 +29,7 @@ const ArtistPage = () => {
   const [artist, setArtist] = useState<Artist | null>(null);
   const [albums, setAlbums] = useState<Album[]>([]);
   const [playing, setPlaying] = useState(false);
+  const { setSelectedSong } = usePlayerContext();
 
   useEffect(() => {
     const fetchArtistData = async () => {
@@ -53,7 +56,9 @@ const ArtistPage = () => {
         `${process.env.NEXT_PUBLIC_API_URL}/track?artistId=${artistId}`
       );
       if (songs.length > 0) {
+        const randomSong = songs[Math.floor(Math.random() * songs.length)];
         setPlaying(true);
+        setSelectedSong(randomSong);
       }
     } catch (error) {
       console.error(error);
@@ -62,8 +67,7 @@ const ArtistPage = () => {
 
   const handlePause = () => setPlaying(false);
 
-  if (!artist)
-    return <p className="text-center text-white text-xl">Loading...</p>;
+  if (!artist) return <p className="text-center text-white text-xl">Loading...</p>;
 
   return (
     <>
@@ -125,6 +129,7 @@ const ArtistPage = () => {
           </div>
         </div>
       </div>
+      <Player/>
     </>
   );
 };
