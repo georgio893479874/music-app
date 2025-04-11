@@ -4,7 +4,6 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Heart } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 
 interface Track {
@@ -58,12 +57,10 @@ export default function PlaylistPage() {
   return (
     <div className="flex">
       <div className="text-white flex flex-col items-center py-12 px-4 flex-1 lg:ml-64">
-        <Image
+        <img
           src={playlist.coverPhoto}
           alt={playlist.name}
-          width={256}
-          height={256}
-          className="rounded-lg border border-gray-600 mb-6 object-cover"
+          className="rounded-lg border border-gray-600 mb-6 object-cover w-64 h-64"
         />
         <h1 className="text-3xl font-bold">{playlist.name}</h1>
         <div className="flex">

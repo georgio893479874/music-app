@@ -3,12 +3,12 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import { MoreVertical } from "lucide-react";
 import Sidebar from "@/components/Sidebar/page";
 import Link from "next/link";
 import Player from "@/components/Player/page";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import Head from "next/head";
+import ShareButton from "@/components/ShareButton/page";
 
 interface Artist {
   id: string;
@@ -71,7 +71,7 @@ export default function AlbumPage() {
         <title>{`${album.title} - Album by ${album.artist.name} | Notent`}</title>
       </Head>
       <div className="flex min-h-screen bg-[#323131] text-white pb-24">
-        <Sidebar />
+        <Sidebar/>
         <div className="flex flex-col items-center flex-1 py-12 px-4 lg:ml-64">
           <img
             src={album.coverUrl}
@@ -96,7 +96,7 @@ export default function AlbumPage() {
                 <span className="font-medium">
                   {index + 1}. {track.title}
                 </span>
-                <MoreVertical className="w-5 h-5 text-gray-400 hover:text-white transition-colors cursor-pointer" />
+                <ShareButton/>
               </li>
             ))}
           </ul>

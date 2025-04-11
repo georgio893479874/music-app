@@ -25,6 +25,7 @@ const Player = () => {
   const [repeatMode, setRepeatMode] = useState<"off" | "one" | "all">("off");
   const [isShuffling, setIsShuffling] = useState(false);
   const [isQueueVisible, setIsQueueVisible] = useState(false);
+  const { setSelectedSong } = usePlayerContext();
   const {
     isPlaying,
     togglePlayPause,
@@ -141,8 +142,22 @@ const Player = () => {
     setIsShuffling(!isShuffling);
   };
 
-  const toggleFavorite = () => {
-    setIsFavorite((prev) => !prev);
+  const toggleFavorite = async () => {
+    try {
+      if (!selectedSong) return;
+      if (isFavorite) {
+        await axios.delete(
+          `${process.env.NEXT_PUBLIC_API_URL}/favorite/${selectedSong.id}`
+        );
+      } else {
+        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/favorite`, {
+          trackId: selectedSong.id,
+        });
+      }
+      setIsFavorite((prev) => !prev);
+    } catch (error) {
+      console.error("Failed to toggle favorite:", error);
+    }
   };
 
   return (
@@ -180,7 +195,7 @@ const Player = () => {
             </span>
           </div>
         </div>
-        <audio ref={audioPlayer} preload="metadata" />
+        <audio ref={audioPlayer} preload="metadata"/>
         <div className="flex items-center gap-4 fixed right-8 bottom-20 sm:right-auto sm:bottom-auto">
           <p className="md:flex hidden">{currentFormatted}</p>
           <Shuffle
@@ -208,7 +223,7 @@ const Player = () => {
             onClick={skipEnd}
             className="text-2xl cursor-pointer text-gray-200"
           />
-          <div onClick={toggleRepeatMode} className="cursor-pointer">
+          <div onClick={toggleRepeatMode} className="cursor-pointer sm:flex hidden">
             {repeatMode === "off" && <Repeat className="text-gray-400" />}
             {repeatMode === "one" && <Repeat1 className="text-blue-400" />}
             {repeatMode === "all" && <Repeat className="text-blue-400" />}
@@ -261,14 +276,14 @@ const Player = () => {
         </div>
       </div>
       {isQueueVisible && (
-        <div className="fixed top-0 right-0 w-80 h-full bg-[#212121] text-white shadow-lg overflow-y-auto">
+        <div className="fixed top-0 right-0 w-80 h-full bg-[#212121] text-white shadow-lg overflow-y-auto pb-24">
           <div className="relative p-4 border-b border-gray-700">
             <h2 className="text-lg font-bold">Up Next</h2>
             <button
               onClick={() => setIsQueueVisible(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl"
             >
-              <X className="cursor-pointer" />
+              <X className="cursor-pointer"/>
             </button>
           </div>
           <div className="p-4 pb-14">
@@ -279,7 +294,7 @@ const Player = () => {
                 <span className="text-blue-400 font-bold">
                   {songs[currentSongIndex]?.title}
                 </span>
-                <br />
+                <br/>
                 <span className="text-sm text-gray-400">
                   {songs[currentSongIndex]?.album?.artist.name}
                 </span>
@@ -289,11 +304,15 @@ const Player = () => {
               <h3 className="text-sm text-gray-400">Next</h3>
               <ul>
                 {songs.slice(currentSongIndex + 1).map((song) => (
-                  <li key={song.id} className="py-2 border-b border-gray-700 flex items-center gap-4">
+                  <li 
+                    key={song.id} 
+                    className="py-2 border-b border-gray-700 flex items-center gap-4 cursor-pointer" 
+                    onClick={() => setSelectedSong(song)}
+                  >
                     <img src={song.coverImagePath} className="w-[40px] h-[40px]" alt="cover" />
                     <div>
                       <span className="font-bold">{song.title}</span>
-                      <br />
+                      <br/>
                       <span className="text-sm text-gray-400">{song.album?.artist.name}</span>
                     </div>
                   </li>

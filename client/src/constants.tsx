@@ -7,31 +7,31 @@ import { ImHeart } from "react-icons/im";
 export const artists = [
   {
     name: "Justin Bieber",
-    image: "/justin-bieber.png",
+    image: "/justin-bieber.webp",
     genre: "Pop",
     topSong: "Sorry",
   },
   {
     name: "Taylor Swift",
-    image: "/taylor-swift.png",
+    image: "/taylor-swift.webp",
     genre: "Country/Pop",
     topSong: "Love Story",
   },
   {
     name: "Lisa",
-    image: "/lisa.png",
+    image: "/lisa.webp",
     genre: "K-Pop",
     topSong: "LALISA",
   },
   {
     name: "Ed Sheeran",
-    image: "/ed-sheeran.png",
+    image: "/ed-sheeran.webp",
     genre: "Pop",
     topSong: "Shape of You",
   },
   {
     name: "Rihanna",
-    image: "/rihanna.png",
+    image: "/rihanna.webp",
     genre: "Pop/R&B",
     topSong: "Umbrella",
   },
@@ -55,22 +55,22 @@ export const playlists = [
   {
     title: "Chill Vibes",
     description: "Relax and unwind with this smooth collection of beats.",
-    imageUrl: "/chill-vibes-icon.jpg",
+    imageUrl: "/chill-vibes-icon.webp",
   },
   {
     title: "Top Hits",
     description: "The biggest songs of the moment, all in one place.",
-    imageUrl: "/top-hits-icon.jpg",
+    imageUrl: "/top-hits-icon.webp",
   },
   {
     title: "Party Anthems",
     description: "Get the party started with these high-energy tracks.",
-    imageUrl: "/party-anthems-icon.jpg",
+    imageUrl: "/party-anthems-icon.webp",
   },
   {
     title: "Workout Boost",
     description: "Pump up your workout with these motivating tracks.",
-    imageUrl: "/workout-boost-icon.jpg",
+    imageUrl: "/workout-boost-icon.webp",
   },
 ];
 
@@ -78,32 +78,32 @@ export const tracks = [
   {
     title: "Anti-Hero",
     duration: "03:21",
-    imgSrc: "/midnight.jpg",
+    imgSrc: "/midnight.webp",
   },
   { 
 		title: "Blank Space", 
 		duration: "04:22", 
-		imgSrc: "/1989.jpg" 
+		imgSrc: "/1989.webp" 
 	},
   { 
 		title: "Gorgeous", 
 		duration: "03:56", 
-		imgSrc: "/reputation.jpg" 
+		imgSrc: "/reputation.webp" 
 	},
   { 
 		title: "Lover", 
 		duration: "04:01", 
-		imgSrc: "/lover.jpg" 
+		imgSrc: "/lover.webp" 
 	},
   { 
 		title: "Red", 
 		duration: "03:45", 
-		imgSrc: "/red.jpg" 
+		imgSrc: "/red.webp" 
 	},
   { 
 		title: "Midnight", 
 		duration: "04:12", 
-		imgSrc: "/midnight.jpg" 
+		imgSrc: "/midnight.webp" 
 	},
 ];
 

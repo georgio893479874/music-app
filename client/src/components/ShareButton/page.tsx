@@ -18,10 +18,24 @@ interface MobileAction {
 }
 
 const mobileActions: MobileAction[] = [
-  { icon: <Share2 className="mr-3" size={18} />, label: "Share", onClick: "copy" },
-  { icon: <Link className="mr-3" size={18} />, label: "Copy Link", onClick: "copy" },
-  { icon: <Radio className="mr-3" size={18} />, label: "Go to radio based on artist" },
-  { icon: <MessageCircleWarning className="mr-3" size={18} />, label: "Complain" },
+  {
+    icon: <Share2 className="mr-3" size={18} />,
+    label: "Share",
+    onClick: "copy",
+  },
+  {
+    icon: <Link className="mr-3" size={18} />,
+    label: "Copy Link",
+    onClick: "copy",
+  },
+  {
+    icon: <Radio className="mr-3" size={18} />,
+    label: "Go to radio based on artist",
+  },
+  {
+    icon: <MessageCircleWarning className="mr-3" size={18} />,
+    label: "Complain",
+  },
   { icon: <Plus className="mr-3" size={18} />, label: "Subscribe" },
   { icon: <QrCode className="mr-3" size={18} />, label: "Show Code" },
 ];
@@ -105,7 +119,9 @@ const ShareButton: FC = () => {
                 {mobileActions.map((action, i) => (
                   <button
                     key={i}
-                    onClick={action.onClick === "copy" ? handleCopyLink : undefined}
+                    onClick={
+                      action.onClick === "copy" ? handleCopyLink : undefined
+                    }
                     className="flex items-center w-full p-3 bg-white/10 rounded-xl hover:bg-white/20 transition"
                   >
                     {action.icon || null} {action.label}

@@ -19,6 +19,7 @@ export default function LoginPage() {
         password: values.password,
       });
       document.cookie = `authToken=${response.data.token}; path=/`;
+      localStorage.setItem("userId", response.data.userId);
       router.push("/dashboard");
     } 
     

@@ -8,6 +8,7 @@ import { RecommendationModule } from './recommendation/recommendation.module';
 import { AuthModule } from './auth/auth.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { SearchModule } from './search/search.module';
+import { FavoriteModule } from './favorite/favorite.module';
 
 @Module({
   imports: [
@@ -18,7 +19,7 @@ import { SearchModule } from './search/search.module';
     GenreModule, 
     RecommendationModule, 
     AuthModule, 
-    PrismaModule, SearchModule,
+    PrismaModule, SearchModule, FavoriteModule,
   ],
 })
 export class AppModule {}
