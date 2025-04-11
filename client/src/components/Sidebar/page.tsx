@@ -1,12 +1,9 @@
-'use client'
-
-import { useState } from 'react';
 import Link from 'next/link';
 import { libraryItems, menuItems } from '@/constants';
+import { Accordion, AccordionItem } from '@heroui/accordion';
+import { ListMusic } from 'lucide-react';
 
 export default function Sidebar() {
-  const [activeItem, setActiveItem] = useState('Home');
-
   return (
     <>
       <div className="hidden lg:flex flex-col w-64 h-screen bg-[#272727] text-gray-200 fixed top-0 left-0">
@@ -19,10 +16,7 @@ export default function Sidebar() {
               <li key={item.name}>
                 <Link href={item.path}>
                   <div
-                    className={`flex items-center py-2 px-6 rounded-lg cursor-pointer mb-2 ${
-                      activeItem === item.name ? 'bg-gray-800 text-white' : 'hover:bg-gray-700'
-                    }`}
-                    onClick={() => setActiveItem(item.name)}
+                    className="flex items-center py-2 px-6 rounded-lg cursor-pointer mb-2"
                   >
                     <span className="mr-4">{item.icon}</span>
                     {item.name}
@@ -32,35 +26,39 @@ export default function Sidebar() {
             ))}
           </ul>
         </nav>
-        <div className="mt-10">
-          <h2 className="text-sm font-semibold text-gray-400 uppercase pl-4">Library</h2>
-          <ul className="mt-4">
-            {libraryItems.map((item) => (
-              <li key={item.name}>
-                <Link href={item.path}>
-                  <div
-                    className={`flex items-center py-2 px-6 rounded-lg cursor-pointer mb-2 ${
-                      activeItem === item.name ? 'bg-gray-800 text-white' : 'hover:bg-gray-700'
-                    }`}
-                    onClick={() => setActiveItem(item.name)}
-                  >
-                    <span className="mr-4">{item.icon}</span>
-                    {item.name}
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <div className="pl-6 pr-6">
+          <Accordion>
+            <AccordionItem
+              title={
+                <div className="flex items-center">
+                  <ListMusic className="mr-2"/>
+                  Library
+                </div>
+              }
+            >
+              <ul>
+                {libraryItems.map((item) => (
+                  <li key={item.name}>
+                    <Link href={item.path}>
+                      <div
+                        className="flex items-center py-2 px-6 rounded-lg cursor-pointer mb-2"
+                      >
+                        <span className="mr-4">{item.icon}</span>
+                        {item.name}
+                      </div>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </AccordionItem>
+          </Accordion>
         </div>
       </div>
-      <div className="lg:hidden z-50 fixed bottom-0 left-0 right-0 bg-[#212121] text-gray-200 flex justify-around py-2 shadow-inner">
+      <div className="lg:hidden z-50 fixed bottom-0 left-0 right-0 text-gray-200 flex justify-around py-2 shadow-inner">
         {menuItems.slice(0, 4).map((item) => (
           <Link href={item.path} key={item.name}>
             <div
-              className={`flex flex-col items-center justify-center ${
-                activeItem === item.name ? 'text-white' : 'text-gray-400'
-              }`}
-              onClick={() => setActiveItem(item.name)}
+              className="flex flex-col items-center justify-center text-white"
             >
               {item.icon}
               <span className="text-xs mt-1">{item.name}</span>

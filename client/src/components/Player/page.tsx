@@ -13,7 +13,7 @@ import { IoVolumeHighOutline, IoVolumeMuteOutline } from "react-icons/io5";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import usePlayer, { Track } from "@/hooks/UsePlayer";
-import { Expand, List, Repeat, Repeat1, Shuffle, X } from "lucide-react";
+import { Expand, List, PictureInPicture2, Repeat, Repeat1, Shuffle, X } from "lucide-react";
 
 const Player = () => {
   const { selectedSong } = usePlayerContext();
@@ -271,7 +271,8 @@ const Player = () => {
               className="text-xl cursor-pointer text-gray-200"
               onClick={toggleQueue}
             />
-            <Expand className="text-xl cursor-pointer text-gray-200" />
+            <Expand className="text-xl cursor-pointer text-gray-200"/>
+            <PictureInPicture2 className="text-xl cursor-pointer text-gray-200"/>
           </div>
         </div>
       </div>

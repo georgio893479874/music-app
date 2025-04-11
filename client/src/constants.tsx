@@ -41,12 +41,12 @@ export const menuItems = [
 	{ name: "Home", icon: <FaHome size={24} />, path: "/dashboard" },
 	{ name: "Discover", icon: <FaCompactDisc size={24} />, path: "/search" },
 	{ name: "Radio", icon: <FaRadio size={24} />, path: "/radio" },
-	{ name: "Albums", icon: <BsMusicNoteList size={24} />, path: "/albums" },
 	{ name: "Podcast", icon: <PiMicrophoneThin size={24} />, path: "/podcast" },
 ];
 
 export const libraryItems = [
 	{ name: "Recently Added", icon: <PiMusicNotesPlusThin size={24} />, path: "/recent" },
+  { name: "Albums", icon: <BsMusicNoteList size={24} />, path: "/albums" },
 	{ name: "Favorite Songs", icon: <ImHeart size={24} />, path: "/favorites" },
 	{ name: "Local Files", icon: <FaFolderOpen size={24} />, path: "/local" },
 ];

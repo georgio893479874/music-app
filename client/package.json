@@ -12,6 +12,7 @@
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@headlessui/react": "^2.2.0",
+    "@heroui/accordion": "^2.2.14",
     "@mui/icons-material": "^6.4.1",
     "@prisma/client": "^6.2.1",
     "@radix-ui/react-dropdown-menu": "^2.1.6",
