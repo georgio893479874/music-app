@@ -12,8 +12,9 @@ import { PiDotsThreeOutlineFill } from "react-icons/pi";
 import { IoVolumeHighOutline, IoVolumeMuteOutline } from "react-icons/io5";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { usePlayerContext } from "@/contexts/PlayerContext";
-import usePlayer, { Track } from "@/hooks/UsePlayer";
+import usePlayer from "@/hooks/UsePlayer";
 import { Expand, List, PictureInPicture2, Repeat, Repeat1, Shuffle, X } from "lucide-react";
+import { Track } from "@/types";
 
 const Player = () => {
   const { selectedSong } = usePlayerContext();
@@ -160,6 +161,8 @@ const Player = () => {
     }
   };
 
+  const handlePictureInPicture = () => {}
+
   return (
     <>
       <div className="lg:h-24 h-20 flex flex-col items-center justify-between p-4 bg-[#212121] text-white fixed lg:bottom-0 bottom-14 left-0 right-0 shadow-lg z-10">
@@ -272,7 +275,10 @@ const Player = () => {
               onClick={toggleQueue}
             />
             <Expand className="text-xl cursor-pointer text-gray-200"/>
-            <PictureInPicture2 className="text-xl cursor-pointer text-gray-200"/>
+            <PictureInPicture2
+              className="text-xl cursor-pointer text-gray-200"
+              onClick={handlePictureInPicture}
+            />
           </div>
         </div>
       </div>

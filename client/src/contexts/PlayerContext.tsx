@@ -1,12 +1,7 @@
 'use client'
 
-import { Track } from '@/hooks/UsePlayer';
+import { PlayerContextProps, Track } from '@/types';
 import { createContext, useContext, useState } from 'react';
-
-interface PlayerContextProps {
-  selectedSong?: Track;
-  setSelectedSong: React.Dispatch<React.SetStateAction<Track | undefined>>;
-}
 
 const PlayerContext = createContext<PlayerContextProps | undefined>(undefined);
 

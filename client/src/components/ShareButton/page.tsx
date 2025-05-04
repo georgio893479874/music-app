@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, FC, JSX } from "react";
+import { useState, useEffect, useRef, FC } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { toast } from "react-hot-toast";
 import { useSwipeable } from "react-swipeable";
@@ -10,12 +10,7 @@ import {
   MessageCircleWarning,
   QrCode,
 } from "lucide-react";
-
-interface MobileAction {
-  icon?: JSX.Element;
-  label: string;
-  onClick?: "copy";
-}
+import { MobileAction } from "@/types";
 
 const mobileActions: MobileAction[] = [
   {

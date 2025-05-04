@@ -5,26 +5,7 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Heart } from "lucide-react";
 import Link from "next/link";
-
-interface Track {
-  id: string;
-  title: string;
-  duration: string;
-}
-
-interface Artist {
-  id: string;
-  name: string;
-}
-
-interface Playlist {
-  id: string;
-  name: string;
-  description?: string;
-  coverPhoto: string;
-  tracks: Track[];
-  artist: Artist;
-}
+import { Playlist } from '@/types';
 
 export default function PlaylistPage() {
   const { playlistId } = useParams();
@@ -83,7 +64,6 @@ export default function PlaylistPage() {
               <span>
                 {index + 1}. {track.title}
               </span>
-              <span className="text-gray-400">{track.duration}</span>
             </li>
           ))}
         </ul>

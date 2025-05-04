@@ -57,8 +57,7 @@ model Track {
   playlists        Playlist[]
   favorites        Favorite[]
   ListeningHistory ListeningHistory[]
-
-  Recommendation Recommendation[]
+  Recommendation   Recommendation[]
 }
 
 model Album {

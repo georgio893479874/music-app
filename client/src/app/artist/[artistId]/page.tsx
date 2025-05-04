@@ -10,19 +10,7 @@ import ShareButton from "@/components/ShareButton/page";
 import Head from "next/head";
 import Player from "@/components/Player/page";
 import { usePlayerContext } from "@/contexts/PlayerContext";
-
-export interface Artist {
-  id: string;
-  name: string;
-  coverPhoto: string;
-}
-
-interface Album {
-  id: string;
-  title: string;
-  releaseDate: string;
-  coverUrl: string;
-}
+import { Album, Artist } from "@/types";
 
 const ArtistPage = () => {
   const { artistId } = useParams();

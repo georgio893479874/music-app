@@ -4,20 +4,7 @@ import { useState } from "react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-
-interface AuthFormProps {
-  title: string;
-  buttonText: string;
-  type: "signup" | "login";
-  onSubmit: (values: AuthFormValues) => void;
-}
-
-interface AuthFormValues {
-  fullName: string;
-  email: string;
-  password: string;
-  rememberMe: boolean;
-}
+import { AuthFormProps } from "@/types";
 
 const AuthForm: React.FC<AuthFormProps> = ({
   title,
@@ -58,10 +45,8 @@ const AuthForm: React.FC<AuthFormProps> = ({
       } 
       catch (error: unknown) {
         if (error instanceof Error) {
-          setError(`An error occurred: ${error.message}`);
-        } 
-
-        else {
+          setError(error.message);
+        } else {
           setError('An unknown error occurred.');
         }
       }

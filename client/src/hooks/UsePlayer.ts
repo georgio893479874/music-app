@@ -1,29 +1,13 @@
-import { Album } from "@/app/album/[albumId]/page";
 import { usePlayerContext } from "@/contexts/PlayerContext";
+import { PlayerService } from "@/types";
 import { useRef, useState, useEffect } from "react";
-
-export interface Track {
-  id: string;
-  title: string;
-  audioFilePath: string;
-  authorId?: string;
-  coverImagePath: string;
-  album?: Album;
-}
-
-interface IControlsService {
-  songs: Track[];
-  currentSongIndex: number;
-  setCurrentSongIndex: React.Dispatch<React.SetStateAction<number>>;
-  repeatMode: "off" | "one" | "all";
-}
 
 const usePlayer = ({
   songs,
   currentSongIndex,
   setCurrentSongIndex,
   repeatMode,
-}: IControlsService) => {
+}: PlayerService) => {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);

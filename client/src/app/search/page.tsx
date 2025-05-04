@@ -8,32 +8,7 @@ import axios from "axios";
 import { genres } from "@/constants";
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar/page";
-
-interface Track {
-  id: string;
-  title: string;
-  coverUrl?: string;
-  artistName?: string;
-}
-
-interface Album {
-  id: string;
-  title: string;
-  coverUrl: string;
-  artistName: string;
-}
-
-interface Artist {
-  id: string;
-  name: string;
-  photoUrl: string;
-}
-
-interface Playlist {
-  id: string;
-  name: string;
-  coverUrl: string;
-}
+import { Album, Artist, Playlist, Track } from "@/types";
 
 type SearchResult = Track | Album | Artist | Playlist;
 
@@ -170,7 +145,7 @@ export default function SearchPage() {
                           <Link href={`/performer/${result.id}`} key={result.id} passHref>
                             <div className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer">
                               <img
-                                src={result.photoUrl}
+                                src={result.coverPhoto}
                                 alt={result.name}
                                 width={40}
                                 height={40}
@@ -188,7 +163,7 @@ export default function SearchPage() {
                           <Link href={`/playlist/${result.id}`} key={result.id} passHref>
                             <div className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer">
                               <img
-                                src={result.coverUrl}
+                                src={result.coverPhoto}
                                 alt={result.name}
                                 width={50}
                                 height={50}

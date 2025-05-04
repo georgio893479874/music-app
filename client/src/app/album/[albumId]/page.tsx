@@ -9,37 +9,7 @@ import Player from "@/components/Player/page";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import Head from "next/head";
 import ShareButton from "@/components/ShareButton/page";
-
-interface Artist {
-  id: string;
-  name: string;
-  coverPhoto: string;
-}
-
-interface Genre {
-  id: string;
-  name: string;
-}
-
-interface Track {
-  id: string;
-  title: string;
-  audioFilePath: string;
-  coverImagePath: string;
-  album?: Album;
-}
-
-export interface Album {
-  id: string;
-  title: string;
-  releaseDate: string;
-  artistId: string;
-  genreId: string;
-  coverUrl: string;
-  artist: Artist;
-  genre: Genre;
-  tracks: Track[];
-}
+import { Album } from "@/types";
 
 export default function AlbumPage() {
   const { albumId } = useParams();

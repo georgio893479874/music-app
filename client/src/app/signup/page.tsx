@@ -2,12 +2,7 @@
 
 import axios from 'axios';
 import AuthForm from '@/components/AuthForm/page';
-
-interface SignUpFormValues {
-  fullName: string;
-  email: string;
-  password: string;
-}
+import { SignUpFormValues } from '@/types';
 
 export default function SignUpPage() {
   const handleSignUpSubmit = async (values: SignUpFormValues) => {
