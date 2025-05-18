@@ -7,6 +7,7 @@ import { LoginFormValues } from "@/types";
 
 export default function LoginPage() {
   const router = useRouter();
+
   const handleLoginSubmit = async (values: LoginFormValues) => {
     try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
@@ -17,7 +18,7 @@ export default function LoginPage() {
       localStorage.setItem("userId", response.data.user.id);
       router.push("/dashboard");
     } catch (error) {
-      console.error(error);
+      throw error;
     }
   };
 

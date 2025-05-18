@@ -15,7 +15,7 @@ import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { Auth } from '../../decorators/auth.decorator';
 import { CurrentUser } from '../../decorators/user.decorator';
-import { AuthDto, AuthExtensionDto, SignUpDto } from './dto/auth.dto';
+import { AuthDto, SignUpDto } from './dto/auth.dto';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
 
@@ -38,29 +38,11 @@ export class AuthController {
   @HttpCode(200)
   @Post('login')
   async login(@Body() dto: AuthDto, @Res({ passthrough: true }) res: Response) {
-    const { refreshToken, ...response } = await this.authService.login(dto);
+    const { refreshToken,  ...response } = await this.authService.login(dto);
 
     this.authService.addRefreshTokenToResponse(res, refreshToken);
 
     return response;
-  }
-
-  @HttpCode(200)
-  @Post('login/extension')
-  async loginExtension(
-    @Body() dto: AuthExtensionDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    try {
-      const { refreshToken, ...response } =
-        await this.authService.loginExtension(dto);
-
-      this.authService.addRefreshTokenToResponse(res, refreshToken);
-
-      return response;
-    } catch (e) {
-      throw new BadRequestException('Invalid login details');
-    }
   }
 
   @HttpCode(200)
@@ -97,22 +79,5 @@ export class AuthController {
   @Get('profile')
   async getProfile(@CurrentUser('id') id: string) {
     return this.userService.findById(id);
-  }
-
-  @Post('profile/extension')
-  async getProfileExtension(@Body('token') token: string) {
-    try {
-      const decoded = this.jwtService.verify(token);
-      const studentId = decoded.id;
-      const user = await this.userService.findById(studentId);
-
-      if (!user) {
-        throw new UnauthorizedException('User not found');
-      }
-
-      return user;
-    } catch (error) {
-      throw new UnauthorizedException('Invalid token');
-    }
   }
 }

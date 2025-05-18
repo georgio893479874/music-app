@@ -15,11 +15,6 @@ export class AuthDto {
   password: string;
 }
 
-export class AuthExtensionDto {
-  @IsString()
-  id: string;
-}
-
 export class SignUpDto {
   @IsNotEmpty()
   @IsEmail()

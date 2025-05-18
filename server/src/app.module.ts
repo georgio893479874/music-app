@@ -20,7 +20,10 @@ import { UserModule } from './user/user.module';
     GenreModule, 
     RecommendationModule, 
     AuthModule, 
-    PrismaModule, SearchModule, FavoriteModule, UserModule,
+    PrismaModule, 
+    SearchModule, 
+    FavoriteModule, 
+    UserModule,
   ],
 })
 export class AppModule {}

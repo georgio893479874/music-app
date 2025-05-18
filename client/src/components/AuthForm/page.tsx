@@ -5,6 +5,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { AuthFormProps } from "@/types";
+import { AxiosError } from "axios";
 
 const AuthForm: React.FC<AuthFormProps> = ({
   title,
@@ -16,21 +17,20 @@ const AuthForm: React.FC<AuthFormProps> = ({
   const [error, setError] = useState("");
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
-
   const validationSchema = Yup.object({
-    fullName:
-      type === "signup"
-        ? Yup.string().required("Full name is required")
-        : Yup.string(),
-    email: Yup.string()
-      .email("Invalid email format")
-      .required("Email is required"),
-    password: Yup.string()
-      .min(6, "Password must be at least 6 characters")
-      .required("Password is required"),
-    rememberMe: Yup.boolean(),
+  fullName: Yup.string()
+    .when("type", {
+      is: "signup",
+      then: (schema) => schema.required("Full name is required"),
+      otherwise: (schema) => schema.notRequired(),
+    }),
+  email: Yup.string()
+    .email("Invalid email address")
+    .required("Email is required"),
+  password: Yup.string()
+    .min(6, "Password must be at least 6 characters")
+    .required("Password is required"),
   });
-
   const formik = useFormik({
     initialValues: {
       fullName: "",
@@ -39,16 +39,25 @@ const AuthForm: React.FC<AuthFormProps> = ({
       rememberMe: false,
     },
     validationSchema,
-    onSubmit: async (values) => {
+    onSubmit: async (values, { setSubmitting }) => {
+      setError("");
       try {
-        onSubmit(values);
-      } 
-      catch (error: unknown) {
-        if (error instanceof Error) {
-          setError(error.message);
+        await onSubmit(values);
+      } catch (error) {
+        const err = error as AxiosError<{ message?: string | string[] }>;
+        if (err.response && err.response.data && err.response.data.message) {
+          setError(
+            Array.isArray(err.response.data.message)
+              ? err.response.data.message.join(", ")
+              : err.response.data.message
+          );
+        } else if (err.message) {
+          setError(err.message);
         } else {
-          setError('An unknown error occurred.');
+          setError("An unknown error occurred.");
         }
+      } finally {
+        setSubmitting(false);
       }
     },
   });

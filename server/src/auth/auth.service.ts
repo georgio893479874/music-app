@@ -3,7 +3,7 @@ import { JwtService } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
 import { hash, verify } from 'argon2';
 import { Response } from 'express';
-import { AuthDto, AuthExtensionDto, SignUpDto } from './dto/auth.dto';
+import { AuthDto, SignUpDto } from './dto/auth.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UserService } from 'src/user/user.service';
 
@@ -52,16 +52,6 @@ export class AuthService {
     };
   }
 
-  async loginExtension(dto: AuthExtensionDto) {
-    const user = await this.validateUserExtension(dto);
-    const tokens = await this.issueTokens(user.id, user.role);
-
-    return {
-      user,
-      ...tokens,
-    };
-  }
-
   async getNewTokens(refreshToken: string) {
     const result = await this.jwt.verifyAsync(refreshToken);
     if (!result) throw new UnauthorizedException('Invalid refresh token');
@@ -98,14 +88,6 @@ export class AuthService {
     const isValid = await verify(user.password, dto.password);
 
     if (!isValid) throw new UnauthorizedException('Email or password invalid');
-
-    return user;
-  }
-
-  private async validateUserExtension(dto: AuthExtensionDto) {
-    const user = await this.userService.findById(dto.id);
-
-    if (!user) throw new UnauthorizedException('Email or password invalid');
 
     return user;
   }

@@ -1,3 +1,7 @@
+import Sidebar from "@/components/Sidebar/page";
+
 export default function SettingsPage() {
-    return <div></div>;
+    return <div>
+        <Sidebar/>
+    </div>;
 }
