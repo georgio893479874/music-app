@@ -24,6 +24,8 @@ const Player = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
   const [repeatMode, setRepeatMode] = useState<"off" | "one" | "all">("off");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [fullscreenImageType, setFullscreenImageType] = useState<'album' | 'artist'>('album');
   const [isShuffling, setIsShuffling] = useState(false);
   const [isQueueVisible, setIsQueueVisible] = useState(false);
   const { setSelectedSong } = usePlayerContext();
@@ -163,6 +165,18 @@ const Player = () => {
 
   const handlePictureInPicture = () => {}
 
+  const handleImageTypeChange = (type: 'album' | 'artist') => {
+    setFullscreenImageType(type);
+  };
+
+  const handleExpand = () => {
+    setIsFullscreen(true);
+  };
+
+  const handleCloseFullscreen = () => {
+    setIsFullscreen(false);
+  };
+
   return (
     <>
       <div className="lg:h-24 h-20 flex flex-col items-center justify-between p-4 bg-[#212121] text-white fixed lg:bottom-0 bottom-14 left-0 right-0 shadow-lg z-10">
@@ -274,7 +288,10 @@ const Player = () => {
               className="text-xl cursor-pointer text-gray-200"
               onClick={toggleQueue}
             />
-            <Expand className="text-xl cursor-pointer text-gray-200"/>
+            <Expand
+              className="text-xl cursor-pointer text-gray-200"
+              onClick={handleExpand}
+            />
             <PictureInPicture2
               className="text-xl cursor-pointer text-gray-200"
               onClick={handlePictureInPicture}
@@ -326,6 +343,46 @@ const Player = () => {
                 ))}
               </ul>
             </div>
+          </div>
+        </div>
+      )}
+      {isFullscreen && (
+        <div className="fixed inset-0 bg-[#15343d] flex flex-col items-center justify-center z-50">
+          <button
+            onClick={handleCloseFullscreen}
+            className="absolute top-6 right-8 text-white text-3xl"
+            aria-label="Close"
+          >
+            <X />
+          </button>
+          <div className="flex gap-4 mb-8">
+            <button
+              className={`px-4 py-2 rounded-lg ${fullscreenImageType === 'album' ? 'bg-white text-black' : 'bg-[#1e1e1e] text-white'}`}
+              onClick={() => handleImageTypeChange('album')}
+            >
+              Album
+            </button>
+            <button
+              className={`px-4 py-2 rounded-lg ${fullscreenImageType === 'artist' ? 'bg-white text-black' : 'bg-[#1e1e1e] text-white'}`}
+              onClick={() => handleImageTypeChange('artist')}
+            >
+              Artist
+            </button>
+          </div>
+          <img
+            src={
+              fullscreenImageType === 'album'
+                ? selectedSong?.coverImagePath
+                : selectedSong?.album?.artist?.coverPhoto
+            }
+            alt="cover"
+            className="rounded-2xl shadow-2xl max-w-[500px] w-full h-auto object-cover"
+            style={{ aspectRatio: "1/1" }}
+          />
+          <div className="mt-8 text-center text-white">
+            <h2 className="text-3xl font-bold">{selectedSong?.title}</h2>
+            <p className="text-xl mt-2">{selectedSong?.album?.artist?.name}</p>
+            <p className="text-md text-gray-400">{selectedSong?.album?.title}</p>
           </div>
         </div>
       )}
