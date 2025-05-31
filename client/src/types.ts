@@ -85,3 +85,14 @@ export interface MobileAction {
   label: string;
   onClick?: "copy";
 }
+
+export interface ListOfSongsProps {
+  coverPhoto: string;
+  name: string;
+  description?: string;
+  tracks: Track[];
+  isFavorite?: boolean;
+  onToggleFavorite?: () => void;
+  label?: string;
+  showFavoriteButton?: boolean;
+}

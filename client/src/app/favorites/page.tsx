@@ -5,7 +5,7 @@ import axios from "axios";
 import { Track } from "@/types";
 import ListOfSongs from "@/components/ListOfSongs";
 
-interface FavoriteResponse {
+export interface FavoriteResponse {
   track: Track;
 }
 
@@ -28,7 +28,7 @@ export default function FavoritesPage() {
     <div className="flex min-h-screen bg-[#323131] text-white">
       <div className="flex-1">
         {favorites.length === 0 ? (
-          <p className="text-gray-400">У вас ще немає улюблених пісень.</p>
+          <p className="text-gray-400 text-center justify-center">You haven&#39;t added any favorites yet</p>
         ) : (
           <ListOfSongs
             coverPhoto="/favorite-cover.jpg"

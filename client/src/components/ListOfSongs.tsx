@@ -1,17 +1,6 @@
 import { Heart } from "lucide-react";
-import { Track } from "@/types";
 import Sidebar from "./Sidebar";
-
-interface ListOfSongsProps {
-  coverPhoto: string;
-  name: string;
-  description?: string;
-  tracks: Track[];
-  isFavorite?: boolean;
-  onToggleFavorite?: () => void;
-  label?: string;
-  showFavoriteButton?: boolean;
-}
+import { ListOfSongsProps } from "@/types";
 
 export default function ListOfSongs({
   coverPhoto,
@@ -26,7 +15,7 @@ export default function ListOfSongs({
   return (
     <>
       <Sidebar/>
-      <div className="min-h-screen bg-gradient-to-b from-neutral-900 to-neutral-800 flex flex-col lg: ml-60">
+      <div className="min-h-screen bg-gradient-to-b from-neutral-900 to-neutral-800 flex flex-col lg: ml-64">
         <div className="flex flex-col md:flex-row items-center md:items-end gap-8 px-8 pt-16 pb-8">
           <img
             src={coverPhoto}
