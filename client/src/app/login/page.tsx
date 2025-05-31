@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import AuthForm from "@/components/AuthForm/page";
+import AuthForm from "@/components/AuthForm";
 import { useRouter } from "next/navigation";
 import { LoginFormValues } from "@/types";
 

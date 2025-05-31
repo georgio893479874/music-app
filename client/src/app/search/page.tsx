@@ -7,7 +7,7 @@ import { IoArrowBackOutline } from "react-icons/io5";
 import axios from "axios";
 import { genres } from "@/constants";
 import Link from "next/link";
-import Sidebar from "@/components/Sidebar/page";
+import Sidebar from "@/components/Sidebar";
 import { Album, Artist, Playlist, Track } from "@/types";
 
 type SearchResult = Track | Album | Artist | Playlist;

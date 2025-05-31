@@ -13,8 +13,18 @@ import { IoVolumeHighOutline, IoVolumeMuteOutline } from "react-icons/io5";
 import { FaHeart, FaRegHeart } from "react-icons/fa";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import usePlayer from "@/hooks/UsePlayer";
-import { Expand, List, PictureInPicture2, Repeat, Repeat1, Shuffle, X } from "lucide-react";
+import {
+  Expand,
+  List,
+  Music,
+  PictureInPicture2,
+  Repeat,
+  Repeat1,
+  Shuffle,
+  X,
+} from "lucide-react";
 import { Track } from "@/types";
+import Image from "next/image";
 
 const Player = () => {
   const { selectedSong } = usePlayerContext();
@@ -25,7 +35,9 @@ const Player = () => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [repeatMode, setRepeatMode] = useState<"off" | "one" | "all">("off");
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [fullscreenImageType, setFullscreenImageType] = useState<'album' | 'artist'>('album');
+  const [fullscreenImageType, setFullscreenImageType] = useState<
+    "album" | "artist"
+  >("album");
   const [isShuffling, setIsShuffling] = useState(false);
   const [isQueueVisible, setIsQueueVisible] = useState(false);
   const { setSelectedSong } = usePlayerContext();
@@ -148,6 +160,12 @@ const Player = () => {
   const toggleFavorite = async () => {
     try {
       if (!selectedSong) return;
+      const userId =
+        typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+      if (!userId) {
+        alert("Auth Error!");
+        return;
+      }
       if (isFavorite) {
         await axios.delete(
           `${process.env.NEXT_PUBLIC_API_URL}/favorite/${selectedSong.id}`
@@ -155,6 +173,7 @@ const Player = () => {
       } else {
         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/favorite`, {
           trackId: selectedSong.id,
+          userId,
         });
       }
       setIsFavorite((prev) => !prev);
@@ -163,9 +182,9 @@ const Player = () => {
     }
   };
 
-  const handlePictureInPicture = () => {}
+  const handlePictureInPicture = () => {};
 
-  const handleImageTypeChange = (type: 'album' | 'artist') => {
+  const handleImageTypeChange = (type: "album" | "artist") => {
     setFullscreenImageType(type);
   };
 
@@ -181,11 +200,19 @@ const Player = () => {
     <>
       <div className="lg:h-24 h-20 flex flex-col items-center justify-between p-4 bg-[#212121] text-white fixed lg:bottom-0 bottom-14 left-0 right-0 shadow-lg z-10">
         <div className="left-4 flex items-center gap-4 z-5 w-full">
-          <img
-            src={selectedSong?.coverImagePath}
-            className="lg:w-16 lg:h-16 w-12 h-12 rounded-sm"
-            alt="cover"
-          />
+          {selectedSong?.coverImagePath ? (
+            <Image
+              src={selectedSong.coverImagePath}
+              width={64}
+              height={64}
+              className="lg:w-16 lg:h-16 w-12 h-12 rounded-sm"
+              alt="cover"
+            />
+          ) : (
+            <div className="flex items-center justify-center bg-[#181818] lg:w-16 lg:h-16 w-12 h-12 rounded-sm">
+              <Music className="text-gray-400 w-8 h-8" />
+            </div>
+          )}
           <div className="flex flex-col text-start">
             <div className="flex gap-2">
               <span className="text-base font-bold">
@@ -212,7 +239,7 @@ const Player = () => {
             </span>
           </div>
         </div>
-        <audio ref={audioPlayer} preload="metadata"/>
+        <audio ref={audioPlayer} preload="metadata" />
         <div className="flex items-center gap-4 fixed right-8 bottom-20 sm:right-auto sm:bottom-auto">
           <p className="md:flex hidden">{currentFormatted}</p>
           <Shuffle
@@ -240,7 +267,10 @@ const Player = () => {
             onClick={skipEnd}
             className="text-2xl cursor-pointer text-gray-200"
           />
-          <div onClick={toggleRepeatMode} className="cursor-pointer sm:flex hidden">
+          <div
+            onClick={toggleRepeatMode}
+            className="cursor-pointer sm:flex hidden"
+          >
             {repeatMode === "off" && <Repeat className="text-gray-400" />}
             {repeatMode === "one" && <Repeat1 className="text-blue-400" />}
             {repeatMode === "all" && <Repeat className="text-blue-400" />}
@@ -307,18 +337,24 @@ const Player = () => {
               onClick={() => setIsQueueVisible(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl"
             >
-              <X className="cursor-pointer"/>
+              <X className="cursor-pointer" />
             </button>
           </div>
           <div className="p-4 pb-14">
             <div className="mb-4">
               <h3 className="text-sm text-gray-400">Playing</h3>
               <div className="py-2 px-4 bg-[#1e1e1e] rounded-md flex items-center gap-4">
-                <img src={songs[currentSongIndex]?.coverImagePath} className="w-[40px] h-[40px]" alt="cover" />
+                <Image
+                  src={songs[currentSongIndex]?.coverImagePath}
+                  width={40}
+                  height={40}
+                  className="w-[40px] h-[40px]"
+                  alt="cover"
+                />
                 <span className="text-blue-400 font-bold">
                   {songs[currentSongIndex]?.title}
                 </span>
-                <br/>
+                <br />
                 <span className="text-sm text-gray-400">
                   {songs[currentSongIndex]?.album?.artist.name}
                 </span>
@@ -328,16 +364,24 @@ const Player = () => {
               <h3 className="text-sm text-gray-400">Next</h3>
               <ul>
                 {songs.slice(currentSongIndex + 1).map((song) => (
-                  <li 
-                    key={song.id} 
-                    className="py-2 border-b border-gray-700 flex items-center gap-4 cursor-pointer" 
+                  <li
+                    key={song.id}
+                    className="py-2 border-b border-gray-700 flex items-center gap-4 cursor-pointer"
                     onClick={() => setSelectedSong(song)}
                   >
-                    <img src={song.coverImagePath} className="w-[40px] h-[40px]" alt="cover" />
+                    <Image
+                      src={song.coverImagePath}
+                      width={40}
+                      height={40}
+                      className="w-[40px] h-[40px]"
+                      alt="cover"
+                    />
                     <div>
                       <span className="font-bold">{song.title}</span>
-                      <br/>
-                      <span className="text-sm text-gray-400">{song.album?.artist.name}</span>
+                      <br />
+                      <span className="text-sm text-gray-400">
+                        {song.album?.artist.name}
+                      </span>
                     </div>
                   </li>
                 ))}
@@ -357,32 +401,44 @@ const Player = () => {
           </button>
           <div className="flex gap-4 mb-8">
             <button
-              className={`px-4 py-2 rounded-lg ${fullscreenImageType === 'album' ? 'bg-white text-black' : 'bg-[#1e1e1e] text-white'}`}
-              onClick={() => handleImageTypeChange('album')}
+              className={`px-4 py-2 rounded-lg ${
+                fullscreenImageType === "album"
+                  ? "bg-white text-black"
+                  : "bg-[#1e1e1e] text-white"
+              }`}
+              onClick={() => handleImageTypeChange("album")}
             >
               Album
             </button>
             <button
-              className={`px-4 py-2 rounded-lg ${fullscreenImageType === 'artist' ? 'bg-white text-black' : 'bg-[#1e1e1e] text-white'}`}
-              onClick={() => handleImageTypeChange('artist')}
+              className={`px-4 py-2 rounded-lg ${
+                fullscreenImageType === "artist"
+                  ? "bg-white text-black"
+                  : "bg-[#1e1e1e] text-white"
+              }`}
+              onClick={() => handleImageTypeChange("artist")}
             >
               Artist
             </button>
           </div>
-          <img
+          <Image
             src={
-              fullscreenImageType === 'album'
-                ? selectedSong?.coverImagePath
-                : selectedSong?.album?.artist?.coverPhoto
+              fullscreenImageType === "album"
+                ? selectedSong?.coverImagePath || "/placeholder.png"
+                : selectedSong?.album?.artist?.coverPhoto || "/placeholder.png"
             }
-            alt="cover"
+            width={500}
+            height={500}
             className="rounded-2xl shadow-2xl max-w-[500px] w-full h-auto object-cover"
+            alt="cover"
             style={{ aspectRatio: "1/1" }}
           />
           <div className="mt-8 text-center text-white">
             <h2 className="text-3xl font-bold">{selectedSong?.title}</h2>
             <p className="text-xl mt-2">{selectedSong?.album?.artist?.name}</p>
-            <p className="text-md text-gray-400">{selectedSong?.album?.title}</p>
+            <p className="text-md text-gray-400">
+              {selectedSong?.album?.title}
+            </p>
           </div>
         </div>
       )}

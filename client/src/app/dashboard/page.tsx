@@ -1,6 +1,6 @@
 'use client'
 
-import Sidebar from "@/components/Sidebar/page";
+import Sidebar from "@/components/Sidebar";
 import Head from "next/head";
 
 export default function DashboardPage() {

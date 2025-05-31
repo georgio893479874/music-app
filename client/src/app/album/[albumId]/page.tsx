@@ -3,12 +3,12 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Sidebar from "@/components/Sidebar/page";
+import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
-import Player from "@/components/Player/page";
+import Player from "@/components/Player";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import Head from "next/head";
-import ShareButton from "@/components/ShareButton/page";
+import ShareButton from "@/components/ShareButton";
 import { Album } from "@/types";
 
 export default function AlbumPage() {

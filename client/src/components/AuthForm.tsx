@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
 import { AuthFormProps } from "@/types";
 import { AxiosError } from "axios";
+import Image from "next/image";
 
 const AuthForm: React.FC<AuthFormProps> = ({
   title,
@@ -72,9 +73,11 @@ const AuthForm: React.FC<AuthFormProps> = ({
           }}
         />
         <div className="border-none flex items-center justify-center lg:hidden w-full lg:w-1/2 bg-gray-900 text-white">
-          <img
+          <Image
             src="/login-icon.webp"
             alt="Login Icon"
+            width={384}
+            height={384}
             className="w-[384px] h-[384px] object-cover"
           />
         </div>

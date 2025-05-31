@@ -1,7 +1,10 @@
 "use client";
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
-import Sidebar from "@/components/Sidebar/page";
+import Sidebar from "@/components/Sidebar";
+import Image from "next/image";
+import { Avatar } from "@mui/material";
+import { PhotoCamera } from "@mui/icons-material";
 
 type User = {
   id: string;
@@ -87,7 +90,7 @@ export default function UserPage() {
     );
   if (!user)
     return (
-      <div className="text-center text-red-500 bg-[#181A20] text-white">
+      <div className="text-center text-red-500 bg-[#181A20]">
         User not found
       </div>
     );
@@ -97,9 +100,11 @@ export default function UserPage() {
       <Sidebar />
       <div className="max-w-3xl mx-auto mt-10 bg-[#181A20] text-white shadow-2xl rounded-2xl p-0 relative overflow-hidden transition-colors duration-300">
         <div className="relative h-44 w-full bg-gradient-to-r from-blue-900 to-blue-700">
-          <img
-            src={bannerPreview || user.bannerUrl || "/banner-placeholder.jpg"}
+          <Image
+            src={bannerPreview || user.bannerUrl || ""}
             alt="Banner"
+            width={1200}
+            height={176}
             className="w-full h-full object-cover"
           />
           <button
@@ -107,12 +112,7 @@ export default function UserPage() {
             onClick={() => bannerInputRef.current?.click()}
             title="Change banner"
           >
-            <svg width="22" height="22" fill="none" viewBox="0 0 24 24">
-              <path
-                fill="currentColor"
-                d="M16.7 5.3a1 1 0 0 1 1.4 1.4l-9 9a1 1 0 0 1-.4.25l-4 1a1 1 0 0 1-1.22-1.22l1-4a1 1 0 0 1 .25-.4l9-9ZM19 7l-2-2 1.29-1.29a2 2 0 0 1 2.83 2.83L19 7ZM4 17v2a1 1 0 0 0 1 1h2l9.29-9.29-3-3L4 17Z"
-              />
-            </svg>
+            <PhotoCamera/>
           </button>
           <input
             type="file"
@@ -124,26 +124,26 @@ export default function UserPage() {
         </div>
         <div className="flex flex-col sm:flex-row items-center gap-6 px-8 -mt-16 relative z-10">
           <div className="relative group">
-            <img
-              src={
-                avatarPreview ||
-                user.avatarUrl ||
-                `https://ui-avatars.com/api/?name=${user.firstname}+${user.lastname}&background=0D8ABC&color=fff`
-              }
-              alt="Avatar"
-              className="w-32 h-32 rounded-full border-4 border-blue-400 shadow-lg object-cover bg-[#23272F]"
-            />
+            <Avatar
+              sx={{
+                width: 128,
+                height: 128,
+                borderRadius: "50%",
+                border: "4px solid #60a5fa",
+                boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)",
+                backgroundColor: "#23272F",
+                objectFit: "cover",
+              }}
+              src={avatarPreview || user?.avatarUrl}
+            >
+              {user.firstname?.charAt(0)}
+            </Avatar>
             <button
               className="absolute bottom-2 right-2 bg-blue-500 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition"
               onClick={() => fileInputRef.current?.click()}
               title="Change avatar"
             >
-              <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
-                <path
-                  fill="currentColor"
-                  d="M16.7 5.3a1 1 0 0 1 1.4 1.4l-9 9a1 1 0 0 1-.4.25l-4 1a1 1 0 0 1-1.22-1.22l1-4a1 1 0 0 1 .25-.4l9-9ZM19 7l-2-2 1.29-1.29a2 2 0 0 1 2.83 2.83L19 7ZM4 17v2a1 1 0 0 0 1 1h2l9.29-9.29-3-3L4 17Z"
-                />
-              </svg>
+              <PhotoCamera/>
             </button>
             <input
               type="file"

@@ -1,7 +1,7 @@
 'use client'
 
 import axios from 'axios';
-import AuthForm from '@/components/AuthForm/page';
+import AuthForm from '@/components/AuthForm';
 import { SignUpFormValues } from '@/types';
 
 export default function SignUpPage() {
