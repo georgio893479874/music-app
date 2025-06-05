@@ -1,3 +1,5 @@
+"use client"
+
 import Link from 'next/link';
 import { libraryItems, menuItems } from '@/constants';
 import { Accordion, AccordionItem } from '@heroui/accordion';
