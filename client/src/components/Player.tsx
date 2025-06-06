@@ -77,6 +77,29 @@ const Player = () => {
   }, [selectedSong]);
 
   useEffect(() => {
+    const checkFavorite = async () => {
+      if (!selectedSong) return;
+      const userId =
+        typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+      if (!userId) return;
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_URL}/favorite`
+        );
+        type Favorite = { track: { id: string }; userId: string };
+        const isFav = res.data.some(
+          (fav: Favorite) =>
+            fav.track.id === selectedSong.id && fav.userId === userId
+        );
+        setIsFavorite(isFav);
+      } catch {
+        setIsFavorite(false);
+      }
+    };
+    checkFavorite();
+  }, [selectedSong]);
+
+  useEffect(() => {
     if (selectedSong?.album?.id) {
       const isAlbumLoaded = songs.some(
         (song) => song.album?.id === selectedSong.album?.id
@@ -168,15 +191,16 @@ const Player = () => {
       }
       if (isFavorite) {
         await axios.delete(
-          `${process.env.NEXT_PUBLIC_API_URL}/favorite/${selectedSong.id}`
+          `${process.env.NEXT_PUBLIC_API_URL}/favorite?userId=${userId}&trackId=${selectedSong.id}`
         );
+        setIsFavorite(false);
       } else {
         await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/favorite`, {
           trackId: selectedSong.id,
           userId,
         });
+        setIsFavorite(true);
       }
-      setIsFavorite((prev) => !prev);
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
     }

@@ -1,6 +1,6 @@
 'use client'
 
-import AvatarMenu from "@/components/ProfileAvatar";
+import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import Head from "next/head";
 
@@ -11,7 +11,7 @@ export default function DashboardPage() {
         <title>Notent - Web Player</title>
       </Head>
       <Sidebar/>
-      <AvatarMenu/>
+      <Header/>
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { JSX } from "react";
+import { Dispatch, JSX, SetStateAction } from "react";
 
 export interface Track {
 	id: string;
@@ -95,4 +95,5 @@ export interface ListOfSongsProps {
   onToggleFavorite?: () => void;
   label?: string;
   showFavoriteButton?: boolean;
+  onSongClick: Dispatch<SetStateAction<Track | undefined>>;
 }

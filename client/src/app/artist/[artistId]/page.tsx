@@ -12,6 +12,7 @@ import Player from "@/components/Player";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import { Album, Artist } from "@/types";
 import Image from "next/image";
+import Header from "@/components/Header";
 
 const ArtistPage = () => {
   const { artistId } = useParams();
@@ -65,8 +66,9 @@ const ArtistPage = () => {
         <title>{artist.name} | Notent</title>
       </Head>
       <div className="flex min-h-screen bg-[#323131] text-white pb-24">
-        <Sidebar />
-        <div className="flex-1 lg:ml-64">
+        <Sidebar/>
+        <Header/>
+        <div className="flex-1 lg:ml-64 mt-16">
           <div className="relative w-full h-[400px] overflow-hidden">
             <Image
               className="w-full h-full object-cover"
@@ -76,7 +78,7 @@ const ArtistPage = () => {
               sizes="100vw"
             />
             <div className="absolute top-4 right-4 flex gap-2">
-              <ShareButton />
+              <ShareButton/>
             </div>
             <div className="absolute bottom-0 w-full p-6 bg-gradient-to-t from-black/70 to-transparent flex items-center gap-2 sm:gap-4">
               <button

@@ -7,12 +7,9 @@ import { ListMusic } from 'lucide-react';
 
 export default function Sidebar() {
   return (
-    <>
-      <div className="hidden lg:flex flex-col w-64 h-screen bg-[#272727] text-gray-200 fixed top-0 left-0">
-        <div className="flex items-center justify-center h-20 bg-[#2b2b2b] gap-3">
-          <span className="text-4xl font-bold text-gray-400">Notent</span>
-        </div>
-        <nav className="mt-10">
+    <div>
+      <div className="hidden lg:flex flex-col w-64 h-screen bg-[#212121] text-gray-200 fixed top-0 left-0">
+        <nav className="mt-16">
           <ul>
             {menuItems.map((item) => (
               <li key={item.name}>
@@ -68,6 +65,6 @@ export default function Sidebar() {
           </Link>
         ))}
       </div>
-    </>
+    </div>
   );
 }

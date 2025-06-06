@@ -9,12 +9,19 @@ import { genres } from "@/constants";
 import Link from "next/link";
 import Sidebar from "@/components/Sidebar";
 import { Album, Artist, Playlist, Track } from "@/types";
+import { useSearchParams } from "next/navigation";
 
 type SearchResult = Track | Album | Artist | Playlist;
 
 export default function SearchPage() {
   const [searchQuery, setSearchQuery] = useState("");
+  const searchParams = useSearchParams();
+  const initialQuery = searchParams.get("query") || "";
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+
+  useEffect(() => {
+    setSearchQuery(initialQuery);
+  }, [initialQuery]);
 
   const handleSearch = async (query: string) => {
     if (query.trim() === "") return;

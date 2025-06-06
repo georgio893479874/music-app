@@ -5,6 +5,7 @@ import IconButton from '@mui/material/IconButton';
 import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 type MenuItemType = {
   label: string;
@@ -41,6 +42,7 @@ const AvatarMenu = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [user, setUser] = useState<{ firstname: string; lastname: string; avatarUrl?: string } | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const router = useRouter();
 
   useEffect(() => {
     const userId = localStorage.getItem('userId');
@@ -71,12 +73,19 @@ const AvatarMenu = () => {
     window.location.href = '/login';
   };
 
+  const handleMyAccount = () => {
+    handleClose();
+    if (user) {
+      router.push(`/user/${localStorage.getItem('userId')}`);
+    }
+  };
+
   const initials = user
     ? `${user.firstname?.[0] || ''}${user.lastname?.[0] || ''}`.toUpperCase()
     : '';
 
   return (
-    <div className='md:fixed top-7 right-4'>
+    <div className='md:fixed right-4'>
       <IconButton onClick={handleClick} size="small">
         {!isLoading && (
           <Avatar src={user?.avatarUrl} sx={{ bgcolor: "#222", color: "#fff" }}>
@@ -118,7 +127,7 @@ const AvatarMenu = () => {
         }}
       >
         <MenuItem
-          onClick={handleClose}
+          onClick={handleMyAccount}
           sx={{
             fontWeight: 600,
             fontSize: 16,
@@ -135,7 +144,6 @@ const AvatarMenu = () => {
             My account
           </span>
         </MenuItem>
-        <Divider sx={{ bgcolor: "#222" }} />
         {menuSections.map((section, idx) => (
           <div key={idx}>
             {section.map((item) =>
