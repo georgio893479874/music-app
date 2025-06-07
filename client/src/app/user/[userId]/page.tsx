@@ -4,6 +4,7 @@ import { useParams } from "next/navigation";
 import Image from "next/image";
 import { Avatar } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
+import axios from "axios";
 
 type User = {
   id: string;
@@ -32,17 +33,18 @@ export default function UserPage() {
 
   useEffect(() => {
     if (!userId) return;
-    fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        setUser(data.user || data);
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}`)
+      .then((res) => {
+        const data = res.data;
+        setUser(data);
         setForm({
-          firstname: data.user?.firstname || data.firstname,
-          lastname: data.user?.lastname || data.lastname,
-          email: data.user?.email || data.email,
+          firstname: data.firstname,
+          lastname: data.lastname,
+          email: data.email,
         });
         setLoading(false);
-      });
+      })
   }, [userId]);
 
   const handleLogout = async () => {
@@ -95,7 +97,7 @@ export default function UserPage() {
     );
 
   return (
-    <div className="min-h-screen bg-[#181A20] text-white flex flex-col rounded-3xl lg:mt-16 lg:mb-32">
+    <div className="min-h-screen bg-[#181A20] text-white flex flex-col rounded-3xl lg:mt-16">
       <div className="relative h-56 w-full bg-gradient-to-r from-blue-900 to-blue-700 rounded-t-3xl">
         {user.bannerUrl || bannerPreview ? (
           <Image
@@ -135,6 +137,7 @@ export default function UserPage() {
                 "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)",
               backgroundColor: "#23272F",
               objectFit: "cover",
+              fontSize: 50,
             }}
             src={avatarPreview || user?.avatarUrl}
           >
@@ -145,7 +148,7 @@ export default function UserPage() {
             onClick={() => fileInputRef.current?.click()}
             title="Change avatar"
           >
-            <PhotoCamera />
+            <PhotoCamera/>
           </button>
           <input
             type="file"
@@ -155,7 +158,7 @@ export default function UserPage() {
             onChange={handleAvatarChange}
           />
         </div>
-        <div className="flex-1 flex flex-col items-center sm:items-start">
+        <div className="flex-1 flex flex-col items-center sm:items-start z-50">
           <h1 className="text-4xl font-bold flex items-center gap-2">
             {user.firstname} {user.lastname}
           </h1>
@@ -168,7 +171,6 @@ export default function UserPage() {
           Logout
         </button>
       </div>
-      {/* Tabs */}
       <div className="mt-8 border-b border-[#23272F] flex gap-8 px-8">
         <button
           className={`pb-2 font-semibold transition-colors duration-200 ${
