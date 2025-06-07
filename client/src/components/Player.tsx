@@ -354,7 +354,7 @@ const Player = () => {
         </div>
       </div>
       {isQueueVisible && (
-        <div className="fixed top-0 right-0 w-80 h-full bg-[#212121] text-white shadow-lg overflow-y-auto pb-24 pt-24">
+        <div className="w-80 bg-[#212121] text-white shadow-lg overflow-y-auto pb-24 pt-24">
           <div className="relative p-4 border-b border-gray-700">
             <h2 className="text-lg font-bold">Up Next</h2>
             <button
@@ -397,7 +397,6 @@ const Player = () => {
                       src={song.coverImagePath}
                       width={40}
                       height={40}
-                      className="w-[40px] h-[40px]"
                       alt="cover"
                     />
                     <div>
@@ -421,7 +420,7 @@ const Player = () => {
             className="absolute top-6 right-8 text-white text-3xl"
             aria-label="Close"
           >
-            <X />
+            <X/>
           </button>
           <div className="flex gap-4 mb-8">
             <button

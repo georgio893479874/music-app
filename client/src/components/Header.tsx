@@ -102,8 +102,8 @@ const Header = () => {
           )}
         </div>
         <div className="flex items-center gap-2 ml-2">
-          <Mail className="fixed right-32"/>
-          <Bell className="fixed right-20"/>
+          <Mail className="fixed right-32 text-white"/>
+          <Bell className="fixed right-20 text-white"/>
           <ProfileAvatar/>
         </div>
       </div>

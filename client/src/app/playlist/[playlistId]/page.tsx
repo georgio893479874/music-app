@@ -5,9 +5,11 @@ import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Playlist } from '@/types';
 import ListOfSongs from '@/components/ListOfSongs';
+import { usePlayerContext } from '@/contexts/PlayerContext';
 
 export default function PlaylistPage() {
   const { playlistId } = useParams();
+  const { setSelectedSong } = usePlayerContext();
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
 
@@ -42,7 +44,8 @@ export default function PlaylistPage() {
       isFavorite={isFavorite}
       onToggleFavorite={toggleFavorite}
       label="Playlist"
-      showFavoriteButton={true}
+      showFavoriteButton={true} 
+      onSongClick={setSelectedSong}
     />
   );
 }

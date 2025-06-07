@@ -1,6 +1,7 @@
 import { Heart } from "lucide-react";
 import { ListOfSongsProps } from "@/types";
 import Link from "next/link";
+import Image from "next/image";
 
 export default function ListOfSongs({
   coverPhoto,
@@ -14,12 +15,14 @@ export default function ListOfSongs({
   onSongClick,
 }: ListOfSongsProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-900 to-neutral-800 flex flex-col pt-4 rounded-3xl mt-16">
+    <div className="bg-gradient-to-b from-neutral-900 to-neutral-800 flex flex-col pt-4 rounded-3xl mt-16">
       <div className="flex flex-col md:flex-row items-center md:items-end gap-8 px-8 pt-16 pb-8">
-        <img
+        <Image
           src={coverPhoto}
           alt={name}
-          className="rounded-xl shadow-lg border border-gray-700 w-60 h-60 object-cover"
+          className="rounded-xl shadow-lg border border-gray-700 object-cover"
+          width={240}
+          height={240}
         />
         <div className="flex flex-col gap-4">
           <span className="uppercase text-xs tracking-widest text-gray-400 font-semibold">

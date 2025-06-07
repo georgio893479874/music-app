@@ -3,13 +3,12 @@
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import axios from "axios";
-import Sidebar from "@/components/Sidebar";
 import Link from "next/link";
-import Player from "@/components/Player";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import Head from "next/head";
 import ShareButton from "@/components/ShareButton";
 import { Album } from "@/types";
+import Image from "next/image";
 
 export default function AlbumPage() {
   const { albumId } = useParams();
@@ -41,12 +40,13 @@ export default function AlbumPage() {
         <title>{`${album.title} - Album by ${album.artist.name} | Notent`}</title>
       </Head>
       <div className="flex min-h-screen bg-[#323131] text-white pb-24">
-        <Sidebar/>
         <div className="flex flex-col items-center flex-1 py-12 px-4 lg:ml-64">
-          <img
+          <Image
             src={album.coverUrl}
             alt={album.title}
-            className="rounded-lg border border-gray-700 mb-6 object-cover w-64 h-64 shadow-lg transition-transform transform hover:scale-105"
+            className="rounded-lg border border-gray-700 mb-6 object-cover shadow-lg transition-transform transform hover:scale-105"
+            width={256}
+            height={256}
           />
           <h1 className="text-4xl font-extrabold text-center mb-2">{album.title}</h1>
           <p className="text-lg text-gray-400 hover:text-white transition-colors cursor-pointer">
@@ -71,7 +71,6 @@ export default function AlbumPage() {
             ))}
           </ul>
         </div>
-        <Player/>
       </div>
     </>
   );

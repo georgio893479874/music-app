@@ -3,16 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import axios from "axios";
-import Sidebar from "@/components/Sidebar";
 import { FaPlay, FaPause } from "react-icons/fa";
 import Link from "next/link";
 import ShareButton from "@/components/ShareButton";
 import Head from "next/head";
-import Player from "@/components/Player";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import { Album, Artist } from "@/types";
 import Image from "next/image";
-import Header from "@/components/Header";
 
 const ArtistPage = () => {
   const { artistId } = useParams();
@@ -66,8 +63,6 @@ const ArtistPage = () => {
         <title>{artist.name} | Notent</title>
       </Head>
       <div className="flex min-h-screen bg-[#323131] text-white pb-24">
-        <Sidebar/>
-        <Header/>
         <div className="flex-1 lg:ml-64 mt-16">
           <div className="relative w-full h-[400px] overflow-hidden">
             <Image
@@ -125,7 +120,6 @@ const ArtistPage = () => {
           </div>
         </div>
       </div>
-      <Player />
     </>
   );
 };
