@@ -9,18 +9,16 @@ import Header from "@/components/Header";
 import Player from "@/components/Player";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 
-export interface FavoriteResponse {
-  track: Track;
-}
-
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<Track[]>([]);
+  const [sidebarWidth, setSidebarWidth] = useState(260);
   const { setSelectedSong } = usePlayerContext();
 
   useEffect(() => {
     const fetchFavorites = async () => {
       try {
         const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/favorite`);
+        type FavoriteResponse = { track: Track };
         setFavorites(res.data.map((fav: FavoriteResponse) => fav.track));
       } catch {
         setFavorites([]);
@@ -29,27 +27,28 @@ export default function FavoritesPage() {
     fetchFavorites();
   }, []);
 
-  console.log(favorites)
-
   return (
     <div className="flex min-h-screen bg-[#212121] text-white">
-      <Sidebar/>
-      <Header/>
-      <div className="flex-1">
-        {favorites.length === 0 ? (
-          <p className="text-gray-400 text-center justify-center">You haven&#39;t added any favorites yet</p>
-        ) : (
-          <ListOfSongs
-            coverPhoto="/favorite-cover.jpg"
-            name="Favorite Songs"
-            tracks={favorites}
-            label="Favorites"
-            showFavoriteButton={false}
-            onSongClick={setSelectedSong}
-          />
-        )}
+      <Sidebar sidebarWidth={sidebarWidth} setSidebarWidth={setSidebarWidth} />
+      <div style={{ width: sidebarWidth }} className="hidden lg:block flex-shrink-0" />
+      <div className="flex-1 flex flex-col">
+        <Header />
+        <div className="flex-1">
+          {favorites.length === 0 ? (
+            <p className="text-gray-400 text-center justify-center">You haven&#39;t added any favorites yet</p>
+          ) : (
+            <ListOfSongs
+              coverPhoto="/favorite-cover.jpg"
+              name="Favorite Songs"
+              tracks={favorites}
+              label="Favorites"
+              showFavoriteButton={false}
+              onSongClick={setSelectedSong}
+            />
+          )}
+        </div>
       </div>
-      <Player/>
+      <Player />
     </div>
   );
 }

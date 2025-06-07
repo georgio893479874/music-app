@@ -14,7 +14,7 @@ export default function ListOfSongs({
   onSongClick,
 }: ListOfSongsProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-neutral-900 to-neutral-800 flex flex-col lg: ml-64 pt-4 rounded-3xl mt-16">
+    <div className="min-h-screen bg-gradient-to-b from-neutral-900 to-neutral-800 flex flex-col pt-4 rounded-3xl mt-16">
       <div className="flex flex-col md:flex-row items-center md:items-end gap-8 px-8 pt-16 pb-8">
         <img
           src={coverPhoto}
@@ -38,7 +38,7 @@ export default function ListOfSongs({
                 }`}
                 aria-label="Add to favorites"
               >
-                <Heart fill={isFavorite ? "currentColor" : "none"} />
+                <Heart fill={isFavorite ? "currentColor" : "none"}/>
               </button>
             )}
             <span className="text-gray-400 text-sm">

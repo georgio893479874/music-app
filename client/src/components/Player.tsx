@@ -354,7 +354,7 @@ const Player = () => {
         </div>
       </div>
       {isQueueVisible && (
-        <div className="fixed top-0 right-0 w-80 h-full bg-[#212121] text-white shadow-lg overflow-y-auto pb-24">
+        <div className="fixed top-0 right-0 w-80 h-full bg-[#212121] text-white shadow-lg overflow-y-auto pb-24 pt-24">
           <div className="relative p-4 border-b border-gray-700">
             <h2 className="text-lg font-bold">Up Next</h2>
             <button
