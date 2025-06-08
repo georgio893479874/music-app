@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const noSidebarRoutes = ["/login", "/register", "/"];
+  const noSidebarRoutes = ["/login", "/signup", "/"];
 
   const shouldShowSidebar = !noSidebarRoutes.includes(pathname);
 
