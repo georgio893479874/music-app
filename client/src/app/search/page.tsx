@@ -1,6 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+"use client";
+
+import { useState, useEffect, Suspense } from "react";
 import { FaSearch } from "react-icons/fa";
 import { PiBellRingingFill } from "react-icons/pi";
 import { IoArrowBackOutline } from "react-icons/io5";
@@ -13,7 +15,7 @@ import Image from "next/image";
 
 type SearchResult = Track | Album | Artist | Playlist;
 
-export default function SearchPage() {
+function SearchPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("query") || "";
@@ -55,7 +57,6 @@ export default function SearchPage() {
       setSearchResults([]);
     }
   }, [searchQuery]);
-
   return (
     <div className="flex-1 lg:ml-64">
       <div className="flex items-center p-6 absolute top-0 left-0 w-full z-50">
@@ -223,5 +224,13 @@ export default function SearchPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function SearchPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SearchPageContent />
+    </Suspense>
   );
 }

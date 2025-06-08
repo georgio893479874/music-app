@@ -1,6 +1,5 @@
 import { Heart } from "lucide-react";
 import { ListOfSongsProps } from "@/types";
-import Link from "next/link";
 import Image from "next/image";
 
 export default function ListOfSongs({
@@ -69,11 +68,7 @@ export default function ListOfSongs({
               >
                 <td className="py-2 px-4 text-gray-400">{index + 1}</td>
                 <td className="py-2 px-4 text-white">{track.title}</td>
-                <Link href={`/artist/${track.album?.artist.id}`}>
-                  <td className="py-2 px-4 text-gray-300">
-                    {track.album?.artist?.name || "-"}
-                  </td>
-                </Link>
+                <td className="py-2 px-4 text-gray-300">{track.album?.artist?.name || "-"}</td>
                 <td className="py-2 px-4 text-gray-300">
                   {track.album?.title || "-"}
                 </td>

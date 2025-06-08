@@ -11,12 +11,12 @@ export const metadata: Metadata = { title: "Notent" };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <PlayerProvider>
-      <html lang="en">
-        <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+    <html lang="en">
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+        <PlayerProvider>
           <AppLayout>{children}</AppLayout>
-        </body>
-      </html>
-    </PlayerProvider>
+        </PlayerProvider>
+      </body>
+    </html>
   );
 }

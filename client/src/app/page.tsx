@@ -6,6 +6,7 @@ import { useEffect, useState } from "react";
 import { FiMenu, FiX } from "react-icons/fi";
 import { FaPlay, FaArrowUp } from "react-icons/fa";
 import { artists, playlists, tracks } from "@/constants";
+import Image from "next/image";
 
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
@@ -91,10 +92,13 @@ export default function Home() {
         </div>
       </header>
       <section className="relative bg-gray-950 min-h-screen flex items-center justify-center text-white">
-        <img
+        <Image
           src="/hero-icon.webp"
           alt="hero"
+          fill
           className="absolute inset-0 w-full h-full object-cover opacity-20"
+          style={{ objectFit: "cover", opacity: 0.2, zIndex: 0 }}
+          priority
         />
         <div className="relative z-10 text-center p-8">
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold mb-6">
@@ -130,10 +134,13 @@ export default function Home() {
                 key={index}
                 className="relative rounded-lg overflow-hidden shadow-lg"
               >
-                <img
+                <Image
                   src={playlist.imageUrl}
                   alt={`${playlist.title} Playlist`}
+                  width={400}
+                  height={400}
                   className="w-full h-full object-cover"
+                  style={{ objectFit: "cover" }}
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
                   <div className="text-center">
@@ -161,10 +168,13 @@ export default function Home() {
               key={index}
               className="w-full sm:w-1/2 md:w-1/3 lg:w-1/4 text-center"
             >
-              <img
+              <Image
                 src={artist.image}
                 alt={artist.name}
+                width={128}
+                height={128}
                 className="rounded-full mb-4 mx-auto object-cover shadow-lg w-32 h-32"
+                style={{ objectFit: "cover" }}
               />
               <h4 className="text-lg font-semibold">{artist.name}</h4>
               <p className="text-gray-300 text-sm">{artist.genre}</p>
@@ -189,10 +199,13 @@ export default function Home() {
         </p>
         <div className="flex flex-col md:flex-row md:justify-between items-center gap-6 md:gap-8">
           <div className="flex-shrink-0">
-            <img
+            <Image
               src="/taylor-swift-transparent.webp"
               alt="Taylor Swift"
+              width={256}
+              height={256}
               className="rounded-full w-full h-full mx-auto object-cover shadow-lg border-2 border-gray-800"
+              style={{ objectFit: "cover" }}
             />
           </div>
           <div className="flex-1 mt-6 md:mt-0">
@@ -211,10 +224,13 @@ export default function Home() {
                   className="flex items-center justify-between py-2 px-3 bg-gray-800 rounded-lg shadow-md gap-16"
                 >
                   <div className="flex items-center">
-                    <img
+                    <Image
                       src={track.imgSrc}
                       alt={track.title}
+                      width={40}
+                      height={40}
                       className="md:w-10 md:h-10 rounded-lg mr-3 border-2 border-gray-700 w-8 h-8"
+                      style={{ objectFit: "cover" }}
                     />
                     <div>
                       <span className="block text-sm md:text-base font-medium">

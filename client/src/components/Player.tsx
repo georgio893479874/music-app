@@ -64,7 +64,7 @@ const Player = () => {
     if (selectedSong?.album?.id) {
       fetchSongs(selectedSong.album.id);
     }
-  }, [selectedSong]);
+  }, [selectedSong, audioPlayer]);
 
   useEffect(() => {
     if (selectedSong && audioPlayer.current) {
@@ -74,7 +74,7 @@ const Player = () => {
         console.error("Failed to play audio:", error);
       });
     }
-  }, [selectedSong]);
+  }, [selectedSong, audioPlayer]);
 
   useEffect(() => {
     const checkFavorite = async () => {

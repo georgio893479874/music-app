@@ -140,7 +140,7 @@ const usePlayer = ({
     return () => {
       audio.removeEventListener("ended", handleEnded);
     };
-  }, [currentSongIndex, setCurrentSongIndex, songs, repeatMode]);
+  }, [currentSongIndex, setCurrentSongIndex, songs, repeatMode, setSelectedSong]);
 
   const togglePlayPause = () => {
     const audio = audioPlayer.current;
