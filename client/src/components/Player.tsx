@@ -23,12 +23,11 @@ import {
   Shuffle,
   X,
 } from "lucide-react";
-import { Track } from "@/types";
+
 import Image from "next/image";
 
-const Player = () => {
-  const { selectedSong } = usePlayerContext();
-  const [songs, setSongs] = useState<Track[]>([]);
+const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
+  const { selectedSong, songs, setSongs } = usePlayerContext();
   const [currentSongIndex, setCurrentSongIndex] = useState<number>(0);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
@@ -39,8 +38,6 @@ const Player = () => {
     "album" | "artist"
   >("album");
   const [isShuffling, setIsShuffling] = useState(false);
-  const [isQueueVisible, setIsQueueVisible] = useState(false);
-  const { setSelectedSong } = usePlayerContext();
   const {
     isPlaying,
     togglePlayPause,
@@ -163,10 +160,6 @@ const Player = () => {
     setRepeatMode((prev) =>
       prev === "off" ? "one" : prev === "one" ? "all" : "off"
     );
-  };
-
-  const toggleQueue = () => {
-    setIsQueueVisible((prev) => !prev);
   };
 
   const shuffleSongs = () => {
@@ -340,7 +333,7 @@ const Player = () => {
             />
             <List
               className="text-xl cursor-pointer text-gray-200"
-              onClick={toggleQueue}
+              onClick={onQueueToggle}
             />
             <Expand
               className="text-xl cursor-pointer text-gray-200"
@@ -353,66 +346,6 @@ const Player = () => {
           </div>
         </div>
       </div>
-      {isQueueVisible && (
-        <div className="w-80 bg-[#212121] text-white shadow-lg overflow-y-auto pb-24 pt-24">
-          <div className="relative p-4 border-b border-gray-700">
-            <h2 className="text-lg font-bold">Up Next</h2>
-            <button
-              onClick={() => setIsQueueVisible(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white text-xl"
-            >
-              <X className="cursor-pointer" />
-            </button>
-          </div>
-          <div className="p-4 pb-14">
-            <div className="mb-4">
-              <h3 className="text-sm text-gray-400">Playing</h3>
-              <div className="py-2 px-4 bg-[#1e1e1e] rounded-md flex items-center gap-4">
-                <Image
-                  src={songs[currentSongIndex]?.coverImagePath}
-                  width={40}
-                  height={40}
-                  className="w-[40px] h-[40px]"
-                  alt="cover"
-                />
-                <span className="text-blue-400 font-bold">
-                  {songs[currentSongIndex]?.title}
-                </span>
-                <br />
-                <span className="text-sm text-gray-400">
-                  {songs[currentSongIndex]?.album?.artist.name}
-                </span>
-              </div>
-            </div>
-            <div>
-              <h3 className="text-sm text-gray-400">Next</h3>
-              <ul>
-                {songs.slice(currentSongIndex + 1).map((song) => (
-                  <li
-                    key={song.id}
-                    className="py-2 border-b border-gray-700 flex items-center gap-4 cursor-pointer"
-                    onClick={() => setSelectedSong(song)}
-                  >
-                    <Image
-                      src={song.coverImagePath}
-                      width={40}
-                      height={40}
-                      alt="cover"
-                    />
-                    <div>
-                      <span className="font-bold">{song.title}</span>
-                      <br />
-                      <span className="text-sm text-gray-400">
-                        {song.album?.artist.name}
-                      </span>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
-        </div>
-      )}
       {isFullscreen && (
         <div className="fixed inset-0 bg-[#15343d] flex flex-col items-center justify-center z-50">
           <button

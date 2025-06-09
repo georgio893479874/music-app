@@ -7,7 +7,7 @@ import { ListMusic } from 'lucide-react';
 
 export default function Sidebar() {
   return (
-    <div className="hidden lg:flex flex-col w-64 h-screen bg-[#212121] text-gray-200">
+    <div className="hidden lg:flex flex-col h-screen bg-[#212121] text-gray-200">
       <nav className="mt-16">
         <ul>
           {menuItems.map((item) => (

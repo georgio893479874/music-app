@@ -3,9 +3,6 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { FaSearch } from "react-icons/fa";
-import { PiBellRingingFill } from "react-icons/pi";
-import { IoArrowBackOutline } from "react-icons/io5";
 import axios from "axios";
 import { genres } from "@/constants";
 import Link from "next/link";
@@ -58,33 +55,8 @@ function SearchPageContent() {
     }
   }, [searchQuery]);
   return (
-    <div className="flex-1 lg:ml-64">
-      <div className="flex items-center p-6 absolute top-0 left-0 w-full z-50">
-        <div className="w-full max-w-[650px] mx-auto">
-          <div className="flex gap-4 lg:ml-40">
-            <button className="p-3 bg-black bg-opacity-40 rounded-2xl transition duration-200">
-              <IoArrowBackOutline size={26} style={{ color: "white" }} />
-            </button>
-            <div className="relative w-full">
-              <input
-                type="text"
-                className="p-4 pl-10 bg-black bg-opacity-40 text-white placeholder-gray-500 rounded-2xl shadow-inner focus:outline-none focus:ring-2 focus:ring-white w-full backdrop-blur-lg"
-                placeholder="Search songs, albums, or artists..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-              <FaSearch
-                className="absolute left-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-white"
-                size={20}
-              />
-            </div>
-            <button className="p-3 bg-black bg-opacity-40 rounded-2xl transition duration-200 hidden md:flex">
-              <PiBellRingingFill size={25} style={{ color: "white" }} />
-            </button>
-          </div>
-        </div>
-      </div>
-      <div className="pt-28 px-6 mb-20">
+    <div className="flex-1">
+      <div className="pt-28 px-6 mb-32">
         {!searchQuery && (
           <>
             <h2 className="text-xl font-semibold text-white mb-4">
@@ -100,8 +72,8 @@ function SearchPageContent() {
                     src={genre.image}
                     alt="genre cover"
                     className="object-cover"
-                    width={250}
-                    height={250}
+                    width={275}
+                    height={275}
                   />
                 </div>
               ))}

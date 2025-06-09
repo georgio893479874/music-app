@@ -8,7 +8,7 @@ import { usePlayerContext } from "@/contexts/PlayerContext";
 
 export default function FavoritesPage() {
   const [favorites, setFavorites] = useState<Track[]>([]);
-  const { setSelectedSong } = usePlayerContext();
+  const { setSelectedSong, setSongs } = usePlayerContext();
 
   useEffect(() => {
     const fetchFavorites = async () => {
@@ -38,7 +38,11 @@ export default function FavoritesPage() {
           tracks={favorites}
           label="Favorites"
           showFavoriteButton={false}
-          onSongClick={setSelectedSong}
+          onSongClick={(song) => {
+            if (!song) return;
+            setSongs(favorites);
+            setSelectedSong(song);
+          }}
         />
       )}
     </div>
