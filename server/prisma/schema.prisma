@@ -58,6 +58,8 @@ model Track {
   favorites        Favorite[]
   ListeningHistory ListeningHistory[]
   Recommendation   Recommendation[]
+
+  Lyric Lyric[]
 }
 
 model Album {
@@ -111,4 +113,14 @@ model Recommendation {
   trackId   String
   track     Track    @relation(fields: [trackId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model Lyric {
+  id        String   @id @default(uuid())
+  text      String
+  timestamp Float
+  track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  trackId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

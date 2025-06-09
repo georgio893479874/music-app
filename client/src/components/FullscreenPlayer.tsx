@@ -4,7 +4,6 @@ import { X } from "lucide-react";
 import Image from "next/image";
 import { Track } from "@/types";
 import { motion } from "framer-motion";
-import { useEffect, useRef } from "react";
 
 interface FullscreenPlayerProps {
   onClose: () => void;
@@ -16,67 +15,6 @@ const FullscreenPlayer = ({
   selectedSong,
 }: FullscreenPlayerProps) => {
   const imageSrc = selectedSong?.coverImagePath || "/placeholder.png"
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const analyserRef = useRef<AnalyserNode | null>(null);
-  const dataArrayRef = useRef<Uint8Array | null>(null);
-
-  useEffect(() => {
-    if (!audioRef.current) return;
-
-    const audioCtx = new (window.AudioContext ||
-      (window as unknown as { webkitAudioContext?: typeof AudioContext })
-        .webkitAudioContext)();
-
-    if (audioCtx.state === "suspended") {
-      audioCtx.resume();
-    }
-
-    const analyser = audioCtx.createAnalyser();
-    const source = audioCtx.createMediaElementSource(audioRef.current);
-    source.connect(analyser);
-    analyser.connect(audioCtx.destination);
-
-    analyser.fftSize = 256;
-    analyserRef.current = analyser;
-
-    const bufferLength = analyser.frequencyBinCount;
-    dataArrayRef.current = new Uint8Array(bufferLength);
-
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    let animationId: number;
-
-    const draw = () => {
-      animationId = requestAnimationFrame(draw);
-      if (!analyser || !ctx || !dataArrayRef.current) return;
-      analyser.getByteFrequencyData(dataArrayRef.current);
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-      const barWidth = canvas.width / bufferLength;
-      dataArrayRef.current.forEach((val, i) => {
-        const barHeight = (val / 255) * canvas.height;
-        ctx.fillStyle = `hsl(${(i / bufferLength) * 360}, 100%, 50%)`;
-        ctx.fillRect(
-          i * barWidth,
-          canvas.height - barHeight,
-          barWidth,
-          barHeight
-        );
-      });
-    };
-
-    draw();
-
-    return () => {
-      cancelAnimationFrame(animationId);
-      audioCtx.close();
-    };
-  }, [selectedSong]);
-
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -118,7 +56,6 @@ const FullscreenPlayer = ({
           {selectedSong.album?.artist?.name || "Unknown Artist"}
         </p>
       </motion.div>
-      <canvas ref={canvasRef} width={400} height={150} className="mb-4" />
     </motion.div>
   );
 };

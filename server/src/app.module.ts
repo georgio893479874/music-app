@@ -10,6 +10,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SearchModule } from './search/search.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { UserModule } from './user/user.module';
+import { LyricModule } from './lyric/lyric.module';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { UserModule } from './user/user.module';
     PrismaModule, 
     SearchModule, 
     FavoriteModule, 
-    UserModule,
+    UserModule, LyricModule,
   ],
 })
 export class AppModule {}

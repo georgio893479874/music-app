@@ -1,4 +1,4 @@
-import { IsString, IsInt, IsOptional, IsUUID } from 'class-validator';
+import { IsString, IsInt, IsUUID } from 'class-validator';
 
 export class CreateTrackDto {
   @IsString()
