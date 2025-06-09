@@ -21,9 +21,9 @@ import {
   Repeat,
   Repeat1,
   Shuffle,
-  X,
 } from "lucide-react";
 import Image from "next/image";
+import FullscreenPlayer from "./FullscreenPlayer";
 
 const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
   const { selectedSong, songs, setSongs } = usePlayerContext();
@@ -33,9 +33,6 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
   const [isFavorite, setIsFavorite] = useState(false);
   const [repeatMode, setRepeatMode] = useState<"off" | "one" | "all">("off");
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [fullscreenImageType, setFullscreenImageType] = useState<
-    "album" | "artist"
-  >("album");
   const [isShuffling, setIsShuffling] = useState(false);
   const {
     isPlaying,
@@ -200,10 +197,6 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
 
   const handlePictureInPicture = () => {};
 
-  const handleImageTypeChange = (type: "album" | "artist") => {
-    setFullscreenImageType(type);
-  };
-
   const handleExpand = () => {
     setIsFullscreen(true);
   };
@@ -345,57 +338,11 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
           </div>
         </div>
       </div>
-      {isFullscreen && (
-        <div className="fixed inset-0 bg-[#15343d] flex flex-col items-center justify-center z-50">
-          <button
-            onClick={handleCloseFullscreen}
-            className="absolute top-6 right-8 text-white text-3xl"
-            aria-label="Close"
-          >
-            <X/>
-          </button>
-          <div className="flex gap-4 mb-8">
-            <button
-              className={`px-4 py-2 rounded-lg ${
-                fullscreenImageType === "album"
-                  ? "bg-white text-black"
-                  : "bg-[#1e1e1e] text-white"
-              }`}
-              onClick={() => handleImageTypeChange("album")}
-            >
-              Album
-            </button>
-            <button
-              className={`px-4 py-2 rounded-lg ${
-                fullscreenImageType === "artist"
-                  ? "bg-white text-black"
-                  : "bg-[#1e1e1e] text-white"
-              }`}
-              onClick={() => handleImageTypeChange("artist")}
-            >
-              Artist
-            </button>
-          </div>
-          <Image
-            src={
-              fullscreenImageType === "album"
-                ? selectedSong?.coverImagePath || "/placeholder.png"
-                : selectedSong?.album?.artist?.coverPhoto || "/placeholder.png"
-            }
-            width={500}
-            height={500}
-            className="rounded-2xl shadow-2xl max-w-[500px] w-full h-auto object-cover"
-            alt="cover"
-            style={{ aspectRatio: "1/1" }}
-          />
-          <div className="mt-8 text-center text-white">
-            <h2 className="text-3xl font-bold">{selectedSong?.title}</h2>
-            <p className="text-xl mt-2">{selectedSong?.album?.artist?.name}</p>
-            <p className="text-md text-gray-400">
-              {selectedSong?.album?.title}
-            </p>
-          </div>
-        </div>
+      {isFullscreen && selectedSong && (
+        <FullscreenPlayer
+          onClose={handleCloseFullscreen}
+          selectedSong={selectedSong}
+        />
       )}
     </>
   );
