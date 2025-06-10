@@ -342,6 +342,7 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
         <FullscreenPlayer
           onClose={handleCloseFullscreen}
           selectedSong={selectedSong}
+          currentTime={currentTime}
         />
       )}
     </>

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateLyricDto } from './dto/create-lyric.dto';
 import { UpdateLyricDto } from './dto/update-lyric.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class LyricService {

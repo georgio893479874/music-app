@@ -1,6 +1,8 @@
-import axios from 'axios';
+import axios from "axios";
 
 export async function fetchLyrics(trackId: string) {
-  const response = await axios.get(`/api/lyric?trackId=${trackId}`);
+  const response = await axios.get(
+    `${process.env.NEXT_PUBLIC_API_URL}/lyric?trackId=${trackId}`
+  );
   return response.data;
 }
