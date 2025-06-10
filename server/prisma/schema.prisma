@@ -58,7 +58,6 @@ model Track {
   favorites        Favorite[]
   ListeningHistory ListeningHistory[]
   Recommendation   Recommendation[]
-
   Lyric Lyric[]
 }
 

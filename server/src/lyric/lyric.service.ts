@@ -8,12 +8,16 @@ export class LyricService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createLyricDto: CreateLyricDto) {
+    const trackExists = await this.prisma.track.findUnique({
+      where: { id: createLyricDto.trackId },
+    });
+
+    if (!trackExists) {
+      throw new Error(`Track with ID ${createLyricDto.trackId} does not exist`);
+    }
+
     return this.prisma.lyric.create({
-      data: {
-        text: createLyricDto.text,
-        timestamp: createLyricDto.timestamp,
-        trackId: createLyricDto.trackId,
-      },
+      data: createLyricDto,
     });
   }
 
