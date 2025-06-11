@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState, useRef } from "react";
 import { useParams } from "next/navigation";
 import Image from "next/image";
@@ -14,280 +15,375 @@ type User = {
   avatarUrl?: string;
   bannerUrl?: string;
   role?: string;
-  isOnline?: boolean;
 };
+
+type Playlist = { id: string; title: string };
+type Song = { id: string; title: string };
 
 export default function UserPage() {
   const { userId } = useParams();
   const [user, setUser] = useState<User | null>(null);
-  const [tab, setTab] = useState<"profile" | "settings" | "activity">(
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<"profile" | "settings" | "playlists">(
     "profile"
   );
-  const [loading, setLoading] = useState(true);
-  const [editMode, setEditMode] = useState(false);
-  const [form, setForm] = useState({ firstname: "", lastname: "", email: "" });
-  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
-  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
+  const [newTitle, setNewTitle] = useState("");
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [selectedPlaylist, setSelectedPlaylist] = useState<Playlist | null>(
+    null
+  );
+  const [playlistSongs, setPlaylistSongs] = useState<Song[]>([]);
+  const [availableSongs, setAvailableSongs] = useState<Song[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
+  const [bannerPreview, setBannerPreview] = useState<string | null>(null);
+  const [form, setForm] = useState({ firstname: "", lastname: "", email: "" });
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     if (!userId) return;
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}`)
-      .then((res) => {
-        const data = res.data;
-        setUser(data);
+
+    (async () => {
+      try {
+        const [{ data: u }, { data: pls }, { data: songs }] = await Promise.all(
+          [
+            axios.get(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}`),
+            axios.get(
+              `${process.env.NEXT_PUBLIC_API_URL}/user/${userId}/playlists`
+            ),
+            axios.get(
+              `${process.env.NEXT_PUBLIC_API_URL}/user/${userId}/songs`
+            ),
+          ]
+        );
+
+        setUser(u);
         setForm({
-          firstname: data.firstname,
-          lastname: data.lastname,
-          email: data.email,
+          firstname: u.firstname,
+          lastname: u.lastname,
+          email: u.email,
         });
+        setPlaylists(pls);
+        setAvailableSongs(songs);
         setLoading(false);
-      })
+      } catch (err) {
+        console.error("Помилка завантаження даних:", err);
+      }
+    })();
   }, [userId]);
 
-  const handleLogout = async () => {
-    await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
-    window.location.href = "/login";
+  const refreshPlaylists = async () => {
+    const { data } = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/user/${userId}/playlists`
+    );
+    setPlaylists(data);
   };
 
-  const handleEdit = () => setEditMode(true);
+  const handleCreate = async () => {
+    if (!newTitle) return;
+    await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/playlists`, {
+      title: newTitle,
+      userId,
+    });
+    setNewTitle("");
+    refreshPlaylists();
+  };
+
+  const handleEdit = (p: Playlist) => {
+    setEditingId(p.id);
+    setEditTitle(p.title);
+  };
+
+  const handleUpdate = async () => {
+    if (!editingId) return;
+    await axios.patch(
+      `${process.env.NEXT_PUBLIC_API_URL}/playlists/${editingId}`,
+      { title: editTitle }
+    );
+    setEditingId(null);
+    refreshPlaylists();
+  };
+
+  const handleDelete = async (id: string) => {
+    await axios.delete(`${process.env.NEXT_PUBLIC_API_URL}/playlists/${id}`);
+    if (selectedPlaylist?.id === id) setSelectedPlaylist(null);
+    refreshPlaylists();
+  };
+
+  const openPlaylist = async (p: Playlist) => {
+    setSelectedPlaylist(p);
+    const { data } = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/playlists/${p.id}/songs`
+    );
+    setPlaylistSongs(data);
+  };
+
+  const addSongToPlaylist = async (songId: string) => {
+    if (!selectedPlaylist) return;
+    await axios.post(
+      `${process.env.NEXT_PUBLIC_API_URL}/playlists/${selectedPlaylist.id}/songs`,
+      { songId }
+    );
+    openPlaylist(selectedPlaylist);
+  };
 
   const handleFormChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async () => {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify(form),
+  const handleSaveProfile = async () => {
+    await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}`, form, {
+      withCredentials: true,
     });
     setUser({ ...user!, ...form });
     setEditMode(false);
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    const file = e.target.files?.[0];
+    if (file) {
       setAvatarPreview(URL.createObjectURL(file));
     }
   };
 
   const handleBannerChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
+    const file = e.target.files?.[0];
+    if (file) {
       setBannerPreview(URL.createObjectURL(file));
     }
   };
 
   if (loading)
     return (
-      <div className="flex justify-center items-center h-96 bg-[#181A20] text-white">
-        Loading...
-      </div>
+      <div className="flex justify-center items-center h-96">Loading...</div>
     );
-  if (!user)
-    return (
-      <div className="text-center text-red-500 bg-[#181A20]">
-        User not found
-      </div>
-    );
+  if (!user) return <div>User not found</div>;
 
   return (
-    <div className="min-h-screen bg-[#181A20] text-white flex flex-col rounded-3xl lg:mt-16">
-      <div className="relative h-56 w-full bg-gradient-to-r from-blue-900 to-blue-700 rounded-t-3xl">
-        {user.bannerUrl || bannerPreview ? (
+    <div className="min-h-screen p-6 bg-gray-900 text-white">
+      {/* Banner and avatar */}
+      <div className="relative h-56 bg-gradient-to-r from-blue-900 to-blue-700 rounded-t-lg">
+        {bannerPreview || user.bannerUrl ? (
           <Image
-            src={bannerPreview || user.bannerUrl || ""}
+            src={bannerPreview || user.bannerUrl!}
             alt="Banner"
-            width={1920}
-            height={224}
-            className="w-full h-full object-cover"
+            fill
+            className="object-cover rounded-t-lg"
           />
         ) : (
           <div className="w-full h-full" />
         )}
         <button
-          className="absolute top-3 right-3 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full transition"
           onClick={() => bannerInputRef.current?.click()}
-          title="Change banner"
+          className="absolute top-3 right-3"
         >
-          <PhotoCamera />
+          <PhotoCamera className="text-white" />
         </button>
         <input
+          ref={bannerInputRef}
           type="file"
           accept="image/*"
-          className="hidden"
-          ref={bannerInputRef}
+          hidden
           onChange={handleBannerChange}
         />
       </div>
-      <div className="flex flex-col sm:flex-row items-center gap-8 px-8 -mt-20">
-        <div className="relative group">
+
+      <div className="flex items-center space-x-6 -mt-20 px-6">
+        <div className="relative">
           <Avatar
-            sx={{
-              width: 160,
-              height: 160,
-              borderRadius: "50%",
-              border: "6px solid #60a5fa",
-              boxShadow:
-                "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)",
-              backgroundColor: "#23272F",
-              objectFit: "cover",
-              fontSize: 50,
-            }}
-            src={avatarPreview || user?.avatarUrl}
-          >
-            {user.firstname?.charAt(0)}
-          </Avatar>
+            src={avatarPreview || user.avatarUrl}
+            sx={{ width: 160, height: 160 }}
+          />
           <button
-            className="absolute bottom-2 right-2 bg-blue-500 text-white p-2 rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition"
+            className="absolute bottom-0 right-0"
             onClick={() => fileInputRef.current?.click()}
-            title="Change avatar"
           >
-            <PhotoCamera/>
+            <PhotoCamera />
           </button>
           <input
+            ref={fileInputRef}
             type="file"
             accept="image/*"
-            className="hidden"
-            ref={fileInputRef}
+            hidden
             onChange={handleAvatarChange}
           />
         </div>
-        <div className="flex-1 flex flex-col items-center sm:items-start z-50">
-          <h1 className="text-4xl font-bold flex items-center gap-2">
+        <div>
+          <h1 className="text-4xl">
             {user.firstname} {user.lastname}
           </h1>
           <p className="text-gray-400">{user.email}</p>
         </div>
-        <button
-          onClick={handleLogout}
-          className="ml-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition z-50"
-        >
-          Logout
-        </button>
       </div>
-      <div className="mt-8 border-b border-[#23272F] flex gap-8 px-8">
-        <button
-          className={`pb-2 font-semibold transition-colors duration-200 ${
-            tab === "profile"
-              ? "border-b-2 border-blue-500 text-blue-400"
-              : "text-gray-400"
-          }`}
-          onClick={() => setTab("profile")}
-        >
-          Profile
-        </button>
-        <button
-          className={`pb-2 font-semibold transition-colors duration-200 ${
-            tab === "settings"
-              ? "border-b-2 border-blue-500 text-blue-400"
-              : "text-gray-400"
-          }`}
-          onClick={() => setTab("settings")}
-        >
-          Settings
-        </button>
-        <button
-          className={`pb-2 font-semibold transition-colors duration-200 ${
-            tab === "activity"
-              ? "border-b-2 border-blue-500 text-blue-400"
-              : "text-gray-400"
-          }`}
-          onClick={() => setTab("activity")}
-        >
-          Activity
-        </button>
+      <div className="mt-8 border-b border-gray-700 flex space-x-8 px-6">
+        {(["profile", "settings", "playlists"] as const).map((t) => (
+          <button
+            key={t}
+            className={`pb-2 ${tab === t ? "border-b-2 border-blue-500" : ""}`}
+            onClick={() => setTab(t)}
+          >
+            {t.charAt(0).toUpperCase() + t.slice(1)}
+          </button>
+        ))}
       </div>
-      <div className="mt-6 px-8 pb-8 flex-1">
+      <div className="mt-6 px-6 pb-8">
         {tab === "profile" && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">User Information</h2>
-            <ul className="space-y-2">
-              <li>
-                <span className="font-medium">First Name:</span>{" "}
-                {user.firstname}
-              </li>
-              <li>
-                <span className="font-medium">Last Name:</span> {user.lastname}
-              </li>
-              <li>
-                <span className="font-medium">Email:</span> {user.email}
-              </li>
-              <li>
-                <span className="font-medium">Role:</span> {user.role || "User"}
-              </li>
-              <li>
-                <span className="font-medium">ID:</span> {user.id}
-              </li>
-            </ul>
-          </div>
+          <ul>
+            <li>
+              <b>First name:</b> {user.firstname}
+            </li>
+            <li>
+              <b>Last name:</b> {user.lastname}
+            </li>
+            <li>
+              <b>Email:</b> {user.email}
+            </li>
+            <li>
+              <b>Role:</b> {user.role}
+            </li>
+            <li>
+              <b>ID:</b> {user.id}
+            </li>
+          </ul>
         )}
-        {tab === "settings" && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Edit Profile</h2>
-            {!editMode ? (
-              <div>
+        {tab === "settings" &&
+          (editMode ? (
+            <div className="flex flex-col space-y-4">
+              {(
+                ["firstname", "lastname", "email"] as (keyof typeof form)[]
+              ).map((field) => (
+                <div key={field}>
+                  <label className="block capitalize">{field}</label>
+                  <input
+                    name={field}
+                    value={form[field]}
+                    onChange={handleFormChange}
+                    className="w-full bg-gray-800 p-2 rounded"
+                  />
+                </div>
+              ))}
+              <div className="flex space-x-4">
                 <button
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg mb-4"
-                  onClick={handleEdit}
+                  onClick={handleSaveProfile}
+                  className="bg-green-600 px-4 py-2"
                 >
-                  Edit profile
+                  Save
                 </button>
-                <div className="text-gray-400">
-                  You can change your data, avatar or banner here.
-                </div>
+                <button
+                  onClick={() => setEditMode(false)}
+                  className="bg-gray-700 px-4 py-2"
+                >
+                  Cancel
+                </button>
               </div>
-            ) : (
-              <div className="space-y-4">
-                <div>
-                  <label className="block font-medium">First Name</label>
-                  <input
-                    type="text"
-                    name="firstname"
-                    value={form.firstname}
-                    onChange={handleFormChange}
-                    className="w-full border border-[#23272F] bg-[#23272F] text-white rounded px-3 py-2"
-                  />
+            </div>
+          ) : (
+            <button
+              onClick={() => setEditMode(true)}
+              className="bg-blue-600 px-4 py-2"
+            >
+              Edit profile
+            </button>
+          ))}
+        {tab === "playlists" && (
+          <div className="space-y-6">
+            <div>
+              <h2 className="text-xl">Ваші плейлисти</h2>
+              {playlists.map((pl) => (
+                <div
+                  key={pl.id}
+                  className="flex items-center justify-between bg-gray-800 p-4 rounded"
+                >
+                  {editingId === pl.id ? (
+                    <input
+                      value={editTitle}
+                      onChange={(e) => setEditTitle(e.target.value)}
+                      className="bg-gray-700 p-2 rounded"
+                    />
+                  ) : (
+                    <span>{pl.title}</span>
+                  )}
+                  <div className="space-x-2">
+                    {editingId === pl.id ? (
+                      <>
+                        <button
+                          onClick={handleUpdate}
+                          className="text-green-400"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={() => setEditingId(null)}
+                          className="text-gray-400"
+                        >
+                          X
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          onClick={() => handleEdit(pl)}
+                          className="text-blue-300"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleDelete(pl.id)}
+                          className="text-red-500"
+                        >
+                          🗑️
+                        </button>
+                        <button
+                          onClick={() => openPlaylist(pl)}
+                          className="text-white"
+                        >
+                          Open
+                        </button>
+                      </>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <label className="block font-medium">Last Name</label>
-                  <input
-                    type="text"
-                    name="lastname"
-                    value={form.lastname}
-                    onChange={handleFormChange}
-                    className="w-full border border-[#23272F] bg-[#23272F] text-white rounded px-3 py-2"
-                  />
-                </div>
-                <div>
-                  <label className="block font-medium">Email</label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={form.email}
-                    onChange={handleFormChange}
-                    className="w-full border border-[#23272F] bg-[#23272F] text-white rounded px-3 py-2"
-                  />
-                </div>
-                <div className="flex gap-4">
-                  <button
-                    className="px-4 py-2 bg-green-600 text-white rounded-lg"
-                    onClick={handleSave}
-                  >
-                    Save
-                  </button>
-                  <button
-                    className="px-4 py-2 bg-gray-700 text-gray-200 rounded-lg"
-                    onClick={() => setEditMode(false)}
-                  >
-                    Cancel
-                  </button>
-                </div>
+              ))}
+              <div className="mt-4 flex space-x-2">
+                <input
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="New playlist"
+                  className="bg-gray-700 p-2 rounded flex-1"
+                />
+                <button
+                  onClick={handleCreate}
+                  className="bg-blue-600 px-4 py-2 rounded"
+                >
+                  Create
+                </button>
+              </div>
+            </div>
+            {selectedPlaylist && (
+              <div>
+                <h3 className="text-lg font-semibold">
+                  {selectedPlaylist.title}
+                </h3>
+                <ul className="list-disc ml-5">
+                  {playlistSongs.map((s) => (
+                    <li key={s.id}>{s.title}</li>
+                  ))}
+                </ul>
+                <select
+                  onChange={(e) => addSongToPlaylist(e.target.value)}
+                  className="mt-2 bg-gray-700 p-2 rounded"
+                >
+                  <option value="">Add song...</option>
+                  {availableSongs.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.title}
+                    </option>
+                  ))}
+                </select>
               </div>
             )}
           </div>

@@ -194,8 +194,95 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
       console.error("Failed to toggle favorite:", error);
     }
   };
+  useEffect(() => {
+    const channel = new BroadcastChannel("music-player");
 
-  const handlePictureInPicture = () => {};
+    channel.onmessage = (event) => {
+      const { type, payload } = event.data;
+
+      switch (type) {
+        case "toggle-play":
+          togglePlayPause();
+          break;
+
+        case "skip-back":
+          skipBegin();
+          break;
+
+        case "skip-next":
+          skipEnd();
+          break;
+
+        case "toggle-mute":
+          setIsMuted((prev) => !prev);
+          break;
+
+        case "change-volume":
+          setVolume(payload.volume);
+          break;
+
+        case "toggle-repeat":
+          setRepeatMode((prev) =>
+            prev === "off" ? "all" : prev === "all" ? "one" : "off"
+          );
+          break;
+
+        case "toggle-shuffle":
+          setIsShuffling((prev) => !prev);
+          break;
+
+        case "request-status":
+          channel.postMessage({
+            type: "status",
+            payload: {
+              title: selectedSong?.title || "",
+              coverImagePath: selectedSong?.coverImagePath,
+              author: selectedSong?.album?.artist?.name,
+              isPlaying,
+              isMuted,
+              volume,
+              repeatMode,
+              isShuffling,
+            },
+          });
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    return () => channel.close();
+  }, [
+    isPlaying,
+    isMuted,
+    volume,
+    repeatMode,
+    isShuffling,
+    togglePlayPause,
+    skipBegin,
+    skipEnd,
+    selectedSong?.title,
+    selectedSong?.coverImagePath,
+    selectedSong?.album?.artist?.name,
+  ]);
+
+  const handlePictureInPicture = () => {
+    const width = 250;
+    const height = 180;
+    const left = window.innerWidth - width - 20;
+    const top = window.innerHeight - height - 60;
+
+    const miniWindow = window.open(
+      "/mini-player",
+      "MiniPlayer",
+      `width=${width},height=${height},left=${left},top=${top},popup=yes,alwaysRaised=yes`
+    );
+
+    if (miniWindow) {
+      miniWindow.focus();
+    }
+  };
 
   const handleExpand = () => {
     setIsFullscreen(true);

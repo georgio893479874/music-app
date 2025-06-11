@@ -10,7 +10,7 @@ import { usePlayerContext } from "@/contexts/PlayerContext";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const noSidebarRoutes = ["/login", "/register", "/"];
+  const noSidebarRoutes = ["/login", "/register", "/", "/mini-player"];
   const shouldShowSidebar = !noSidebarRoutes.includes(pathname);
   const [isQueueVisible, setIsQueueVisible] = useState(false);
   const { songs, selectedSong, setSelectedSong } = usePlayerContext();
@@ -24,7 +24,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
       <Header />
       <PanelGroup direction="horizontal" className="flex-1 min-h-0">
         <Panel defaultSize={14} minSize={8} maxSize={20} className="min-w-[56px]">
-          <Sidebar />
+          <Sidebar/>
         </Panel>
         <PanelResizeHandle className="w-1 bg-gray-700 cursor-col-resize" />
         <Panel className="flex-1 flex flex-col min-h-0">
