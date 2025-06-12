@@ -1,4 +1,5 @@
 "use client";
+
 import Header from "@/components/Header";
 import Player from "@/components/Player";
 import Sidebar from "@/components/Sidebar";
@@ -20,7 +21,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="h-screen min-h-0 flex flex-col">
+    <div className="h-screen min-h-0 flex flex-col mt-32">
       <Header />
       <PanelGroup direction="horizontal" className="flex-1 min-h-0">
         <Panel defaultSize={14} minSize={8} maxSize={20} className="min-w-[56px]">

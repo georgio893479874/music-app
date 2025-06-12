@@ -60,7 +60,7 @@ export default function ListOfSongs({
             </tr>
           </thead>
           <tbody>
-            {tracks.map((track, index) => (
+            {tracks?.map((track, index) => (
               <tr
                 key={track.id}
                 className="border-b border-gray-800 hover:bg-neutral-800 transition"

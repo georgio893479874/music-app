@@ -30,6 +30,7 @@ model User {
   favorites        Favorite[]
   listeningHistory ListeningHistory[]
   recommendations  Recommendation[]
+  avatar           String?
 }
 
 model Playlist {
@@ -58,7 +59,7 @@ model Track {
   favorites        Favorite[]
   ListeningHistory ListeningHistory[]
   Recommendation   Recommendation[]
-  Lyric Lyric[]
+  Lyric            Lyric[]
 }
 
 model Album {

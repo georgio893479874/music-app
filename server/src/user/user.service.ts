@@ -16,4 +16,22 @@ export class UserService {
       where: { id },
     });
   }
+
+  async create(data: {
+    email: string;
+    firstname?: string;
+    lastname?: string;
+    avatar?: string;
+    password?: string | null;
+  }) {
+    return this.prisma.user.create({
+      data: {
+        email: data.email,
+        firstname: data.firstname,
+        lastname: data.lastname,
+        avatar: data.avatar,
+        password: data.password || null,
+      },
+    });
+  }
 }

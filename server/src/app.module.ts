@@ -11,6 +11,7 @@ import { SearchModule } from './search/search.module';
 import { FavoriteModule } from './favorite/favorite.module';
 import { UserModule } from './user/user.module';
 import { LyricModule } from './lyric/lyric.module';
+import { UploadModule } from './upload/upload.module';
 
 @Module({
   imports: [
@@ -24,7 +25,9 @@ import { LyricModule } from './lyric/lyric.module';
     PrismaModule, 
     SearchModule, 
     FavoriteModule, 
-    UserModule, LyricModule,
+    UserModule, 
+    LyricModule,
+    UploadModule,
   ],
 })
 export class AppModule {}
