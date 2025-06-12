@@ -18,9 +18,14 @@ export default function Sidebar() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
   const router = useRouter();
-  const userId = localStorage.getItem("userId");
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
+  useEffect(() => {
+    const id = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+    setUserId(id);
+  }, []);
 
   useEffect(() => {
     const fetchPlaylists = async () => {
