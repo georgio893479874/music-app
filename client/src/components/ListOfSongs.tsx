@@ -1,4 +1,4 @@
-import { Heart } from "lucide-react";
+import { Heart, Music } from "lucide-react";
 import { ListOfSongsProps } from "@/types";
 import Image from "next/image";
 
@@ -13,16 +13,24 @@ export default function ListOfSongs({
   showFavoriteButton = true,
   onSongClick,
 }: ListOfSongsProps) {
+  const hasCover = Boolean(coverPhoto);
+
   return (
     <div className="bg-gradient-to-b from-neutral-900 to-neutral-800 flex flex-col pt-4 rounded-3xl mt-16">
       <div className="flex flex-col md:flex-row items-center md:items-end gap-8 px-8 pt-16 pb-8">
-        <Image
-          src={coverPhoto}
-          alt={name}
-          className="rounded-xl shadow-lg border border-gray-700 object-cover"
-          width={240}
-          height={240}
-        />
+        {hasCover ? (
+          <Image
+            src={coverPhoto}
+            alt={name}
+            className="rounded-xl shadow-lg border border-gray-700 object-cover"
+            width={240}
+            height={240}
+          />
+        ) : (
+          <div className="w-[240px] h-[240px] flex items-center justify-center rounded-xl shadow-lg border border-gray-700 bg-neutral-800">
+            <Music className="w-20 h-20 text-gray-500" />
+          </div>
+        )}
         <div className="flex flex-col gap-4">
           <span className="uppercase text-xs tracking-widest text-gray-400 font-semibold">
             {label}
@@ -40,7 +48,7 @@ export default function ListOfSongs({
                 }`}
                 aria-label="Add to favorites"
               >
-                <Heart fill={isFavorite ? "currentColor" : "none"}/>
+                <Heart fill={isFavorite ? "currentColor" : "none"} />
               </button>
             )}
             <span className="text-gray-400 text-sm">
@@ -68,7 +76,9 @@ export default function ListOfSongs({
               >
                 <td className="py-2 px-4 text-gray-400">{index + 1}</td>
                 <td className="py-2 px-4 text-white">{track.title}</td>
-                <td className="py-2 px-4 text-gray-300">{track.album?.artist?.name || "-"}</td>
+                <td className="py-2 px-4 text-gray-300">
+                  {track.album?.artist?.name || "-"}
+                </td>
                 <td className="py-2 px-4 text-gray-300">
                   {track.album?.title || "-"}
                 </td>

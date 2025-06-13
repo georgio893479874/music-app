@@ -2,6 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { CreatePlaylistDto } from './dto/create-playlist.dto';
 import { UpdatePlaylistDto } from './dto/update-playlist.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { AddTrackDto } from './dto/add-track.dto';
+import { RemoveTrackDto } from './dto/remove-track.dto';
 
 @Injectable()
 export class PlaylistService {
@@ -20,22 +22,52 @@ export class PlaylistService {
     });
   }
 
-  async findAll(query: string) {
+  async addTrack(dto: AddTrackDto) {
+    return this.prisma.playlist.update({
+      where: { id: dto.playlistId },
+      data: {
+        tracks: {
+          connect: { id: dto.trackId },
+        },
+      },
+      include: { tracks: true },
+    });
+  }
+
+  async removeTrack(dto: RemoveTrackDto) {
+    return this.prisma.playlist.update({
+      where: { id: dto.playlistId },
+      data: {
+        tracks: {
+          disconnect: { id: dto.trackId },
+        },
+      },
+      include: { tracks: true },
+    });
+  }
+
+  async findAll(userId: string) {
     return this.prisma.playlist.findMany({
       where: {
-        name: {
-          contains: query,
-          mode: 'insensitive',
-        },
+        userId: userId,
+      },
+      orderBy: {
+        createdAt: 'desc',
       },
     });
   }
 
   findOne(id: string) {
     return this.prisma.playlist.findUnique({
-      where: {
-        id: id,
-      },
+      where: { id },
+      include: { tracks: true },
+    });
+  }
+
+  async getPlaylistsByUser(userId: string) {
+    return this.prisma.playlist.findMany({
+      where: { userId },
+      include: { tracks: true },
     });
   }
 

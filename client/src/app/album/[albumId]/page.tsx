@@ -66,7 +66,7 @@ export default function AlbumPage() {
                 <span className="font-medium">
                   {index + 1}. {track.title}
                 </span>
-                <ShareButton/>
+                <ShareButton trackId={track?.id}/>
               </li>
             ))}
           </ul>

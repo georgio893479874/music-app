@@ -9,54 +9,83 @@ import { ListMusic, PlusCircle } from "lucide-react";
 import axios from "axios";
 import { Dialog } from "@headlessui/react";
 
-type Playlist = {
-  id: string;
-  name: string;
-};
+type Playlist = { id: string; name: string };
 
 export default function Sidebar() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newPlaylistName, setNewPlaylistName] = useState("");
-  const [userId, setUserId] = useState<string | null>(null);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
-    const id = typeof window !== "undefined" ? localStorage.getItem("userId") : null;
+    const id =
+      typeof window !== "undefined" ? localStorage.getItem("userId") : null;
     setUserId(id);
   }, []);
 
   useEffect(() => {
+    if (!userId) return;
     const fetchPlaylists = async () => {
       try {
         const res = await axios.get(`${API_URL}/playlist`, {
           params: { query: userId },
         });
-
         setPlaylists(res.data);
-      } catch (error) {
-        console.error("Failed to load playlists:", error);
+      } catch (err) {
+        console.error("Failed to load playlists:", err);
       }
     };
     fetchPlaylists();
   }, [API_URL, userId]);
 
+  const uploadCover = async (): Promise<string | null> => {
+    if (!coverFile) return null;
+    try {
+      setIsUploading(true);
+      const formData = new FormData();
+      formData.append("file", coverFile);
+
+      const res = await fetch(`${API_URL}/upload`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+      return data.secure_url as string;
+    } catch (err) {
+      console.error("Upload failed:", err);
+      return null;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleCreatePlaylist = async () => {
     if (!userId || !newPlaylistName.trim()) return;
+
+    const coverPhoto =
+      (await uploadCover()) ??
+      "/placeholder";
 
     try {
       const res = await axios.post(`${API_URL}/playlist/create`, {
         name: newPlaylistName,
         userId,
-        coverPhoto: "/placeholder",
+        coverPhoto,
       });
 
       setNewPlaylistName("");
+      setCoverFile(null);
+      setCoverPreview(null);
       setIsModalOpen(false);
       router.push(`/playlist/${res.data.id}`);
-    } catch (error) {
-      console.error("Failed to create playlist:", error);
+    } catch (err) {
+      console.error("Failed to create playlist:", err);
     }
   };
 
@@ -103,20 +132,17 @@ export default function Sidebar() {
         <div className="mt-4">
           <div className="flex justify-between items-center px-6 mb-2">
             <h3 className="text-sm font-semibold uppercase">Your Playlists</h3>
-            <button
-              onClick={() => setIsModalOpen(true)}
-              title="Create Playlist"
-            >
+            <button onClick={() => setIsModalOpen(true)} title="Create Playlist">
               <PlusCircle className="text-gray-400 hover:text-white transition" />
             </button>
           </div>
           <ul>
-            {playlists.map((playlist) => (
-              <li key={playlist.id}>
-                <Link href={`/playlist/${playlist.id}`}>
+            {playlists.map((pl) => (
+              <li key={pl.id}>
+                <Link href={`/playlist/${pl.id}`}>
                   <div className="flex items-center py-2 px-6 rounded-lg cursor-pointer mb-1 hover:bg-[#2a2a2a] transition">
                     <span className="mr-4">🎵</span>
-                    {playlist.name}
+                    {pl.name}
                   </div>
                 </Link>
               </li>
@@ -142,6 +168,31 @@ export default function Sidebar() {
               placeholder="Playlist name"
               className="w-full p-2 border border-gray-300 rounded mb-4"
             />
+            <div className="space-y-2 mb-4">
+              <label className="block text-sm font-medium">
+                Cover photo (optional)
+              </label>
+
+              {coverPreview && (
+                <img
+                  src={coverPreview}
+                  alt="Cover preview"
+                  className="w-full h-40 object-cover rounded-lg"
+                />
+              )}
+
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0] || null;
+                  setCoverFile(file);
+                  setCoverPreview(file ? URL.createObjectURL(file) : null);
+                }}
+              />
+            </div>
+
+            {/* ---------- Actions ---------- */}
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setIsModalOpen(false)}
@@ -151,9 +202,10 @@ export default function Sidebar() {
               </button>
               <button
                 onClick={handleCreatePlaylist}
-                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                disabled={isUploading}
+                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-60"
               >
-                Create
+                {isUploading ? "Uploading..." : "Create"}
               </button>
             </div>
           </Dialog.Panel>

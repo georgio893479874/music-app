@@ -63,7 +63,7 @@ const ArtistPage = () => {
         <title>{artist.name} | Notent</title>
       </Head>
       <div className="flex min-h-screen bg-[#323131] text-white pb-24">
-        <div className="flex-1 lg:ml-64 mt-16">
+        <div className="flex-1 mt-16">
           <div className="relative w-full h-[400px] overflow-hidden">
             <Image
               className="w-full h-full object-cover"

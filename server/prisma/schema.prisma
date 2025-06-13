@@ -39,7 +39,7 @@ model Playlist {
   name       String
   userId     String
   user       User           @relation(fields: [userId], references: [id])
-  tracks     Track[]
+  tracks     Track[]        @relation("PlaylistTracks")
   access     PlaylistAccess @default(PRIVATE)
   coverPhoto String?
 }
@@ -55,7 +55,7 @@ model Track {
   audioFilePath    String
   coverImagePath   String
   users            User[]
-  playlists        Playlist[]
+  playlists        Playlist[]         @relation("PlaylistTracks")
   favorites        Favorite[]
   ListeningHistory ListeningHistory[]
   Recommendation   Recommendation[]
