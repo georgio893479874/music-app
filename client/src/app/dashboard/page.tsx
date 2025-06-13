@@ -1,13 +1,27 @@
-'use client'
+"use client"
 
-import Head from "next/head";
+import { getRecommendations } from "@/api/recommendations";
+import { RecommendationSection } from "@/components/RecommendationSection";
+import React, { useEffect, useState } from "react";
 
-export default function DashboardPage() {
+export const Dashboard: React.FC = () => {
+  const [madeForYou, setMadeForYou] = useState([]);
+  const [discovery, setDiscovery] = useState([]);
+  const [newMusic, setNewMusic] = useState([]);
+
+  useEffect(() => {
+    getRecommendations("made_for_you").then(setMadeForYou);
+    getRecommendations("discovery").then(setDiscovery);
+    getRecommendations("new_music").then(setNewMusic);
+  }, []);
+
   return (
-    <>
-       <Head>
-        <title>Notent - Web Player</title>
-      </Head>
-    </>
+    <div>
+      <RecommendationSection title="Made for You" recommendations={madeForYou} />
+      <RecommendationSection title="Discovery Station" recommendations={discovery} />
+      <RecommendationSection title="New Music Mix" recommendations={newMusic} />
+    </div>
   );
-}
+};
+
+export default Dashboard;

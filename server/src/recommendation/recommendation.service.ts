@@ -1,26 +1,40 @@
 import { Injectable } from '@nestjs/common';
-import { CreateRecommendationDto } from './dto/create-recommendation.dto';
-import { UpdateRecommendationDto } from './dto/update-recommendation.dto';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { ContentBasedStrategy } from './strategies/content-based.strategy';
+import { CollaborativeStrategy } from './strategies/collaborative.strategy';
+import { HybridStrategy } from './strategies/hybrid.strategy';
+import { GetRecommendationDto } from './dto/get-recommendation.dto';
 
 @Injectable()
 export class RecommendationService {
-  create(createRecommendationDto: CreateRecommendationDto) {
-    return 'This action adds a new recommendation';
-  }
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly contentBased: ContentBasedStrategy,
+    private readonly collaborative: CollaborativeStrategy,
+    private readonly hybrid: HybridStrategy,
+  ) {}
 
-  findAll() {
-    return `This action returns all recommendation`;
-  }
+  async getRecommendations(dto: GetRecommendationDto) {
+    const { userId, limit = 20, type } = dto;
 
-  findOne(id: number) {
-    return `This action returns a #${id} recommendation`;
-  }
+    let recommendations = [];
+    if (type === "made_for_you") {
+      recommendations = await this.hybrid.generate(userId, limit);
+    } else if (type === "discovery") {
+      recommendations = await this.collaborative.generate(userId, limit);
+    } else if (type === "new_music") {
+      recommendations = await this.contentBased.generate(userId, limit);
+    }
 
-  update(id: number, updateRecommendationDto: UpdateRecommendationDto) {
-    return `This action updates a #${id} recommendation`;
-  }
+    await this.prisma.recommendation.createMany({
+      data: recommendations.map((t) => ({
+        userId,
+        trackId: t.id,
+        type,
+      })),
+      skipDuplicates: true,
+    });
 
-  remove(id: number) {
-    return `This action removes a #${id} recommendation`;
+    return recommendations;
   }
 }

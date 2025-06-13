@@ -59,3 +59,36 @@ body {
     border-color: #6d28d9;
   }
 }
+
+.rec-section {
+  margin-bottom: 36px;
+}
+.rec-row {
+  display: flex;
+  gap: 24px;
+  overflow-x: auto;
+}
+.rec-card {
+  min-width: 220px;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  padding: 16px;
+  text-align: left;
+  transition: box-shadow 0.2s;
+}
+.rec-card img {
+  border-radius: 14px;
+  width: 100%;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+}
+.rec-title {
+  font-weight: bold;
+  font-size: 1.1em;
+  margin-top: 10px;
+}
+.rec-artist, .rec-album {
+  color: #555;
+  font-size: 0.93em;
+}
