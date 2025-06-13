@@ -4,7 +4,7 @@ import { getRecommendations } from "@/api/recommendations";
 import { RecommendationSection } from "@/components/RecommendationSection";
 import React, { useEffect, useState } from "react";
 
-export const Dashboard: React.FC = () => {
+export default function DashboardPage() {
   const [madeForYou, setMadeForYou] = useState([]);
   const [discovery, setDiscovery] = useState([]);
   const [newMusic, setNewMusic] = useState([]);
@@ -23,5 +23,3 @@ export const Dashboard: React.FC = () => {
     </div>
   );
 };
-
-export default Dashboard;
