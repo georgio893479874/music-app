@@ -18,6 +18,8 @@ import { CurrentUser } from '../../decorators/user.decorator';
 import { AuthDto, SignUpDto } from './dto/auth.dto';
 import { UserService } from 'src/user/user.service';
 import { JwtService } from '@nestjs/jwt';
+import { UseGuards } from '@nestjs/common';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -38,7 +40,7 @@ export class AuthController {
   @HttpCode(200)
   @Post('login')
   async login(@Body() dto: AuthDto, @Res({ passthrough: true }) res: Response) {
-    const { refreshToken,  ...response } = await this.authService.login(dto);
+    const { refreshToken, ...response } = await this.authService.login(dto);
 
     this.authService.addRefreshTokenToResponse(res, refreshToken);
 
@@ -79,5 +81,37 @@ export class AuthController {
   @Get('profile')
   async getProfile(@CurrentUser('id') id: string) {
     return this.userService.findById(id);
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  googleAuth() {
+    return;
+  }
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const user = req.user;
+    const tokens = await this.authService.issueTokens(user['id'], user['role']);
+    return res.redirect(
+      `http://localhost:3000/oauth/success?token=${tokens.accessToken}`,
+    );
+  }
+
+  @Get('facebook')
+  @UseGuards(AuthGuard('facebook'))
+  facebookAuth() {
+    return;
+  }
+
+  @Get('facebook/callback')
+  @UseGuards(AuthGuard('facebook'))
+  async facebookAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const user = req.user;
+    const tokens = await this.authService.issueTokens(user['id'], user['role']);
+    return res.redirect(
+      `http://localhost:3000/oauth/success?token=${tokens.accessToken}`,
+    );
   }
 }

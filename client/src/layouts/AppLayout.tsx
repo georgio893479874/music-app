@@ -11,7 +11,7 @@ import { usePlayerContext } from "@/contexts/PlayerContext";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const noSidebarRoutes = ["/login", "/register", "/", "/mini-player"];
+  const noSidebarRoutes = ["/login", "/signup", "/", "/mini-player"];
   const shouldShowSidebar = !noSidebarRoutes.includes(pathname);
   const [isQueueVisible, setIsQueueVisible] = useState(false);
   const { songs, selectedSong, setSelectedSong } = usePlayerContext();

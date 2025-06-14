@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import { useState } from "react";
 import { useFormik } from "formik";
@@ -19,18 +19,17 @@ const AuthForm: React.FC<AuthFormProps> = ({
 
   const handleClickShowPassword = () => setShowPassword(!showPassword);
   const validationSchema = Yup.object({
-  fullName: Yup.string()
-    .when("type", {
+    fullName: Yup.string().when("type", {
       is: "signup",
       then: (schema) => schema.required("Full name is required"),
       otherwise: (schema) => schema.notRequired(),
     }),
-  email: Yup.string()
-    .email("Invalid email address")
-    .required("Email is required"),
-  password: Yup.string()
-    .min(6, "Password must be at least 6 characters")
-    .required("Password is required"),
+    email: Yup.string()
+      .email("Invalid email address")
+      .required("Email is required"),
+    password: Yup.string()
+      .min(6, "Password must be at least 6 characters")
+      .required("Password is required"),
   });
   const formik = useFormik({
     initialValues: {
@@ -91,7 +90,10 @@ const AuthForm: React.FC<AuthFormProps> = ({
             <form onSubmit={formik.handleSubmit}>
               {type === "signup" && (
                 <div className="mb-4">
-                  <label htmlFor="fullName" className="block text-sm text-gray-300">
+                  <label
+                    htmlFor="fullName"
+                    className="block text-sm text-gray-300"
+                  >
                     Full Name
                   </label>
                   <input
@@ -124,7 +126,10 @@ const AuthForm: React.FC<AuthFormProps> = ({
                 )}
               </div>
               <div className="mb-4 relative">
-                <label htmlFor="password" className="block text-sm text-gray-300">
+                <label
+                  htmlFor="password"
+                  className="block text-sm text-gray-300"
+                >
                   Password
                 </label>
                 <input
@@ -180,6 +185,35 @@ const AuthForm: React.FC<AuthFormProps> = ({
                 {type === "signup" ? "Sign In" : "Register Here"}
               </a>
             </p>
+            <div className="my-4">
+              <p className="text-center text-gray-400 mb-2">Or sign in with</p>
+              <div className="flex flex-col gap-2">
+                <a
+                  href="http://localhost:4521/auth/google"
+                  className="flex items-center justify-center gap-2 bg-white text-black py-2 px-4 rounded-lg hover:bg-gray-200 transition duration-300"
+                >
+                  <Image
+                    src="/google-icon.png"
+                    alt="Google"
+                    width={20}
+                    height={20}
+                  />
+                  Continue with Google
+                </a>
+                <a
+                  href="http://localhost:4521/auth/facebook"
+                  className="flex items-center justify-center gap-2 bg-[#1877F2] text-white py-2 px-4 rounded-lg hover:bg-[#145dbf] transition duration-300"
+                >
+                  <Image
+                    src="/facebook-icon.png"
+                    alt="Facebook"
+                    width={20}
+                    height={20}
+                  />
+                  Continue with Facebook
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>

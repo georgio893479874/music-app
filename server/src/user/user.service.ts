@@ -30,7 +30,7 @@ export class UserService {
         firstname: data.firstname,
         lastname: data.lastname,
         avatar: data.avatar,
-        password: data.password || null,
+        password: data.password ?? null,
       },
     });
   }

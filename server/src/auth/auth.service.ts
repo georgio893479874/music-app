@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { Role } from '@prisma/client';
 import { hash, verify } from 'argon2';
@@ -66,7 +70,7 @@ export class AuthService {
     };
   }
 
-  private async issueTokens(userId: string, role?: Role) {
+  public async issueTokens(userId: string, role?: Role) {
     const data = { id: userId, role };
 
     const accessToken = this.jwt.sign(data, {
