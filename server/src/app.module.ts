@@ -12,6 +12,7 @@ import { FavoriteModule } from './favorite/favorite.module';
 import { UserModule } from './user/user.module';
 import { LyricModule } from './lyric/lyric.module';
 import { UploadModule } from './upload/upload.module';
+import { HistoryModule } from './history/history.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { UploadModule } from './upload/upload.module';
     UserModule, 
     LyricModule,
     UploadModule,
+    HistoryModule,
   ],
 })
 export class AppModule {}

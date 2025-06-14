@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import {
   BsFillPauseCircleFill,
@@ -28,6 +28,7 @@ import FullscreenPlayer from "./FullscreenPlayer";
 const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
   const { selectedSong, songs, setSongs } = usePlayerContext();
   const [currentSongIndex, setCurrentSongIndex] = useState<number>(0);
+  const lastLoggedTrackId = useRef<string | null>(null);
   const [volume, setVolume] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -68,6 +69,40 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
       });
     }
   }, [selectedSong, audioPlayer]);
+
+  useEffect(() => {
+    const logListeningHistory = async () => {
+      if (!selectedSong) return;
+
+      const userId = localStorage.getItem("userId");
+      if (!userId) return;
+
+      if (selectedSong.id !== lastLoggedTrackId.current) {
+        try {
+          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/history`, {
+            userId,
+            trackId: selectedSong.id,
+          });
+          lastLoggedTrackId.current = selectedSong.id;
+        } catch (error) {
+          console.error("❌ Failed to add to history:", error);
+        }
+      }
+    };
+
+    if (selectedSong && audioPlayer.current) {
+      audioPlayer.current.src = selectedSong.audioFilePath;
+      audioPlayer.current.load();
+      audioPlayer.current
+        .play()
+        .then(() => {
+          logListeningHistory();
+        })
+        .catch((error) => {
+          console.error("Failed to play audio:", error);
+        });
+    }
+  }, [selectedSong]);
 
   useEffect(() => {
     const checkFavorite = async () => {
@@ -192,95 +227,6 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
       }
     } catch (error) {
       console.error("Failed to toggle favorite:", error);
-    }
-  };
-  useEffect(() => {
-    const channel = new BroadcastChannel("music-player");
-
-    channel.onmessage = (event) => {
-      const { type, payload } = event.data;
-
-      switch (type) {
-        case "toggle-play":
-          togglePlayPause();
-          break;
-
-        case "skip-back":
-          skipBegin();
-          break;
-
-        case "skip-next":
-          skipEnd();
-          break;
-
-        case "toggle-mute":
-          setIsMuted((prev) => !prev);
-          break;
-
-        case "change-volume":
-          setVolume(payload.volume);
-          break;
-
-        case "toggle-repeat":
-          setRepeatMode((prev) =>
-            prev === "off" ? "all" : prev === "all" ? "one" : "off"
-          );
-          break;
-
-        case "toggle-shuffle":
-          setIsShuffling((prev) => !prev);
-          break;
-
-        case "request-status":
-          channel.postMessage({
-            type: "status",
-            payload: {
-              title: selectedSong?.title || "",
-              coverImagePath: selectedSong?.coverImagePath,
-              author: selectedSong?.album?.artist?.name,
-              isPlaying,
-              isMuted,
-              volume,
-              repeatMode,
-              isShuffling,
-            },
-          });
-          break;
-
-        default:
-          break;
-      }
-    };
-
-    return () => channel.close();
-  }, [
-    isPlaying,
-    isMuted,
-    volume,
-    repeatMode,
-    isShuffling,
-    togglePlayPause,
-    skipBegin,
-    skipEnd,
-    selectedSong?.title,
-    selectedSong?.coverImagePath,
-    selectedSong?.album?.artist?.name,
-  ]);
-
-  const handlePictureInPicture = () => {
-    const width = 250;
-    const height = 180;
-    const left = window.innerWidth - width - 20;
-    const top = window.innerHeight - height - 60;
-
-    const miniWindow = window.open(
-      "/mini-player",
-      "MiniPlayer",
-      `width=${width},height=${height},left=${left},top=${top},popup=yes,alwaysRaised=yes`
-    );
-
-    if (miniWindow) {
-      miniWindow.focus();
     }
   };
 
@@ -420,7 +366,6 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
             />
             <PictureInPicture2
               className="text-xl cursor-pointer text-gray-200"
-              onClick={handlePictureInPicture}
             />
           </div>
         </div>
