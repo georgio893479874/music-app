@@ -3,6 +3,17 @@ import { FaRadio } from "react-icons/fa6";
 import { BsMusicNoteList } from "react-icons/bs";
 import { PiMicrophoneThin, PiMusicNotesPlusThin } from "react-icons/pi";
 import { ImHeart } from "react-icons/im";
+import {
+  Plus,
+  Share2,
+  Link,
+  Radio,
+  MessageCircleWarning,
+  QrCode,
+} from "lucide-react";
+import { MenuItemType } from "./types";
+
+export const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export const artists = [
   {
@@ -38,17 +49,21 @@ export const artists = [
 ];
 
 export const menuItems = [
-	{ name: "Home", icon: <FaHome size={24} />, path: "/dashboard" },
-	{ name: "Discover", icon: <FaCompactDisc size={24} />, path: "/search" },
-	{ name: "Radio", icon: <FaRadio size={24} />, path: "/radio" },
-	{ name: "Podcast", icon: <PiMicrophoneThin size={24} />, path: "/podcast" },
+  { name: "Home", icon: <FaHome size={24} />, path: "/dashboard" },
+  { name: "Discover", icon: <FaCompactDisc size={24} />, path: "/search" },
+  { name: "Radio", icon: <FaRadio size={24} />, path: "/radio" },
+  { name: "Podcast", icon: <PiMicrophoneThin size={24} />, path: "/podcast" },
 ];
 
 export const libraryItems = [
-	{ name: "Recently Added", icon: <PiMusicNotesPlusThin size={24} />, path: "/recent" },
+  {
+    name: "Recently Added",
+    icon: <PiMusicNotesPlusThin size={24} />,
+    path: "/recent",
+  },
   { name: "Albums", icon: <BsMusicNoteList size={24} />, path: "/albums" },
-	{ name: "Favorite Songs", icon: <ImHeart size={24} />, path: "/favorites" },
-	{ name: "Local Files", icon: <FaFolderOpen size={24} />, path: "/local" },
+  { name: "Favorite Songs", icon: <ImHeart size={24} />, path: "/favorites" },
+  { name: "Local Files", icon: <FaFolderOpen size={24} />, path: "/local" },
 ];
 
 export const playlists = [
@@ -80,31 +95,31 @@ export const tracks = [
     duration: "03:21",
     imgSrc: "/midnight.webp",
   },
-  { 
-		title: "Blank Space", 
-		duration: "04:22", 
-		imgSrc: "/1989.webp" 
-	},
-  { 
-		title: "Gorgeous", 
-		duration: "03:56", 
-		imgSrc: "/reputation.webp" 
-	},
-  { 
-		title: "Lover", 
-		duration: "04:01", 
-		imgSrc: "/lover.webp" 
-	},
-  { 
-		title: "Red", 
-		duration: "03:45", 
-		imgSrc: "/red.webp" 
-	},
-  { 
-		title: "Midnight", 
-		duration: "04:12", 
-		imgSrc: "/midnight.webp" 
-	},
+  {
+    title: "Blank Space",
+    duration: "04:22",
+    imgSrc: "/1989.webp",
+  },
+  {
+    title: "Gorgeous",
+    duration: "03:56",
+    imgSrc: "/reputation.webp",
+  },
+  {
+    title: "Lover",
+    duration: "04:01",
+    imgSrc: "/lover.webp",
+  },
+  {
+    title: "Red",
+    duration: "03:45",
+    imgSrc: "/red.webp",
+  },
+  {
+    title: "Midnight",
+    duration: "04:12",
+    imgSrc: "/midnight.webp",
+  },
 ];
 
 export const genres = [
@@ -119,4 +134,57 @@ export const genres = [
   { image: "/soul.webp" },
   { image: "/blues.webp" },
   { image: "/hip-hop.webp" },
+];
+
+export const mobileActions = [
+  {
+    icon: <Share2 className="mr-3" size={18} />,
+    label: "Share",
+    onClick: "copy",
+  },
+  {
+    icon: <Plus className="mr-3" size={18} />,
+    label: "Add to Playlist",
+    onClick: "addToPlaylist",
+  },
+  {
+    icon: <Link className="mr-3" size={18} />,
+    label: "Copy Link",
+    onClick: "copy",
+  },
+  {
+    icon: <Radio className="mr-3" size={18} />,
+    label: "Go to radio based on artist",
+  },
+  {
+    icon: <MessageCircleWarning className="mr-3" size={18} />,
+    label: "Complain",
+  },
+  { icon: <Plus className="mr-3" size={18} />, label: "Subscribe" },
+  { icon: <QrCode className="mr-3" size={18} />, label: "Show Code" },
+];
+
+export const menuSections: MenuItemType[][] = [
+  [
+    { label: "About us", href: "/" },
+    { label: "Legal", href: "/" },
+    { label: "Copyright", href: "/" },
+  ],
+  [
+    { label: "Mobile apps", href: "/" },
+    { label: "For Creators", href: "/" },
+    { label: "Blog", href: "/" },
+    { label: "Jobs", href: "/" },
+    { label: "Developers", href: "/" },
+    { label: "SoundCloud Store", href: "/" },
+  ],
+  [
+    { label: "Support", href: "/" },
+    { label: "Keyboard shortcuts", href: "/" },
+  ],
+  [
+    { label: "Subscription", href: "/" },
+    { label: "Settings", href: "/settings" },
+    { label: "Sign out", href: "/login", action: "logout" },
+  ],
 ];

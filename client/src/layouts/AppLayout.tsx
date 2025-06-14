@@ -21,13 +21,13 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="h-screen min-h-0 flex flex-col mt-32">
+    <div className="h-screen min-h-0 flex flex-col">
       <Header />
       <PanelGroup direction="horizontal" className="flex-1 min-h-0">
-        <Panel defaultSize={14} minSize={8} maxSize={20} className="min-w-[56px]">
+        <Panel defaultSize={14} minSize={8} maxSize={20} className="min-w-[56px] max-w-[120px]">
           <Sidebar/>
         </Panel>
-        <PanelResizeHandle className="w-1 bg-gray-700 cursor-col-resize" />
+        <PanelResizeHandle className="w-1 bg-gray-700 cursor-col-resize"/>
         <Panel className="flex-1 flex flex-col min-h-0">
           <main className="flex-1 overflow-y-auto min-h-0 bg-[#212121] rounded-2xl m-4 shadow-lg">
             {children}

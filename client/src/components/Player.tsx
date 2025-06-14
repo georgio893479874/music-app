@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import FullscreenPlayer from "./FullscreenPlayer";
+import { API_URL } from "@/constants";
 
 const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
   const { selectedSong, songs, setSongs } = usePlayerContext();
@@ -79,7 +80,7 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
 
       if (selectedSong.id !== lastLoggedTrackId.current) {
         try {
-          await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/history`, {
+          await axios.post(`${API_URL}/history`, {
             userId,
             trackId: selectedSong.id,
           });
@@ -112,7 +113,7 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
       if (!userId) return;
       try {
         const res = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/favorite`
+          `${API_URL}/favorite`
         );
         type Favorite = { track: { id: string }; userId: string };
         const isFav = res.data.some(
@@ -157,7 +158,7 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
   const fetchSongs = async (albumId: string) => {
     try {
       const { data } = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/album/${albumId}`
+        `${API_URL}/album/${albumId}`
       );
       if (data?.tracks?.length > 0) {
         setSongs(data.tracks);
@@ -215,11 +216,11 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
       }
       if (isFavorite) {
         await axios.delete(
-          `${process.env.NEXT_PUBLIC_API_URL}/favorite?userId=${userId}&trackId=${selectedSong.id}`
+          `${API_URL}/favorite?userId=${userId}&trackId=${selectedSong.id}`
         );
         setIsFavorite(false);
       } else {
-        await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/favorite`, {
+        await axios.post(`${API_URL}/favorite`, {
           trackId: selectedSong.id,
           userId,
         });
@@ -240,7 +241,7 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
 
   return (
     <>
-      <div className="lg:h-24 h-20 flex flex-col items-center justify-between p-4 bg-[#212121] text-white fixed lg:bottom-0 bottom-14 left-0 right-0 shadow-lg z-10">
+      <div className="lg:h-24 h-20 flex flex-col items-center justify-between p-4 bg-[#212121] text-white shadow-lg z-10">
         <div className="left-4 flex items-center gap-4 z-5 w-full">
           {selectedSong?.coverImagePath ? (
             <Image

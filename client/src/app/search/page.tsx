@@ -4,7 +4,7 @@
 
 import { useState, useEffect, Suspense } from "react";
 import axios from "axios";
-import { genres } from "@/constants";
+import { API_URL, genres } from "@/constants";
 import Link from "next/link";
 import { Album, Artist, Playlist, Track } from "@/types";
 import { useSearchParams } from "next/navigation";
@@ -27,7 +27,7 @@ function SearchPageContent() {
 
     try {
       const { data } = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/search`,
+        `${API_URL}/search`,
         {
           params: { query },
         }

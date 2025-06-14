@@ -51,7 +51,7 @@ const Header = () => {
   };
 
   return (
-    <header className="w-full flex items-center justify-between px-6 py-2 fixed top-0 left-0 z-50 bg-[#212121]">
+    <header className="w-full flex items-center justify-between px-6 py-2 bg-[#212121]">
       <div className="flex items-center gap-2 w-full max-w-4xl mx-auto">
         <button
           className="flex items-center justify-center w-12 h-12 rounded-2xl bg-[#373636] bg-opacity-60 hover:bg-opacity-80 transition"

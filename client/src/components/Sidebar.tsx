@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { libraryItems, menuItems } from "@/constants";
+import { API_URL, libraryItems, menuItems } from "@/constants";
 import { Accordion, AccordionItem } from "@heroui/accordion";
 import { ListMusic, PlusCircle } from "lucide-react";
 import axios from "axios";
@@ -19,7 +19,6 @@ export default function Sidebar() {
   const [coverPreview, setCoverPreview] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const router = useRouter();
-  const API_URL = process.env.NEXT_PUBLIC_API_URL;
   const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {

@@ -13,6 +13,7 @@ import { UserModule } from './user/user.module';
 import { LyricModule } from './lyric/lyric.module';
 import { UploadModule } from './upload/upload.module';
 import { HistoryModule } from './history/history.module';
+import { PodcastModule } from './podcast/podcast.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { HistoryModule } from './history/history.module';
     LyricModule,
     UploadModule,
     HistoryModule,
+    PodcastModule,
   ],
 })
 export class AppModule {}

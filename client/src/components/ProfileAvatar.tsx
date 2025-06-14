@@ -6,37 +6,7 @@ import Avatar from '@mui/material/Avatar';
 import Divider from '@mui/material/Divider';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-
-type MenuItemType = {
-  label: string;
-  href: string;
-  action?: string;
-};
-
-const menuSections: MenuItemType[][] = [
-  [
-    { label: "About us", href: "/" },
-    { label: "Legal", href: "/" },
-    { label: "Copyright", href: "/" },
-  ],
-  [
-    { label: "Mobile apps", href: "/" },
-    { label: "For Creators", href: "/" },
-    { label: "Blog", href: "/" },
-    { label: "Jobs", href: "/" },
-    { label: "Developers", href: "/" },
-    { label: "SoundCloud Store", href: "/" },
-  ],
-  [
-    { label: "Support", href: "/" },
-    { label: "Keyboard shortcuts", href: "/" },
-  ],
-  [
-    { label: "Subscription", href: "/" },
-    { label: "Settings", href: "/settings" },
-    { label: "Sign out", href: "/login", action: "logout" },
-  ],
-];
+import { API_URL, menuSections } from '@/constants';
 
 const AvatarMenu = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -50,7 +20,7 @@ const AvatarMenu = () => {
       setIsLoading(false);
       return;
     }
-    fetch(`${process.env.REACT_APP_API_URL || process.env.NEXT_PUBLIC_API_URL}/user/${userId}`)
+    fetch(`${API_URL}/user/${userId}`)
       .then(res => res.json())
       .then(data => {
         setUser(data.user || data);

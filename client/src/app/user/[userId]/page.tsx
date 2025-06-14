@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Avatar } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 import axios from "axios";
+import { API_URL } from "@/constants";
 
 type User = {
   id: string;
@@ -34,7 +35,7 @@ export default function UserPage() {
   useEffect(() => {
     if (!userId) return;
     axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}`)
+      .get(`${API_URL}/user/${userId}`)
       .then((res) => {
         const data = res.data;
         setUser(data);
@@ -59,7 +60,7 @@ export default function UserPage() {
   };
 
   const handleSave = async () => {
-    await fetch(`${process.env.NEXT_PUBLIC_API_URL}/user/${userId}`, {
+    await fetch(`${API_URL}/user/${userId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

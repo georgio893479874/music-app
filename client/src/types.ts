@@ -97,3 +97,10 @@ export interface ListOfSongsProps {
   showFavoriteButton?: boolean;
   onSongClick?: (song: Track) => void;
 }
+
+
+export type MenuItemType = {
+  label: string;
+  href: string;
+  action?: string;
+};

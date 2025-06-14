@@ -4,28 +4,23 @@ import { useEffect, useState, useRef, FC } from "react";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import { toast } from "react-hot-toast";
 import { useSwipeable } from "react-swipeable";
-import {
-  Plus,
-  Share2,
-  Link,
-  Radio,
-  MessageCircleWarning,
-  QrCode,
-} from "lucide-react";
 import axios from "axios";
+import { API_URL, mobileActions } from "@/constants";
+
+interface Playlist {
+  id: string;
+  name: string;
+}
 
 interface ShareButtonProps {
   trackId?: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
 export const ShareButton: FC<ShareButtonProps> = ({ trackId }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
   const [showPlaylistModal, setShowPlaylistModal] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [playlists, setPlaylists] = useState<any[]>([]);
+  const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [selectedPlaylistId, setSelectedPlaylistId] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const startY = useRef<number | null>(null);
@@ -47,11 +42,10 @@ export const ShareButton: FC<ShareButtonProps> = ({ trackId }) => {
       const userId = localStorage.getItem("userId");
       if (!userId) return;
 
-      const res = await axios.get(`${API_URL}/playlist/user/${userId}`);
+      const res = await axios.get<Playlist[]>(`${API_URL}/playlist/user/${userId}`);
       setPlaylists(res.data);
       setShowPlaylistModal(true);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
+    } catch {
       toast.error("Failed to load playlists");
     }
   };
@@ -67,15 +61,13 @@ export const ShareButton: FC<ShareButtonProps> = ({ trackId }) => {
       toast.success("Track added!");
       setShowPlaylistModal(false);
       setIsOpen(false);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (err) {
+    } catch {
       toast.error("Failed to add track");
     }
-     await fetchUserPlaylists();
+    await fetchUserPlaylists();
   };
 
-
-  const handleActionClick = (action: string | undefined) => {
+  const handleActionClick = (action?: string) => {
     if (action === "copy") {
       handleCopyLink();
     } else if (action === "addToPlaylist") {
@@ -118,17 +110,7 @@ export const ShareButton: FC<ShareButtonProps> = ({ trackId }) => {
     startY.current = null;
   };
 
-  const mobileActions = [
-    { icon: <Share2 className="mr-3" size={18} />, label: "Share", onClick: "copy" },
-    { icon: <Plus className="mr-3" size={18} />, label: "Add to Playlist", onClick: "addToPlaylist" },
-    { icon: <Link className="mr-3" size={18} />, label: "Copy Link", onClick: "copy" },
-    { icon: <Radio className="mr-3" size={18} />, label: "Go to radio based on artist" },
-    { icon: <MessageCircleWarning className="mr-3" size={18} />, label: "Complain" },
-    { icon: <Plus className="mr-3" size={18} />, label: "Subscribe" },
-    { icon: <QrCode className="mr-3" size={18} />, label: "Show Code" },
-  ];
-
-  const ActionList = () => (
+  const ActionList: FC = () => (
     <div className="space-y-3">
       {mobileActions.map((action, i) => (
         <button
@@ -142,7 +124,7 @@ export const ShareButton: FC<ShareButtonProps> = ({ trackId }) => {
     </div>
   );
 
-  const PlaylistModal = () => (
+  const PlaylistModal: FC = () => (
     <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
       <div className="bg-neutral-900 p-6 rounded-lg w-full max-w-sm">
         <h2 className="text-lg font-semibold mb-4 text-white">Select Playlist</h2>
@@ -161,10 +143,16 @@ export const ShareButton: FC<ShareButtonProps> = ({ trackId }) => {
           ))}
         </div>
         <div className="flex justify-end mt-4 gap-2">
-          <button onClick={() => setShowPlaylistModal(false)} className="px-4 py-2 text-sm text-gray-400 hover:text-white">
+          <button
+            onClick={() => setShowPlaylistModal(false)}
+            className="px-4 py-2 text-sm text-gray-400 hover:text-white"
+          >
             Cancel
           </button>
-          <button onClick={handleAddTrack} className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+          <button
+            onClick={handleAddTrack}
+            className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+          >
             Add
           </button>
         </div>
@@ -180,7 +168,6 @@ export const ShareButton: FC<ShareButtonProps> = ({ trackId }) => {
       >
         <BsThreeDotsVertical size={20} />
       </button>
-
       {isOpen && isMobile && (
         <div className="fixed inset-0 bg-black/40 flex items-end z-50">
           <div
@@ -197,13 +184,11 @@ export const ShareButton: FC<ShareButtonProps> = ({ trackId }) => {
           </div>
         </div>
       )}
-
       {isOpen && !isMobile && (
         <div className="absolute right-0 mt-2 w-64 bg-black/80 text-white rounded-lg shadow-lg p-2 animate-fade-in z-40">
-          {ActionList()}
+          <ActionList />
         </div>
       )}
-
       {showPlaylistModal && <PlaylistModal />}
     </>
   );

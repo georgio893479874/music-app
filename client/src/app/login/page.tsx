@@ -4,13 +4,14 @@ import axios from "axios";
 import AuthForm from "@/components/AuthForm";
 import { useRouter } from "next/navigation";
 import { LoginFormValues } from "@/types";
+import { API_URL } from "@/constants";
 
 export default function LoginPage() {
   const router = useRouter();
 
   const handleLoginSubmit = async (values: LoginFormValues) => {
     try {
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+      const response = await axios.post(`${API_URL}/auth/login`, {
         email: values.email,
         password: values.password,
       });

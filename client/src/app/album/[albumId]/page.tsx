@@ -9,6 +9,7 @@ import Head from "next/head";
 import ShareButton from "@/components/ShareButton";
 import { Album } from "@/types";
 import Image from "next/image";
+import { API_URL } from "@/constants";
 
 export default function AlbumPage() {
   const { albumId } = useParams();
@@ -21,7 +22,7 @@ export default function AlbumPage() {
     const fetchAlbum = async () => {
       try {
         const response = await axios.get<Album>(
-          `${process.env.NEXT_PUBLIC_API_URL}/album/${albumId}`
+          `${API_URL}/album/${albumId}`
         );
         setAlbum(response.data);
       } catch (error) {

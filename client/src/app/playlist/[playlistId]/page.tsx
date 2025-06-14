@@ -6,6 +6,7 @@ import axios from 'axios';
 import { Playlist } from '@/types';
 import ListOfSongs from '@/components/ListOfSongs';
 import { usePlayerContext } from '@/contexts/PlayerContext';
+import { API_URL } from '@/constants';
 
 export default function PlaylistPage() {
   const { playlistId } = useParams();
@@ -22,7 +23,7 @@ export default function PlaylistPage() {
 
     const fetchPlaylist = async () => {
       try {
-        const response = await axios.get<Playlist>(`http://localhost:4521/playlist/${playlistId}`);
+        const response = await axios.get<Playlist>(`${API_URL}/playlist/${playlistId}`);
         setPlaylist(response.data);
       } 
       catch (error) {

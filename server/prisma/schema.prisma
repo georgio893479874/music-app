@@ -63,7 +63,6 @@ model Track {
   Lyric            Lyric[]
 }
 
-
 model Album {
   id          String   @id @default(uuid())
   createdAt   DateTime @default(now())
@@ -78,12 +77,13 @@ model Album {
 }
 
 model Artist {
-  id         String   @id @default(uuid())
-  createdAt  DateTime @default(now())
-  name       String   @unique
+  id         String    @id @default(uuid())
+  createdAt  DateTime  @default(now())
+  name       String    @unique
   coverPhoto String?
   albums     Album[]
-  Track      Track[]  @relation(name: "ArtistToTrack")
+  Track      Track[]   @relation(name: "ArtistToTrack")
+  podcasts   Podcast[] @relation("ArtistPodcasts")
 }
 
 model Genre {
@@ -126,4 +126,27 @@ model Lyric {
   trackId   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Podcast {
+  id          String           @id @default(uuid())
+  createdAt   DateTime         @default(now())
+  title       String
+  description String
+  hostId      String
+  host        Artist           @relation("ArtistPodcasts", fields: [hostId], references: [id])
+  coverUrl    String?
+  episodes    PodcastEpisode[]
+}
+
+model PodcastEpisode {
+  id             String   @id @default(uuid())
+  title          String
+  description    String
+  audioFilePath  String
+  duration       Int
+  podcastId      String
+  podcast        Podcast  @relation(fields: [podcastId], references: [id])
+  releaseDate    DateTime @default(now())
+  coverImagePath String?
 }

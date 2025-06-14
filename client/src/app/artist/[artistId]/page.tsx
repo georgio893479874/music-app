@@ -10,6 +10,7 @@ import Head from "next/head";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import { Album, Artist } from "@/types";
 import Image from "next/image";
+import { API_URL } from "@/constants";
 
 const ArtistPage = () => {
   const { artistId } = useParams();
@@ -22,12 +23,12 @@ const ArtistPage = () => {
     const fetchArtistData = async () => {
       try {
         const { data: artistData } = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/performer/${artistId}`
+          `${API_URL}/performer/${artistId}`
         );
         setArtist(artistData);
 
         const { data: albumData } = await axios.get(
-          `${process.env.NEXT_PUBLIC_API_URL}/album?artistId=${artistId}`
+          `${API_URL}/album?artistId=${artistId}`
         );
         setAlbums(albumData);
       } catch (error) {
@@ -40,7 +41,7 @@ const ArtistPage = () => {
   const handlePlay = async () => {
     try {
       const { data: songs } = await axios.get(
-        `${process.env.NEXT_PUBLIC_API_URL}/track?artistId=${artistId}`
+        `${API_URL}/track?artistId=${artistId}`
       );
       if (songs.length > 0) {
         const randomSong = songs[Math.floor(Math.random() * songs.length)];
@@ -63,7 +64,7 @@ const ArtistPage = () => {
         <title>{artist.name} | Notent</title>
       </Head>
       <div className="flex min-h-screen bg-[#323131] text-white pb-24">
-        <div className="flex-1 mt-16">
+        <div className="flex-1">
           <div className="relative w-full h-[400px] overflow-hidden">
             <Image
               className="w-full h-full object-cover"
