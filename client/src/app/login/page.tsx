@@ -17,6 +17,7 @@ export default function LoginPage() {
       });
       document.cookie = `authToken=${response.data.accessToken}; path=/`;
       localStorage.setItem("userId", response.data.user.id);
+      localStorage.setItem("token", response.data.accessToken);
       router.push("/dashboard");
     } catch (error) {
       throw error;

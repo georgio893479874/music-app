@@ -5,6 +5,12 @@ import { CollaborativeStrategy } from './strategies/collaborative.strategy';
 import { HybridStrategy } from './strategies/hybrid.strategy';
 import { GetRecommendationDto } from './dto/get-recommendation.dto';
 
+const prismaTypeMap = {
+  made_for_you: "MADE_FOR_YOU",
+  discovery: "DISCOVERY",
+  new_music: "NEW_MUSIC",
+} as const;
+
 @Injectable()
 export class RecommendationService {
   constructor(
@@ -30,7 +36,7 @@ export class RecommendationService {
       data: recommendations.map((t) => ({
         userId,
         trackId: t.id,
-        type,
+        type: prismaTypeMap[type], 
       })),
       skipDuplicates: true,
     });

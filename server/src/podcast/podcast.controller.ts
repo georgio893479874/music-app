@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+} from '@nestjs/common';
 import { PodcastService } from './podcast.service';
 import { CreatePodcastDto } from './dto/create-podcast.dto';
 import { UpdatePodcastDto } from './dto/update-podcast.dto';
@@ -19,16 +27,19 @@ export class PodcastController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.podcastService.findOne(+id);
+    return this.podcastService.findOne(id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePodcastDto: UpdatePodcastDto) {
-    return this.podcastService.update(+id, updatePodcastDto);
+  update(
+    @Param('id') id: string,
+    @Body() updatePodcastDto: UpdatePodcastDto,
+  ) {
+    return this.podcastService.update(id, updatePodcastDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.podcastService.remove(+id);
+    return this.podcastService.remove(id);
   }
 }

@@ -104,3 +104,32 @@ export type MenuItemType = {
   href: string;
   action?: string;
 };
+
+export type HistoryEntry = {
+  id: string;
+  listenedAt: string;
+  track: Track;
+};
+
+type Recommendation = {
+  id: string;
+  title: string;
+  coverUrl?: string;
+  album?: {
+    title: string;
+    artist?: {
+      name: string;
+    };
+  };
+  artist?: {
+    name: string;
+  };
+  genre?: {
+    name: string;
+  };
+};
+
+export interface Props {
+  title: string;
+  recommendations: Recommendation[];
+}

@@ -1,6 +1,19 @@
+import axios from "axios";
+
 export const getRecommendations = async (type: string) => {
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/recommendations?type=${type}`
-  );
-  return res.json();
+  try {
+    const token = localStorage.getItem('token');
+
+    const res = await axios.get(`http://localhost:4521/recommendations?type=${type}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      withCredentials: true,
+    });
+
+    return res.data;
+  } catch (error) {
+    console.error(`Failed to fetch recommendations (${type}):`, error);
+    return [];
+  }
 };

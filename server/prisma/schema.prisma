@@ -17,6 +17,12 @@ enum PlaylistAccess {
   PRIVATE
 }
 
+enum RecommendationType {
+  MADE_FOR_YOU
+  DISCOVERY
+  NEW_MUSIC
+}
+
 model User {
   id               String             @id @default(uuid())
   createdAt        DateTime           @default(now())
@@ -110,12 +116,13 @@ model ListeningHistory {
 }
 
 model Recommendation {
-  id        Int      @id @default(autoincrement())
+  id        Int                @id @default(autoincrement())
   userId    String
-  user      User     @relation(fields: [userId], references: [id])
+  user      User               @relation(fields: [userId], references: [id])
   trackId   String
-  track     Track    @relation(fields: [trackId], references: [id])
-  createdAt DateTime @default(now())
+  track     Track              @relation(fields: [trackId], references: [id])
+  type      RecommendationType
+  createdAt DateTime           @default(now())
 }
 
 model Lyric {
