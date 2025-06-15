@@ -10,7 +10,7 @@ import Head from "next/head";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import { Album, Artist } from "@/types";
 import Image from "next/image";
-import { API_URL, userId } from "@/constants";
+import { API_URL, getUserId } from "@/constants";
 
 const ArtistPage = () => {
   const { artistId } = useParams();
@@ -19,6 +19,7 @@ const ArtistPage = () => {
   const [playing, setPlaying] = useState(false);
   const { setSelectedSong } = usePlayerContext();
   const [isSubscribed, setIsSubscribed] = useState(false);
+  const userId = getUserId();
 
   useEffect(() => {
     const fetchArtistData = async () => {

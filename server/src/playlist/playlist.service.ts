@@ -10,17 +10,18 @@ export class PlaylistService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createPlaylistDto: CreatePlaylistDto) {
-    return this.prisma.playlist.create({
-      data: {
-        name: createPlaylistDto.name,
-        user: {
-          connect: {
-            id: createPlaylistDto.userId,
-          },
+  return this.prisma.playlist.create({
+    data: {
+      name: createPlaylistDto.name,
+      coverPhoto: createPlaylistDto.coverPhoto,
+      user: {
+        connect: {
+          id: createPlaylistDto.userId,
         },
       },
-    });
-  }
+    },
+  });
+}
 
   async addTrack(dto: AddTrackDto) {
     return this.prisma.playlist.update({

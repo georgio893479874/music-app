@@ -8,8 +8,7 @@ import { Accordion, AccordionItem } from "@heroui/accordion";
 import { ListMusic, PlusCircle } from "lucide-react";
 import axios from "axios";
 import { Dialog } from "@headlessui/react";
-
-type Playlist = { id: string; name: string };
+import { Playlist } from "@/types";
 
 export default function Sidebar() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
@@ -44,18 +43,21 @@ export default function Sidebar() {
 
   const uploadCover = async (): Promise<string | null> => {
     if (!coverFile) return null;
+
     try {
       setIsUploading(true);
+
       const formData = new FormData();
       formData.append("file", coverFile);
 
-      const res = await fetch(`${API_URL}/upload`, {
-        method: "POST",
-        body: formData,
+      const res = await axios.post(`${API_URL}/upload`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
 
-      const data = await res.json();
-      return data.secure_url as string;
+      console.log("Upload response:", res.data);
+      return res.data.secure_url as string;
     } catch (err) {
       console.error("Upload failed:", err);
       return null;
@@ -67,9 +69,7 @@ export default function Sidebar() {
   const handleCreatePlaylist = async () => {
     if (!userId || !newPlaylistName.trim()) return;
 
-    const coverPhoto =
-      (await uploadCover()) ??
-      "/placeholder";
+    const coverPhoto = (await uploadCover()) ?? "/placeholder";
 
     try {
       const res = await axios.post(`${API_URL}/playlist/create`, {
@@ -131,7 +131,16 @@ export default function Sidebar() {
         <div className="mt-4">
           <div className="flex justify-between items-center px-6 mb-2">
             <h3 className="text-sm font-semibold uppercase">Your Playlists</h3>
-            <button onClick={() => setIsModalOpen(true)} title="Create Playlist">
+            <button
+              onClick={() => {
+                if (!userId) {
+                  alert("Please log in first.");
+                  return;
+                }
+                setIsModalOpen(true);
+              }}
+              title="Create Playlist"
+            >
               <PlusCircle className="text-gray-400 hover:text-white transition" />
             </button>
           </div>
@@ -190,23 +199,29 @@ export default function Sidebar() {
                 }}
               />
             </div>
-
-            {/* ---------- Actions ---------- */}
-            <div className="flex justify-end gap-2">
-              <button
-                onClick={() => setIsModalOpen(false)}
-                className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 transition"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreatePlaylist}
-                disabled={isUploading}
-                className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-60"
-              >
-                {isUploading ? "Uploading..." : "Create"}
-              </button>
-            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleCreatePlaylist();
+              }}
+            >
+              <div className="flex justify-end gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isUploading}
+                  className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-60"
+                >
+                  {isUploading ? "Uploading..." : "Create"}
+                </button>
+              </div>
+            </form>
           </Dialog.Panel>
         </div>
       </Dialog>

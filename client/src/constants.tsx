@@ -1,3 +1,4 @@
+"use client"
 import { FaHome, FaCompactDisc, FaFolderOpen } from "react-icons/fa";
 import { FaRadio } from "react-icons/fa6";
 import { BsMusicNoteList } from "react-icons/bs";
@@ -189,5 +190,16 @@ export const menuSections: MenuItemType[][] = [
   ],
 ];
 
-export const token = localStorage.getItem('token');
-export const userId = localStorage.getItem('userId');
+export const getToken = (): string | null => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("token");
+  }
+  return null;
+};
+
+export const getUserId = (): string | null => {
+  if (typeof window !== "undefined") {
+    return localStorage.getItem("userId");
+  }
+  return null;
+};
