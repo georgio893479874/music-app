@@ -1,9 +1,8 @@
+import { token } from "@/constants";
 import axios from "axios";
 
 export const getRecommendations = async (type: string) => {
   try {
-    const token = localStorage.getItem('token');
-
     const res = await axios.get(`http://localhost:4521/recommendations?type=${type}`, {
       headers: {
         Authorization: `Bearer ${token}`,

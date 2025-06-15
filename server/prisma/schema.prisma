@@ -37,6 +37,8 @@ model User {
   listeningHistory ListeningHistory[]
   recommendations  Recommendation[]
   avatar           String?
+
+  ArtistSubscription ArtistSubscription[]
 }
 
 model Playlist {
@@ -90,6 +92,8 @@ model Artist {
   albums     Album[]
   Track      Track[]   @relation(name: "ArtistToTrack")
   podcasts   Podcast[] @relation("ArtistPodcasts")
+
+  ArtistSubscription ArtistSubscription[]
 }
 
 model Genre {
@@ -156,4 +160,15 @@ model PodcastEpisode {
   podcast        Podcast  @relation(fields: [podcastId], references: [id])
   releaseDate    DateTime @default(now())
   coverImagePath String?
+}
+
+model ArtistSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  artistId  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  artist    Artist   @relation(fields: [artistId], references: [id])
+
+  @@unique([userId, artistId])
 }

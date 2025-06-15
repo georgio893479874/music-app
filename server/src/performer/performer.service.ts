@@ -6,7 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class PerformerService {
   constructor(private readonly prisma: PrismaService) {}
-  
+
   async create(createPerformerDto: CreatePerformerDto) {
     return this.prisma.artist.create({
       data: createPerformerDto,
@@ -51,15 +51,31 @@ export class PerformerService {
 
     return artist;
   }
+
+  async subscribeToArtist(userId: string, artistId: string) {
+    return this.prisma.artistSubscription.create({
+      data: {
+        userId,
+        artistId,
+      },
+    });
+  }
+
+  async unsubscribeFromArtist(userId: string, artistId: string) {
+    return this.prisma.artistSubscription.delete({
+      where: {
+        userId_artistId: { userId, artistId },
+      },
+    });
+  }
+
+  async isSubscribed(userId: string, artistId: string) {
+    const subscription = await this.prisma.artistSubscription.findUnique({
+      where: {
+        userId_artistId: { userId, artistId },
+      },
+    });
+
+    return !!subscription;
+  }
 }
-
-
-
-
-
-
-
-
-
-
-

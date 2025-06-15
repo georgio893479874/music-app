@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { PerformerService } from './performer.service';
 import { CreatePerformerDto } from './dto/create-performer.dto';
 import { UpdatePerformerDto } from './dto/update-performer.dto';
@@ -23,12 +32,30 @@ export class PerformerController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePerformerDto: UpdatePerformerDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updatePerformerDto: UpdatePerformerDto,
+  ) {
     return this.performerService.update(id, updatePerformerDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.performerService.remove(id);
+  }
+
+  @Post(':id/subscribe')
+  subscribe(@Param('id') artistId: string, @Body('userId') userId: string) {
+    return this.performerService.subscribeToArtist(userId, artistId);
+  }
+
+  @Post(':id/unsubscribe')
+  unsubscribe(@Param('id') artistId: string, @Body('userId') userId: string) {
+    return this.performerService.unsubscribeFromArtist(userId, artistId);
+  }
+
+  @Get(':id/is-subscribed')
+  isSubscribed(@Param('id') artistId: string, @Query('userId') userId: string) {
+    return this.performerService.isSubscribed(userId, artistId);
   }
 }

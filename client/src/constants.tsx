@@ -188,3 +188,6 @@ export const menuSections: MenuItemType[][] = [
     { label: "Sign out", href: "/login", action: "logout" },
   ],
 ];
+
+export const token = localStorage.getItem('token');
+export const userId = localStorage.getItem('userId');

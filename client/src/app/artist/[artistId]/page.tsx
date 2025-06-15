@@ -10,7 +10,7 @@ import Head from "next/head";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import { Album, Artist } from "@/types";
 import Image from "next/image";
-import { API_URL } from "@/constants";
+import { API_URL, userId } from "@/constants";
 
 const ArtistPage = () => {
   const { artistId } = useParams();
@@ -18,6 +18,7 @@ const ArtistPage = () => {
   const [albums, setAlbums] = useState<Album[]>([]);
   const [playing, setPlaying] = useState(false);
   const { setSelectedSong } = usePlayerContext();
+  const [isSubscribed, setIsSubscribed] = useState(false);
 
   useEffect(() => {
     const fetchArtistData = async () => {
@@ -37,6 +38,44 @@ const ArtistPage = () => {
     };
     fetchArtistData();
   }, [artistId]);
+
+  useEffect(() => {
+    const checkSubscription = async () => {
+      try {
+        const { data } = await axios.get(
+          `${API_URL}/performer/${artistId}/is-subscribed`,
+          { params: { userId: userId } }
+        );
+        setIsSubscribed(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    if (artistId) checkSubscription();
+  }, [artistId]);
+
+  const handleSubscribe = async () => {
+    try {
+      await axios.post(`${API_URL}/performer/${artistId}/subscribe`, {
+        userId: userId,
+      });
+      setIsSubscribed(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handleUnsubscribe = async () => {
+    try {
+      await axios.post(`${API_URL}/performer/${artistId}/unsubscribe`, {
+        userId: userId,
+      });
+      setIsSubscribed(false);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handlePlay = async () => {
     try {
@@ -88,7 +127,13 @@ const ArtistPage = () => {
               </h1>
             </div>
           </div>
-          <div className="mt-12 p-4">
+          <div className="mt-2 p-4">
+            <button
+              className="ml-4 px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
+              onClick={isSubscribed ? handleUnsubscribe : handleSubscribe}
+            >
+              {isSubscribed ? "Unfollow" : "Follow"}
+            </button>
             <h1 className="text-4xl font-bold mb-6">Albums</h1>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {albums.map((album) => (
@@ -104,7 +149,7 @@ const ArtistPage = () => {
                       />
                       <div className="absolute inset-0 flex justify-between items-end p-4 opacity-0 group-hover:opacity-100 transition duration-300">
                         <button className="p-2 bg-black/50 rounded-full text-white hover:bg-black/70 transition">
-                          <FaPlay size={16}/>
+                          <FaPlay size={16} />
                         </button>
                       </div>
                     </div>
