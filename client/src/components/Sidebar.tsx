@@ -1,230 +1,172 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { API_URL, libraryItems, menuItems } from "@/constants";
-import { Accordion, AccordionItem } from "@heroui/accordion";
-import { ListMusic, PlusCircle } from "lucide-react";
-import axios from "axios";
-import { Dialog } from "@headlessui/react";
-import { Playlist } from "@/types";
+import { usePathname } from "next/navigation";
+import {
+  Compass,
+  Album,
+  ListMusic,
+  User,
+  Clock,
+  Heart,
+  Folder,
+  Settings,
+  LogOut,
+} from "lucide-react";
 
-export default function Sidebar() {
-  const [playlists, setPlaylists] = useState<Playlist[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newPlaylistName, setNewPlaylistName] = useState("");
-  const [coverFile, setCoverFile] = useState<File | null>(null);
-  const [coverPreview, setCoverPreview] = useState<string | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const router = useRouter();
-  const [userId, setUserId] = useState<string | null>(null);
+export default function Sidebar({
+  width,
+  collapsed,
+}: {
+  width: number;
+  collapsed: boolean;
+}) {
+  const pathname = usePathname();
+  const isActive = (path: string) => pathname === path;
+  return (
+    <div
+      className="h-full bg-[#212121] flex flex-col py-4 transition-all duration-300 overflow-hidden flex-shrink-0"
+      style={{ width }}
+    >
+      <div className="flex items-center px-4 mb-6">
+        {!collapsed && (
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="w-28 h-auto object-contain filter invert"
+          />
+        )}
+      </div>
+      <SidebarSection title="MENU" collapsed={collapsed}>
+        <SidebarItem
+          icon={<Compass className="w-5 h-5" />}
+          label="Explore"
+          href="/explore"
+          active={isActive("/explore")}
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          icon={<Album className="w-5 h-5" />}
+          label="Albums"
+          href="/albums"
+          active={isActive("/albums")}
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          icon={<ListMusic className="w-5 h-5" />}
+          label="Genres"
+          href="/genres"
+          active={isActive("/genres")}
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          icon={<User className="w-5 h-5" />}
+          label="Artist"
+          href="/artist"
+          active={isActive("/artist")}
+          collapsed={collapsed}
+        />
+      </SidebarSection>
+      <SidebarSection title="LIBRARY" collapsed={collapsed}>
+        <SidebarItem
+          icon={<Clock className="w-5 h-5" />}
+          label="Recent"
+          href="/recent"
+          active={isActive("/recent")}
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          icon={<ListMusic className="w-5 h-5" />}
+          label="Playlist"
+          href="/playlist"
+          active={isActive("/playlist")}
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          icon={<Heart className="w-5 h-5" />}
+          label="Favorites"
+          href="/favorites"
+          active={isActive("/favorites")}
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          icon={<Folder className="w-5 h-5" />}
+          label="Local"
+          href="/local"
+          active={isActive("/local")}
+          collapsed={collapsed}
+        />
+      </SidebarSection>
+      <SidebarSection title="SETTING" collapsed={collapsed}>
+        <SidebarItem
+          icon={<Settings className="w-5 h-5" />}
+          label="Account"
+          href="/account"
+          active={isActive("/account")}
+          collapsed={collapsed}
+        />
+        <SidebarItem
+          icon={<LogOut className="w-5 h-5" />}
+          label="Logout"
+          href="/logout"
+          active={isActive("/logout")}
+          collapsed={collapsed}
+        />
+      </SidebarSection>
+    </div>
+  );
+}
 
-  useEffect(() => {
-    const id =
-      typeof window !== "undefined" ? localStorage.getItem("userId") : null;
-    setUserId(id);
-  }, []);
-
-  useEffect(() => {
-    if (!userId) return;
-    const fetchPlaylists = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/playlist`, {
-          params: { query: userId },
-        });
-        setPlaylists(res.data);
-      } catch (err) {
-        console.error("Failed to load playlists:", err);
-      }
-    };
-    fetchPlaylists();
-  }, [API_URL, userId]);
-
-  const uploadCover = async (): Promise<string | null> => {
-    if (!coverFile) return null;
-
-    try {
-      setIsUploading(true);
-
-      const formData = new FormData();
-      formData.append("file", coverFile);
-
-      const res = await axios.post(`${API_URL}/upload`, formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
-
-      console.log("Upload response:", res.data);
-      return res.data.secure_url as string;
-    } catch (err) {
-      console.error("Upload failed:", err);
-      return null;
-    } finally {
-      setIsUploading(false);
-    }
-  };
-
-  const handleCreatePlaylist = async () => {
-    if (!userId || !newPlaylistName.trim()) return;
-
-    const coverPhoto = (await uploadCover()) ?? "/placeholder";
-
-    try {
-      const res = await axios.post(`${API_URL}/playlist/create`, {
-        name: newPlaylistName,
-        userId,
-        coverPhoto,
-      });
-
-      setNewPlaylistName("");
-      setCoverFile(null);
-      setCoverPreview(null);
-      setIsModalOpen(false);
-      router.push(`/playlist/${res.data.id}`);
-    } catch (err) {
-      console.error("Failed to create playlist:", err);
-    }
-  };
+function SidebarSection({
+  title,
+  children,
+  collapsed,
+}: {
+  title: string;
+  children: React.ReactNode;
+  collapsed: boolean;
+}) {
+  if (collapsed) return <div className="mb-4">{children}</div>;
 
   return (
-    <div className="hidden lg:flex flex-col h-screen bg-[#212121] text-gray-200">
-      <nav className="mt-16">
-        <ul>
-          {menuItems.map((item) => (
-            <li key={item.name}>
-              <Link href={item.path}>
-                <div className="flex items-center py-2 px-6 rounded-lg cursor-pointer mb-2 hover:bg-[#2a2a2a] transition">
-                  <span className="mr-4">{item.icon}</span>
-                  {item.name}
-                </div>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </nav>
-      <div className="pl-6 pr-6 mt-4">
-        <Accordion>
-          <AccordionItem
-            title={
-              <div className="flex items-center">
-                <ListMusic className="mr-2" />
-                Library
-              </div>
-            }
-          >
-            <ul>
-              {libraryItems.map((item) => (
-                <li key={item.name}>
-                  <Link href={item.path}>
-                    <div className="flex items-center py-2 px-6 rounded-lg cursor-pointer mb-2 hover:bg-[#2a2a2a] transition">
-                      <span className="mr-4">{item.icon}</span>
-                      {item.name}
-                    </div>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </AccordionItem>
-        </Accordion>
-        <div className="mt-4">
-          <div className="flex justify-between items-center px-6 mb-2">
-            <h3 className="text-sm font-semibold uppercase">Your Playlists</h3>
-            <button
-              onClick={() => {
-                if (!userId) {
-                  alert("Please log in first.");
-                  return;
-                }
-                setIsModalOpen(true);
-              }}
-              title="Create Playlist"
-            >
-              <PlusCircle className="text-gray-400 hover:text-white transition" />
-            </button>
-          </div>
-          <ul>
-            {playlists.map((pl) => (
-              <li key={pl.id}>
-                <Link href={`/playlist/${pl.id}`}>
-                  <div className="flex items-center py-2 px-6 rounded-lg cursor-pointer mb-1 hover:bg-[#2a2a2a] transition">
-                    <span className="mr-4">🎵</span>
-                    {pl.name}
-                  </div>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+    <div className="mb-6">
+      <div className="text-xs text-gray-500 font-semibold px-6 mb-2">
+        {title}
       </div>
-      <Dialog
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        className="relative z-50"
-      >
-        <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white p-6 rounded-lg w-full max-w-sm shadow-lg">
-            <Dialog.Title className="text-lg font-semibold mb-4">
-              Create Playlist
-            </Dialog.Title>
-            <input
-              type="text"
-              value={newPlaylistName}
-              onChange={(e) => setNewPlaylistName(e.target.value)}
-              placeholder="Playlist name"
-              className="w-full p-2 border border-gray-300 rounded mb-4"
-            />
-            <div className="space-y-2 mb-4">
-              <label className="block text-sm font-medium">
-                Cover photo (optional)
-              </label>
-
-              {coverPreview && (
-                <img
-                  src={coverPreview}
-                  alt="Cover preview"
-                  className="w-full h-40 object-cover rounded-lg"
-                />
-              )}
-
-              <input
-                type="file"
-                accept="image/*"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] || null;
-                  setCoverFile(file);
-                  setCoverPreview(file ? URL.createObjectURL(file) : null);
-                }}
-              />
-            </div>
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                handleCreatePlaylist();
-              }}
-            >
-              <div className="flex justify-end gap-2">
-                <button
-                  type="button"
-                  onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 rounded bg-gray-300 hover:bg-gray-400 transition"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isUploading}
-                  className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition disabled:opacity-60"
-                >
-                  {isUploading ? "Uploading..." : "Create"}
-                </button>
-              </div>
-            </form>
-          </Dialog.Panel>
-        </div>
-      </Dialog>
+      <nav className="flex flex-col space-y-1">{children}</nav>
     </div>
+  );
+}
+
+function SidebarItem({
+  icon,
+  label,
+  href,
+  active,
+  collapsed,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  href: string;
+  active: boolean;
+  collapsed: boolean;
+}) {
+  return (
+    <Link href={href}>
+      <div
+        title={collapsed ? label : undefined}
+        className={`flex items-center ${
+          collapsed ? "justify-center" : "gap-3 px-6"
+        } py-2 cursor-pointer rounded-lg transition text-sm
+        ${
+          active
+            ? "bg-gray-800 text-cyan-400 font-semibold"
+            : "text-gray-400 hover:bg-gray-800 hover:text-white"
+        }`}
+      >
+        <div className="w-5 h-5">{icon}</div>
+        {!collapsed && <span>{label}</span>}
+      </div>
+    </Link>
   );
 }

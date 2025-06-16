@@ -34,4 +34,20 @@ export class UserService {
       },
     });
   }
+
+  async updateUser(
+    id: string,
+    data: {
+      firstname?: string;
+      lastname?: string;
+      email?: string;
+      avatar?: string;
+      banner?: string;
+    },
+  ) {
+    return this.prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
 }

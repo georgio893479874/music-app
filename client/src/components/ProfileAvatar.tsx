@@ -55,7 +55,7 @@ const AvatarMenu = () => {
     : '';
 
   return (
-    <div className='md:fixed right-4'>
+    <div>
       <IconButton onClick={handleClick} size="small">
         {!isLoading && (
           <Avatar src={user?.avatarUrl} sx={{ bgcolor: "#222", color: "#fff" }}>

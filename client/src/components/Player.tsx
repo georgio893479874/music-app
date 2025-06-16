@@ -25,6 +25,7 @@ import {
 import Image from "next/image";
 import FullscreenPlayer from "./FullscreenPlayer";
 import { API_URL } from "@/constants";
+import { fetchSongsByAlbumId } from "@/api/album";
 
 const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
   const { selectedSong, songs, setSongs } = usePlayerContext();
@@ -112,9 +113,7 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
         typeof window !== "undefined" ? localStorage.getItem("userId") : null;
       if (!userId) return;
       try {
-        const res = await axios.get(
-          `${API_URL}/favorite`
-        );
+        const res = await axios.get(`${API_URL}/favorite`);
         type Favorite = { track: { id: string }; userId: string };
         const isFav = res.data.some(
           (fav: Favorite) =>
@@ -157,11 +156,9 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
 
   const fetchSongs = async (albumId: string) => {
     try {
-      const { data } = await axios.get(
-        `${API_URL}/album/${albumId}`
-      );
-      if (data?.tracks?.length > 0) {
-        setSongs(data.tracks);
+      const tracks = await fetchSongsByAlbumId(albumId);
+      if (tracks.length > 0) {
+        setSongs(tracks);
       }
     } catch (error) {
       console.error("Failed to load songs:", error);
@@ -241,103 +238,99 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
 
   return (
     <>
-      <div className="lg:h-24 h-20 flex flex-col items-center justify-between p-4 bg-[#212121] text-white shadow-lg z-10">
-        <div className="left-4 flex items-center gap-4 z-5 w-full">
-          {selectedSong?.coverImagePath ? (
-            <Image
-              src={selectedSong.coverImagePath}
-              width={64}
-              height={64}
-              className="lg:w-16 lg:h-16 w-12 h-12 rounded-sm"
-              alt="cover"
-            />
-          ) : (
-            <div className="flex items-center justify-center bg-[#181818] lg:w-16 lg:h-16 w-12 h-12 rounded-sm">
-              <Music className="text-gray-400 w-8 h-8" />
-            </div>
-          )}
-          <div className="flex flex-col text-start">
-            <div className="flex gap-2">
-              <span className="text-base font-bold">
-                {selectedSong?.album?.artist.name}
-              </span>
-              <div className="gap-2 hidden sm:flex">
-                {isFavorite ? (
-                  <FaHeart
-                    className="text-white cursor-pointer"
-                    onClick={toggleFavorite}
-                  />
-                ) : (
-                  <FaRegHeart
-                    className="text-white cursor-pointer"
-                    onClick={toggleFavorite}
-                  />
-                )}
-                <PiDotsThreeOutlineFill className="text-white cursor-pointer hidden sm:flex" />
+      <div className="fixed bottom-0 left-0 w-full h-20 lg:h-24 bg-[#212121] text-white shadow-lg z-50 px-4">
+        <div className="flex flex-row items-center justify-between w-full h-full gap-4">
+          <div className="flex flex-row items-center gap-4 min-w-0 flex-shrink-0">
+            {selectedSong?.coverImagePath ? (
+              <Image
+                src={selectedSong.coverImagePath}
+                width={64}
+                height={64}
+                className="lg:w-16 lg:h-16 w-12 h-12 rounded-sm object-cover"
+                alt="cover"
+              />
+            ) : (
+              <div className="flex items-center justify-center bg-[#181818] lg:w-16 lg:h-16 w-12 h-12 rounded-sm">
+                <Music className="text-gray-400 w-8 h-8" />
               </div>
+            )}
+            <div className="flex flex-col min-w-0">
+              <div className="flex items-center gap-2">
+                <span className="text-base font-bold truncate max-w-[120px] lg:max-w-[180px]">
+                  {selectedSong?.album?.artist.name}
+                </span>
+                <div className="gap-2 hidden sm:flex">
+                  {isFavorite ? (
+                    <FaHeart
+                      className="text-white cursor-pointer"
+                      onClick={toggleFavorite}
+                    />
+                  ) : (
+                    <FaRegHeart
+                      className="text-white cursor-pointer"
+                      onClick={toggleFavorite}
+                    />
+                  )}
+                  <PiDotsThreeOutlineFill className="text-white cursor-pointer" />
+                </div>
+              </div>
+              <span className="text-xs text-gray-400 truncate max-w-[150px] lg:max-w-[250px]">{selectedSong?.title}</span>
+              <span className="text-xs text-gray-500 lg:inline hidden truncate max-w-[180px]">
+                PLAYING FROM: {selectedSong?.album?.title}
+              </span>
             </div>
-            <span className="text-xs text-gray-400">{selectedSong?.title}</span>
-            <span className="text-xs text-gray-500 lg:flex hidden">
-              PLAYING FROM: {selectedSong?.album?.title}
-            </span>
           </div>
-        </div>
-        <audio ref={audioPlayer} preload="metadata" />
-        <div className="flex items-center gap-4 fixed right-8 bottom-20 sm:right-auto sm:bottom-auto">
-          <p className="md:flex hidden">{currentFormatted}</p>
-          <Shuffle
-            onClick={shuffleSongs}
-            className={`text-xl cursor-pointer ${
-              isShuffling ? "text-blue-400" : "text-gray-400"
-            } sm:flex hidden`}
-          />
-          <BsFillSkipStartCircleFill
-            onClick={skipBegin}
-            className="text-2xl cursor-pointer text-gray-200"
-          />
-          {isPlaying ? (
-            <BsFillPauseCircleFill
-              onClick={togglePlayPause}
-              className="text-3xl cursor-pointer text-gray-200"
-            />
-          ) : (
-            <BsFillPlayCircleFill
-              onClick={togglePlayPause}
-              className="text-3xl cursor-pointer text-gray-200"
-            />
-          )}
-          <BsSkipEndCircleFill
-            onClick={skipEnd}
-            className="text-2xl cursor-pointer text-gray-200"
-          />
-          <div
-            onClick={toggleRepeatMode}
-            className="cursor-pointer sm:flex hidden"
-          >
-            {repeatMode === "off" && <Repeat className="text-gray-400" />}
-            {repeatMode === "one" && <Repeat1 className="text-blue-400" />}
-            {repeatMode === "all" && <Repeat className="text-blue-400" />}
+          <div className="flex flex-col items-center justify-center flex-1 mx-4 min-w-0">
+            <div className="flex items-center gap-4 mb-1 justify-center">
+              <p className="md:flex hidden text-sm w-10 text-right">{currentFormatted}</p>
+              <Shuffle
+                onClick={shuffleSongs}
+                className={`text-xl cursor-pointer ${isShuffling ? "text-blue-400" : "text-gray-400"} sm:flex hidden`}
+              />
+              <BsFillSkipStartCircleFill
+                onClick={skipBegin}
+                className="text-2xl cursor-pointer text-gray-200"
+              />
+              {isPlaying ? (
+                <BsFillPauseCircleFill
+                  onClick={togglePlayPause}
+                  className="text-3xl cursor-pointer text-gray-200"
+                />
+              ) : (
+                <BsFillPlayCircleFill
+                  onClick={togglePlayPause}
+                  className="text-3xl cursor-pointer text-gray-200"
+                />
+              )}
+              <BsSkipEndCircleFill
+                onClick={skipEnd}
+                className="text-2xl cursor-pointer text-gray-200"
+              />
+              <div onClick={toggleRepeatMode} className="cursor-pointer sm:flex hidden">
+                {repeatMode === "off" && <Repeat className="text-gray-400" />}
+                {repeatMode === "one" && <Repeat1 className="text-blue-400" />}
+                {repeatMode === "all" && <Repeat className="text-blue-400" />}
+              </div>
+              <p className="md:flex hidden text-sm w-10">{durationFormatted}</p>
+            </div>
+            <div className="w-full max-w-md md:flex hidden">
+              <input
+                type="range"
+                min={0}
+                max={duration}
+                value={currentTime}
+                onChange={handleProgressChange}
+                ref={progressBar}
+                className="w-full h-1 bg-gray-500 rounded-full appearance-none cursor-pointer"
+                style={{
+                  backgroundSize: `${(currentTime / (duration || 1)) * 100}% 100%`,
+                  backgroundImage: "linear-gradient(to right, white, white)",
+                }}
+              />
+            </div>
           </div>
-          <p className="md:flex hidden">{durationFormatted}</p>
-        </div>
-        <div className="flex-col items-center lg:mb-2 w-full max-w-md md:flex hidden">
-          <input
-            type="range"
-            min={0}
-            max={duration}
-            value={currentTime}
-            onChange={handleProgressChange}
-            ref={progressBar}
-            className="w-full h-1 bg-gray-500 rounded-full appearance-none cursor-pointer"
-            style={{
-              backgroundSize: `${(currentTime / (duration || 1)) * 100}% 100%`,
-              backgroundImage: "linear-gradient(to right, white, white)",
-            }}
-          />
-        </div>
-        <div className="fixed right-4 gap-4 items-center lg:mt-5 lg:flex hidden">
-          <div className="flex gap-4 items-center">
-            {isMuted || volume == 0 ? (
+          <div className="flex flex-row items-center gap-3 min-w-[170px] justify-end lg:mt-4">
+            {isMuted || volume === 0 ? (
               <IoVolumeMuteOutline
                 onClick={toggleMute}
                 className="text-xl cursor-pointer text-gray-200"
@@ -355,7 +348,7 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
               step="0.01"
               value={isMuted ? 0 : volume}
               onChange={handleVolumeChange}
-              className="w-24 h-1 bg-gray-500 rounded-full appearance-none cursor-pointer"
+              className="w-20 h-1 bg-gray-500 rounded-full appearance-none cursor-pointer"
             />
             <List
               className="text-xl cursor-pointer text-gray-200"
@@ -365,11 +358,10 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
               className="text-xl cursor-pointer text-gray-200"
               onClick={handleExpand}
             />
-            <PictureInPicture2
-              className="text-xl cursor-pointer text-gray-200"
-            />
+            <PictureInPicture2 className="text-xl cursor-pointer text-gray-200 hidden lg:inline" />
           </div>
         </div>
+        <audio ref={audioPlayer} preload="metadata" />
       </div>
       {isFullscreen && selectedSong && (
         <FullscreenPlayer

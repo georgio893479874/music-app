@@ -177,7 +177,6 @@ export const menuSections: MenuItemType[][] = [
     { label: "Blog", href: "/" },
     { label: "Jobs", href: "/" },
     { label: "Developers", href: "/" },
-    { label: "SoundCloud Store", href: "/" },
   ],
   [
     { label: "Support", href: "/" },

@@ -24,20 +24,20 @@ enum RecommendationType {
 }
 
 model User {
-  id               String             @id @default(uuid())
-  createdAt        DateTime           @default(now())
-  email            String             @unique
-  password         String?
-  firstname        String
-  lastname         String?
-  role             Role?
-  playlists        Playlist[]
-  tracks           Track[]
-  favorites        Favorite[]
-  listeningHistory ListeningHistory[]
-  recommendations  Recommendation[]
-  avatar           String?
-
+  id                 String               @id @default(uuid())
+  createdAt          DateTime             @default(now())
+  email              String               @unique
+  password           String?
+  firstname          String
+  lastname           String?
+  role               Role?
+  playlists          Playlist[]
+  tracks             Track[]
+  favorites          Favorite[]
+  listeningHistory   ListeningHistory[]
+  recommendations    Recommendation[]
+  avatar             String?
+  banner             String?
   ArtistSubscription ArtistSubscription[]
 }
 

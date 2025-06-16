@@ -2,14 +2,13 @@
 
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import Link from "next/link";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import Head from "next/head";
 import ShareButton from "@/components/ShareButton";
 import { Album } from "@/types";
 import Image from "next/image";
-import { API_URL } from "@/constants";
+import { fetchAlbumById } from "@/api/album";
 
 export default function AlbumPage() {
   const { albumId } = useParams();
@@ -19,12 +18,10 @@ export default function AlbumPage() {
   useEffect(() => {
     if (!albumId) return;
 
-    const fetchAlbum = async () => {
+     const fetchAlbum = async () => {
       try {
-        const response = await axios.get<Album>(
-          `${API_URL}/album/${albumId}`
-        );
-        setAlbum(response.data);
+        const albumData = await fetchAlbumById(albumId as string);
+        setAlbum(albumData);
       } catch (error) {
         console.error("Error fetching album:", error);
       }
