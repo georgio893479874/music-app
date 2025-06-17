@@ -56,7 +56,7 @@ export default function RecentPage() {
               <div>
                 <h2 className="text-lg font-semibold">{entry.track.title}</h2>
                 <p className="text-sm text-gray-400">
-                  Прослухано: {new Date(entry.listenedAt).toLocaleString()}
+                  Played: {new Date(entry.listenedAt).toLocaleString()}
                 </p>
               </div>
             </li>

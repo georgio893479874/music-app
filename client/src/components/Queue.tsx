@@ -24,13 +24,13 @@ export default function Queue({
         <div className="flex flex-col items-center gap-3">
           <Music className="w-14 h-14 text-gray-600" />
           <div className="text-lg text-gray-500 font-semibold">
-            Пісню не вибрано
+            No song selected
           </div>
           <button
             onClick={onClose}
             className="mt-6 px-4 py-2 bg-[#292929] rounded-xl text-gray-400 hover:text-white hover:bg-[#383838] transition"
           >
-            <X className="inline mr-1" /> Закрити
+            <X className="inline mr-1" /> Close
           </button>
         </div>
       </div>

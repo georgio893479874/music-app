@@ -58,4 +58,9 @@ export class PerformerController {
   isSubscribed(@Param('id') artistId: string, @Query('userId') userId: string) {
     return this.performerService.isSubscribed(userId, artistId);
   }
+
+  @Get(':id/monthly-listens')
+  async getArtistMonthlyListens(@Param('id') id: string) {
+    return this.performerService.getArtistMonthlyListens(id);
+  }
 }

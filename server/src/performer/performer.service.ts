@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { CreatePerformerDto } from './dto/create-performer.dto';
 import { UpdatePerformerDto } from './dto/update-performer.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { subMonths } from 'date-fns';
 
 @Injectable()
 export class PerformerService {
@@ -86,5 +87,25 @@ export class PerformerService {
         artist: true,
       },
     });
+  }
+
+  async getArtistMonthlyListens(artistId: string) {
+    const tracks = await this.prisma.track.findMany({
+      where: { authorId: artistId },
+      select: { id: true },
+    });
+
+    const trackIds = tracks.map((track) => track.id);
+    if (trackIds.length === 0) return 0;
+    const lastMonth = subMonths(new Date(), 1);
+
+    const listens = await this.prisma.listeningHistory.count({
+      where: {
+        trackId: { in: trackIds },
+        listenedAt: { gte: lastMonth },
+      },
+    });
+
+    return listens;
   }
 }

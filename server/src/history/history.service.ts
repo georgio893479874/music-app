@@ -43,4 +43,22 @@ export class HistoryService {
       where: { id },
     });
   }
+
+  async findByTrack(trackId: string) {
+    return this.prisma.listeningHistory.findMany({
+      where: { trackId },
+      include: {
+        user: true,
+      },
+      orderBy: {
+        listenedAt: 'desc',
+      },
+    });
+  }
+
+  async countByTrack(trackId: string) {
+    return this.prisma.listeningHistory.count({
+      where: { trackId },
+    });
+  }
 }

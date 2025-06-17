@@ -23,6 +23,12 @@ enum RecommendationType {
   NEW_MUSIC
 }
 
+enum AlbumType {
+  ALBUM
+  SINGLE
+  EP
+}
+
 model User {
   id                    String               @id @default(uuid())
   createdAt             DateTime             @default(now())
@@ -74,27 +80,27 @@ model Track {
 }
 
 model Album {
-  id          String   @id @default(uuid())
-  createdAt   DateTime @default(now())
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now())
   title       String
   releaseDate DateTime
   artistId    String
-  artist      Artist   @relation(fields: [artistId], references: [id])
+  artist      Artist    @relation(fields: [artistId], references: [id])
   tracks      Track[]
   genreId     String
-  genre       Genre    @relation(fields: [genreId], references: [id])
+  genre       Genre     @relation(fields: [genreId], references: [id])
   coverUrl    String?
+  type        AlbumType @default(ALBUM)
 }
 
 model Artist {
-  id         String    @id @default(uuid())
-  createdAt  DateTime  @default(now())
-  name       String    @unique
-  coverPhoto String?
-  albums     Album[]
-  Track      Track[]   @relation(name: "ArtistToTrack")
-  podcasts   Podcast[] @relation("ArtistPodcasts")
-
+  id                 String               @id @default(uuid())
+  createdAt          DateTime             @default(now())
+  name               String               @unique
+  coverPhoto         String?
+  albums             Album[]
+  Track              Track[]              @relation(name: "ArtistToTrack")
+  podcasts           Podcast[]            @relation("ArtistPodcasts")
   ArtistSubscription ArtistSubscription[]
 }
 
@@ -182,6 +188,6 @@ model UserSubscription {
   createdAt      DateTime @default(now())
   subscriber     User     @relation("subscriptionsFromUser", fields: [subscriberId], references: [id])
   subscribedTo   User     @relation("subscriptionsToUser", fields: [subscribedToId], references: [id])
-  
+
   @@unique([subscriberId, subscribedToId])
 }

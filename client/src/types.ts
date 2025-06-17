@@ -1,6 +1,7 @@
 import { JSX } from "react";
 
 export interface Track {
+  duration: number;
 	id: string;
 	title: string;
 	audioFilePath: string;
@@ -8,6 +9,7 @@ export interface Track {
 	coverImagePath: string;
 	album?: Album;
 	artistName?: string;
+  listens?: number;
 }
 
 export interface Album {

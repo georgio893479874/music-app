@@ -37,6 +37,7 @@
     "class-validator": "^0.14.1",
     "cloudinary": "^2.6.1",
     "connect-redis": "^8.0.2",
+    "date-fns": "^4.1.0",
     "express-session": "^1.18.1",
     "ioredis": "^5.6.1",
     "jsonwebtoken": "^9.0.2",

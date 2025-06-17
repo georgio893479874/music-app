@@ -6,7 +6,7 @@ import { Avatar } from "@mui/material";
 import { PhotoCamera } from "@mui/icons-material";
 import axios from "axios";
 import { API_URL } from "@/constants";
-import { Artist } from "@/types";
+import { Artist, Playlist } from "@/types";
 
 type User = {
   avatar: string | null;
@@ -21,21 +21,10 @@ type User = {
   following?: number;
   likes?: number;
   about?: string;
-  pro?: boolean;
-  badges?: {
-    orange?: number;
-    blue?: number;
-    black?: number;
-  };
 };
 
-type Playlist = {
-  id: string;
-  title: string;
-  cover: string | null;
-  tracks: number;
-  plays: number;
-  likes: number;
+type ArtistSubscription = {
+  artist: Artist;
 };
 
 export default function UserPage() {
@@ -66,7 +55,7 @@ export default function UserPage() {
     if (!userId) return;
     fetch(`${API_URL}/user/${userId}/artist-subscriptions`)
       .then((res) => res.json())
-      .then((data) => setSubscriptions(data));
+      .then((data: ArtistSubscription[]) => setSubscriptions(data.map((sub) => sub.artist)));
   }, [userId]);
 
   useEffect(() => {
@@ -84,7 +73,7 @@ export default function UserPage() {
       setPlaylistsLoading(false);
     };
     fetchPlaylists();
-  }, [API_URL, userId]);
+  }, [userId]);
 
   const uploadImage = async (file: File): Promise<string | null> => {
     if (!file) return null;
@@ -223,11 +212,6 @@ export default function UserPage() {
                 <h1 className="text-3xl font-bold text-white">
                   {user.firstname} {user.lastname}
                 </h1>
-                {user.pro && (
-                  <span className="bg-blue-900 text-blue-300 font-bold px-2 py-1 rounded-lg text-xs ml-2">
-                    PRO
-                  </span>
-                )}
               </div>
               <div className="text-gray-400">
                 {user.about ||
@@ -249,23 +233,6 @@ export default function UserPage() {
               </div>
             </div>
             <div className="flex flex-col items-center md:items-end gap-2 ml-auto">
-              <div className="flex gap-2 mb-2">
-                {user.badges?.orange && (
-                  <span className="w-7 h-7 bg-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    {user.badges.orange}
-                  </span>
-                )}
-                {user.badges?.blue && (
-                  <span className="w-7 h-7 bg-blue-700 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    {user.badges.blue}
-                  </span>
-                )}
-                {user.badges?.black && (
-                  <span className="w-7 h-7 bg-black rounded-full flex items-center justify-center text-white font-bold text-sm">
-                    {user.badges.black}
-                  </span>
-                )}
-              </div>
               <div className="flex gap-8">
                 <div className="flex flex-col items-center">
                   <span className="font-bold text-xl text-white">
@@ -274,7 +241,7 @@ export default function UserPage() {
                   <span className="text-xs text-gray-500">Followers</span>
                 </div>
                 <div
-                  className="flex flex-col items-center"
+                  className="flex flex-col items-center cursor-pointer"
                   onClick={() => setShowSubsModal(true)}
                 >
                   <span className="font-bold text-xl text-white">
@@ -351,26 +318,26 @@ export default function UserPage() {
                       className="bg-[#191C23] rounded-2xl shadow hover:shadow-lg transition p-4 flex flex-col border border-[#23272F]"
                     >
                       <div className="relative w-full h-48 mb-4 rounded-xl overflow-hidden bg-[#23272F] flex items-center justify-center">
-                        {playlist.cover ? (
+                        {playlist.coverPhoto ? (
                           <Image
-                            src={playlist.cover}
-                            alt={playlist.title}
+                            src={playlist.coverPhoto}
+                            alt={playlist.name}
                             fill
                             className="object-cover"
                           />
                         ) : (
                           <div className="text-gray-600 font-bold text-2xl">
-                            {playlist.title}
+                            {playlist.name}
                           </div>
                         )}
                       </div>
                       <h3 className="font-bold text-lg mb-1 text-white truncate">
-                        {playlist.title}
+                        {playlist.name}
                       </h3>
                       <div className="flex justify-between items-center text-xs text-gray-400">
-                        <span>{playlist.tracks} tracks</span>
-                        <span>🎵 {playlist.plays ?? 0}</span>
-                        <span>❤️ {playlist.likes ?? 0}</span>
+                        <span>0 tracks</span>
+                        <span>🎵 0</span>
+                        <span>❤️ 0</span>
                       </div>
                     </div>
                   ))
@@ -422,11 +389,11 @@ export default function UserPage() {
             onClick={(e) => e.stopPropagation()}
           >
             <h2 className="text-2xl font-bold text-white mb-6">
-              Ваші підписки
+              Your subscriptions
             </h2>
             {subscriptions.length === 0 && (
               <div className="text-gray-400 text-center">
-                Ви ще не підписані ні на одного виконавця.
+                You are not subscribed to any artists yet
               </div>
             )}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
@@ -449,7 +416,7 @@ export default function UserPage() {
                   <div className="text-white font-semibold text-lg">
                     {sub.name}
                   </div>
-                  <div className="text-gray-400 text-xs">Виконавець</div>
+                  <div className="text-gray-400 text-xs">Performer</div>
                 </div>
               ))}
             </div>

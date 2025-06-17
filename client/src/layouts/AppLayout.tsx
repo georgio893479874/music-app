@@ -53,7 +53,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <PanelResizeHandle className="w-1 bg-gray-700 cursor-col-resize"/>
             <Panel
               defaultSize={14}
-              minSize={8}
+              minSize={18}
               maxSize={20}
               className="min-w-[200px] max-w-[400px]"
             >
