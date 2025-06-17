@@ -1,9 +1,13 @@
 import { Body, Controller, Get, Param, Put, Query } from '@nestjs/common';
 import { UserService } from './user.service';
+import { PerformerService } from 'src/performer/performer.service';
 
 @Controller('user')
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly performerService: PerformerService
+  ) {}
 
   @Get('email')
   async findByEmail(@Query('email') email: string) {
@@ -28,5 +32,10 @@ export class UserController {
     },
   ) {
     return this.userService.updateUser(id, data);
+  }
+
+  @Get(':userId/artist-subscriptions')
+  async getArtistSubscriptions(@Param('userId') userId: string) {
+    return this.performerService.getUserArtistSubscriptions(userId);
   }
 }

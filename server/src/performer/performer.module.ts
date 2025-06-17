@@ -7,5 +7,6 @@ import { PrismaModule } from 'src/prisma/prisma.module';
   controllers: [PerformerController],
   providers: [PerformerService],
   imports: [PrismaModule],
+  exports: [PerformerService],
 })
 export class PerformerModule {}

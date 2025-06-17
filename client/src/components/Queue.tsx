@@ -20,7 +20,7 @@ export default function Queue({
 }: QueueProps) {
   if (!selectedSong) {
     return (
-      <div className="h-full bg-[#212121] rounded-2xl shadow-lg border border-[#292929] flex flex-col justify-center items-center">
+      <div className="bg-[#212121] rounded-2xl shadow-lg border border-[#292929] flex flex-col justify-center items-center">
         <div className="flex flex-col items-center gap-3">
           <Music className="w-14 h-14 text-gray-600" />
           <div className="text-lg text-gray-500 font-semibold">

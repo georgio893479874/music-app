@@ -25,7 +25,7 @@ export default function Sidebar({
   const isActive = (path: string) => pathname === path;
   return (
     <div
-      className="h-full bg-[#212121] flex flex-col py-4 transition-all duration-300 overflow-hidden flex-shrink-0"
+      className="h-full bg-[#212121] flex flex-col py-4 transition-all duration-300 flex-shrink-0"
       style={{ width }}
     >
       <div className="flex items-center px-4 mb-6">

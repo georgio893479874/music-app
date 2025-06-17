@@ -78,4 +78,13 @@ export class PerformerService {
 
     return !!subscription;
   }
+
+  async getUserArtistSubscriptions(userId: string) {
+    return this.prisma.artistSubscription.findMany({
+      where: { userId },
+      include: {
+        artist: true,
+      },
+    });
+  }
 }

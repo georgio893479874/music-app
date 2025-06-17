@@ -35,7 +35,7 @@ export default function RecentPage() {
   }
 
   return (
-    <div className="min-h-screen p-8 bg-[#1e1e1e] text-white">
+    <div className="p-8 bg-[#1e1e1e] text-white h-[calc(100vh-160px)]">
       <h1 className="text-3xl font-bold mb-6">Історія прослуховування</h1>
       {history.length === 0 ? (
         <p className="text-gray-400">У вас ще немає історії прослуховування.</p>

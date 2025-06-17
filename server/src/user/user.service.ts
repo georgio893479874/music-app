@@ -50,4 +50,54 @@ export class UserService {
       data,
     });
   }
+
+   async subscribeToUser(subscriberId: string, subscribedToId: string) {
+    return this.prisma.userSubscription.create({
+      data: {
+        subscriberId,
+        subscribedToId,
+      },
+    });
+  }
+
+  async unsubscribeFromUser(subscriberId: string, subscribedToId: string) {
+    return this.prisma.userSubscription.delete({
+      where: {
+        subscriberId_subscribedToId: {
+          subscriberId,
+          subscribedToId,
+        },
+      },
+    });
+  }
+
+  async isSubscribed(subscriberId: string, subscribedToId: string) {
+    const subscription = await this.prisma.userSubscription.findUnique({
+      where: {
+        subscriberId_subscribedToId: {
+          subscriberId,
+          subscribedToId,
+        },
+      },
+    });
+    return !!subscription;
+  }
+
+  async getUserSubscriptions(subscriberId: string) {
+    return this.prisma.userSubscription.findMany({
+      where: { subscriberId },
+      include: {
+        subscribedTo: true,
+      },
+    });
+  }
+
+  async getUserSubscribers(subscribedToId: string) {
+    return this.prisma.userSubscription.findMany({
+      where: { subscribedToId },
+      include: {
+        subscriber: true,
+      },
+    });
+  }
 }

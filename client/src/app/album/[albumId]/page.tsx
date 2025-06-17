@@ -37,7 +37,7 @@ export default function AlbumPage() {
       <Head>
         <title>{`${album.title} - Album by ${album.artist.name} | Notent`}</title>
       </Head>
-      <div className="flex min-h-screen bg-[#323131] text-white pb-24">
+      <div className="flex bg-[#323131] text-white max-h-[calc(100vh-160px)]">
         <div className="flex flex-col items-center flex-1 py-12 px-4">
           <Image
             src={album.coverUrl}
