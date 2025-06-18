@@ -55,7 +55,7 @@ export default function Sidebar({
         <SidebarItem
           icon={<ListMusic className="w-5 h-5" />}
           label="Genres"
-          href="/genres"
+          href="/search"
           active={isActive("/genres")}
           collapsed={collapsed}
         />

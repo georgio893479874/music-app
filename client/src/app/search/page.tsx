@@ -56,7 +56,7 @@ function SearchPageContent() {
   }, [searchQuery]);
   return (
     <div className="flex-1">
-      <div className="pt-28 px-6 mb-32">
+      <div className="pb-4">
         {!searchQuery && (
           <>
             <h2 className="text-xl font-semibold text-white mb-4">
@@ -81,7 +81,7 @@ function SearchPageContent() {
           </>
         )}
         {searchQuery && (
-          <div className="mt-6 bg-[#232222] text-white rounded-2xl p-6 shadow-lg">
+          <div className="mt-6 text-white rounded-2xl p-6 shadow-lg">
             <h2 className="text-2xl font-bold mb-6 border-b pb-2">
               Search Results
             </h2>
