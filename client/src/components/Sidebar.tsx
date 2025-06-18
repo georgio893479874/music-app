@@ -61,9 +61,9 @@ export default function Sidebar({
         />
         <SidebarItem
           icon={<User className="w-5 h-5" />}
-          label="Artist"
-          href="/artist"
-          active={isActive("/artist")}
+          label="Artists"
+          href="/artists"
+          active={isActive("/artists")}
           collapsed={collapsed}
         />
       </SidebarSection>
@@ -77,9 +77,9 @@ export default function Sidebar({
         />
         <SidebarItem
           icon={<ListMusic className="w-5 h-5" />}
-          label="Playlist"
-          href="/playlist"
-          active={isActive("/playlist")}
+          label="All Playlists"
+          href="/playlists"
+          active={isActive("/playlists")}
           collapsed={collapsed}
         />
         <SidebarItem

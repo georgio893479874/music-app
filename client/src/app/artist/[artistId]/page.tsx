@@ -258,7 +258,7 @@ const ArtistPage = () => {
             {albums.map((album) => (
               <Link href={`/album/${album.id}`} key={album.id} passHref>
                 <div className="relative group cursor-pointer">
-                  <div className="relative overflow-hidden rounded-xl shadow-lg h-48 w-full">
+                  <div className="relative overflow-hidden rounded-xl shadow-lg h-48 w-full object-cover">
                     <Image
                       className="w-full h-full object-cover transition duration-300 group-hover:scale-105"
                       src={album.coverUrl}
