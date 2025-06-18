@@ -8,8 +8,8 @@ import Head from "next/head";
 import ShareButton from "@/components/ShareButton";
 import { Album } from "@/types";
 import Image from "next/image";
-import { fetchAlbumById } from "@/api/album";
 import { API_URL } from "@/constants";
+import { fetchAlbumById } from "@/api";
 
 export default function AlbumPage() {
   const { albumId } = useParams();

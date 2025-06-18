@@ -3,7 +3,7 @@
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Mail, Bell } from "lucide-react";
-import ProfileAvatar from "./ProfileAvatar";
+import ProfileAvatar from "./AvatarMenu";
 import clsx from "clsx";
 import { IoClose } from "react-icons/io5";
 import { FaSearch } from "react-icons/fa";

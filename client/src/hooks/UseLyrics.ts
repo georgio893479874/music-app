@@ -1,4 +1,4 @@
-import { fetchLyrics } from '@/api/lyrics';
+import { fetchLyrics } from '@/api';
 import { useEffect, useState } from 'react';
 
 interface LyricLine {

@@ -1,27 +1,47 @@
-import { Controller, Get, Query, Req, BadRequestException, UseGuards } from '@nestjs/common';
+import { Controller, Get, Param, Query } from '@nestjs/common';
 import { RecommendationService } from './recommendation.service';
-import { isRecommendationType } from 'guards/recommendation-type.guard';
-import { AuthGuard } from '@nestjs/passport';
 
-@Controller('recommendations')
+@Controller('recommendation')
 export class RecommendationController {
-  constructor(private readonly service: RecommendationService) {}
+  constructor(private readonly recommendationService: RecommendationService) {}
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get()
+  @Get('user/:userId')
   async getUserRecommendations(
-    @Req() req,
-    @Query('type') type: string,
-    @Query('limit') limit?: number,
+    @Param('userId') userId: string,
+    @Query('type') type?: string,
   ) {
-    if (!isRecommendationType(type)) {
-      throw new BadRequestException('Invalid recommendation type');
-    }
+    return this.recommendationService.getRecommendationsForUser(userId, type);
+  }
 
-    return this.service.getRecommendations({
-      userId: req.user.id,
-      type,
-      limit,
-    });
+  @Get('user/:userId/latest-tracks')
+  getLatestTracks(@Param('userId') userId: string) {
+    return this.recommendationService.getLatestTracksForUser(userId);
+  }
+
+  @Get('user/:userId/recommended-albums')
+  getRecommendedAlbums(@Param('userId') userId: string) {
+    return this.recommendationService.getRecommendedAlbumsForUser(userId);
+  }
+
+  @Get('user/:userId/popular-playlists')
+  getPopularPlaylists(@Param('userId') userId: string) {
+    return this.recommendationService.getPopularPlaylistsForUser(userId);
+  }
+
+  @Get('user/:userId/popular-artists')
+  getPopularArtists(@Param('userId') userId: string) {
+    return this.recommendationService.getPopularArtistsForUser(userId);
+  }
+
+  @Get('popular-artist')
+  getMostPopularArtist() {
+    return this.recommendationService.getMostPopularArtist();
+  }
+
+  @Get('global')
+  async getGlobalRecommendations(
+    @Query('type') type?: string,
+  ) {
+    return this.recommendationService.getGlobalRecommendations(type);
   }
 }

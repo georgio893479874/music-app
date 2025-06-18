@@ -14,9 +14,11 @@ import { LyricModule } from './lyric/lyric.module';
 import { UploadModule } from './upload/upload.module';
 import { HistoryModule } from './history/history.module';
 import { PodcastModule } from './podcast/podcast.module';
+import { ScheduleModule } from '@nestjs/schedule';
 
 @Module({
   imports: [
+    ScheduleModule.forRoot(),
     AlbumModule, 
     TrackModule, 
     PerformerModule, 
