@@ -96,7 +96,7 @@ export default function AlbumPage() {
           </div>
           <div className="flex flex-col gap-2">
             <span className="uppercase text-sm tracking-widest text-white/80 font-semibold">
-              Альбом
+              Album
             </span>
             <h1 className="text-6xl font-extrabold text-white drop-shadow-md mb-1">
               {album.title}

@@ -25,7 +25,7 @@ import {
 import Image from "next/image";
 import FullscreenPlayer from "./FullscreenPlayer";
 import { API_URL } from "@/constants";
-import { fetchSongsByAlbumId } from "@/api/album";
+import { fetchSongsByAlbumId } from "@/api";
 
 const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
   const { selectedSong, songs, setSongs } = usePlayerContext();
