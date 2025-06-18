@@ -7,19 +7,46 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  USER
+}
+
+enum PlaylistAccess {
+  PUBLIC
+  PRIVATE
+}
+
+enum RecommendationType {
+  MADE_FOR_YOU
+  DISCOVERY
+  NEW_MUSIC
+}
+
+enum AlbumType {
+  ALBUM
+  SINGLE
+  EP
+}
+
 model User {
-  id               String             @id @default(uuid())
-  createdAt        DateTime           @default(now())
-  email            String             @unique
-  password         String
-  firstname        String
-  lastname         String?
-  role             Role?
-  favorites        Favorite[]
-  listeningHistory ListeningHistory[]
-  playlists        Playlist[]
-  recommendations  Recommendation[]
-  tracks           Track[]            @relation("TrackToUser")
+  id                    String               @id @default(uuid())
+  createdAt             DateTime             @default(now())
+  email                 String               @unique
+  password              String?
+  firstname             String
+  lastname              String?
+  role                  Role?
+  playlists             Playlist[]
+  tracks                Track[]
+  favorites             Favorite[]
+  listeningHistory      ListeningHistory[]
+  recommendations       Recommendation[]
+  avatar                String?
+  banner                String?
+  ArtistSubscription    ArtistSubscription[]
+  subscriptionsFromUser UserSubscription[]   @relation("subscriptionsFromUser")
+  subscriptionsToUser   UserSubscription[]   @relation("subscriptionsToUser")
 }
 
 model Playlist {
@@ -27,10 +54,10 @@ model Playlist {
   createdAt  DateTime       @default(now())
   name       String
   userId     String
+  user       User           @relation(fields: [userId], references: [id])
+  tracks     Track[]        @relation("PlaylistTracks")
   access     PlaylistAccess @default(PRIVATE)
   coverPhoto String?
-  user       User           @relation(fields: [userId], references: [id])
-  Track      Track[]
 }
 
 model Track {
@@ -39,37 +66,42 @@ model Track {
   title            String
   duration         Int
   albumId          String
+  authorId         String?
+  album            Album              @relation(fields: [albumId], references: [id])
+  author           Artist?            @relation(name: "ArtistToTrack", fields: [authorId], references: [id])
   audioFilePath    String
   coverImagePath   String
-  authorId         String?
+  users            User[]
+  playlists        Playlist[]         @relation("PlaylistTracks")
   favorites        Favorite[]
   ListeningHistory ListeningHistory[]
-  Lyric            Lyric[]
   Recommendation   Recommendation[]
-  album            Album              @relation(fields: [albumId], references: [id])
-  Playlist         Playlist[]
-  users            User[]             @relation("TrackToUser")
+  Lyric            Lyric[]
 }
 
 model Album {
-  id          String   @id @default(uuid())
-  createdAt   DateTime @default(now())
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now())
   title       String
   releaseDate DateTime
   artistId    String
-  genreId     String
-  coverUrl    String?
-  artist      Artist   @relation(fields: [artistId], references: [id])
-  genre       Genre    @relation(fields: [genreId], references: [id])
+  artist      Artist    @relation(fields: [artistId], references: [id])
   tracks      Track[]
+  genreId     String
+  genre       Genre     @relation(fields: [genreId], references: [id])
+  coverUrl    String?
+  type        AlbumType @default(ALBUM)
 }
 
 model Artist {
-  id         String   @id @default(uuid())
-  createdAt  DateTime @default(now())
-  name       String   @unique
-  coverPhoto String?
-  albums     Album[]
+  id                 String               @id @default(uuid())
+  createdAt          DateTime             @default(now())
+  name               String               @unique
+  coverPhoto         String?
+  albums             Album[]
+  Track              Track[]              @relation(name: "ArtistToTrack")
+  podcasts           Podcast[]            @relation("ArtistPodcasts")
+  ArtistSubscription ArtistSubscription[]
 }
 
 model Genre {
@@ -81,45 +113,81 @@ model Genre {
 model Favorite {
   id      String @id @default(uuid())
   userId  String
+  user    User   @relation(fields: [userId], references: [id])
   trackId String
   track   Track  @relation(fields: [trackId], references: [id])
-  user    User   @relation(fields: [userId], references: [id])
 }
 
 model ListeningHistory {
   id         String   @id @default(uuid())
   userId     String
-  trackId    String
-  listenedAt DateTime @default(now())
-  track      Track    @relation(fields: [trackId], references: [id])
   user       User     @relation(fields: [userId], references: [id])
+  trackId    String
+  track      Track    @relation(fields: [trackId], references: [id])
+  listenedAt DateTime @default(now())
 }
 
 model Recommendation {
-  id        Int      @id @default(autoincrement())
+  id        Int                @id @default(autoincrement())
   userId    String
+  user      User               @relation(fields: [userId], references: [id])
   trackId   String
-  createdAt DateTime @default(now())
-  track     Track    @relation(fields: [trackId], references: [id])
-  user      User     @relation(fields: [userId], references: [id])
+  track     Track              @relation(fields: [trackId], references: [id])
+  type      RecommendationType
+  createdAt DateTime           @default(now())
 }
 
 model Lyric {
   id        String   @id @default(uuid())
-  trackId   String
   text      String
-  createdAt DateTime @default(now())
   timestamp Float
-  updatedAt DateTime @updatedAt
   track     Track    @relation(fields: [trackId], references: [id], onDelete: Cascade)
+  trackId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-enum Role {
-  ADMIN
-  USER
+model Podcast {
+  id          String           @id @default(uuid())
+  createdAt   DateTime         @default(now())
+  title       String
+  description String
+  hostId      String
+  host        Artist           @relation("ArtistPodcasts", fields: [hostId], references: [id])
+  coverUrl    String?
+  episodes    PodcastEpisode[]
 }
 
-enum PlaylistAccess {
-  PUBLIC
-  PRIVATE
+model PodcastEpisode {
+  id             String   @id @default(uuid())
+  title          String
+  description    String
+  audioFilePath  String
+  duration       Int
+  podcastId      String
+  podcast        Podcast  @relation(fields: [podcastId], references: [id])
+  releaseDate    DateTime @default(now())
+  coverImagePath String?
+}
+
+model ArtistSubscription {
+  id        String   @id @default(uuid())
+  userId    String
+  artistId  String
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+  artist    Artist   @relation(fields: [artistId], references: [id])
+
+  @@unique([userId, artistId])
+}
+
+model UserSubscription {
+  id             String   @id @default(uuid())
+  subscriberId   String
+  subscribedToId String
+  createdAt      DateTime @default(now())
+  subscriber     User     @relation("subscriptionsFromUser", fields: [subscriberId], references: [id])
+  subscribedTo   User     @relation("subscriptionsToUser", fields: [subscribedToId], references: [id])
+
+  @@unique([subscriberId, subscribedToId])
 }
