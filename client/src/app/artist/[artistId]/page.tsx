@@ -39,7 +39,7 @@ const ArtistPage = () => {
         await Promise.all(
           trackData.map(async (track: Track) => {
             const { data: count } = await axios.get(
-              `${API_URL}/track/${track.id}/count`
+              `${API_URL}/history/track/${track.id}/count`
             );
             counts[track.id] = count;
           })
