@@ -10,18 +10,18 @@ export class PlaylistService {
   constructor(private readonly prisma: PrismaService) {}
 
   create(createPlaylistDto: CreatePlaylistDto) {
-  return this.prisma.playlist.create({
-    data: {
-      name: createPlaylistDto.name,
-      coverPhoto: createPlaylistDto.coverPhoto,
-      user: {
-        connect: {
-          id: createPlaylistDto.userId,
+    return this.prisma.playlist.create({
+      data: {
+        name: createPlaylistDto.name,
+        coverPhoto: createPlaylistDto.coverPhoto,
+        user: {
+          connect: {
+            id: createPlaylistDto.userId,
+          },
         },
       },
-    },
-  });
-}
+    });
+  }
 
   async addTrack(dto: AddTrackDto) {
     return this.prisma.playlist.update({
@@ -89,5 +89,30 @@ export class PlaylistService {
         id: id,
       },
     });
+  }
+
+  async likePlaylist(userId: string, playlistId: string) {
+    return this.prisma.favoritePlaylist.create({
+      data: { userId, playlistId },
+    });
+  }
+
+  async unlikePlaylist(userId: string, playlistId: string) {
+    return this.prisma.favoritePlaylist.deleteMany({
+      where: { userId, playlistId },
+    });
+  }
+
+  async countPlaylistLikes(playlistId: string) {
+    return this.prisma.favoritePlaylist.count({
+      where: { playlistId },
+    });
+  }
+
+  async isPlaylistLiked(userId: string, playlistId: string) {
+    const fav = await this.prisma.favoritePlaylist.findUnique({
+      where: { userId_playlistId: { userId, playlistId } },
+    });
+    return !!fav;
   }
 }

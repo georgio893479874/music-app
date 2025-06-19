@@ -7,6 +7,7 @@ import { PhotoCamera } from "@mui/icons-material";
 import axios from "axios";
 import { API_URL } from "@/constants";
 import { Artist, Playlist } from "@/types";
+import Link from "next/link";
 
 type User = {
   avatar: string | null;
@@ -55,7 +56,9 @@ export default function UserPage() {
     if (!userId) return;
     fetch(`${API_URL}/user/${userId}/artist-subscriptions`)
       .then((res) => res.json())
-      .then((data: ArtistSubscription[]) => setSubscriptions(data.map((sub) => sub.artist)));
+      .then((data: ArtistSubscription[]) =>
+        setSubscriptions(data.map((sub) => sub.artist))
+      );
   }, [userId]);
 
   useEffect(() => {
@@ -313,33 +316,32 @@ export default function UserPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {playlists && playlists.length > 0 ? (
                   playlists.map((playlist) => (
-                    <div
-                      key={playlist.id}
-                      className="bg-[#191C23] rounded-2xl shadow hover:shadow-lg transition p-4 flex flex-col border border-[#23272F]"
-                    >
-                      <div className="relative w-full h-48 mb-4 rounded-xl overflow-hidden bg-[#23272F] flex items-center justify-center">
-                        {playlist.coverPhoto ? (
-                          <Image
-                            src={playlist.coverPhoto}
-                            alt={playlist.name}
-                            fill
-                            className="object-cover"
-                          />
-                        ) : (
-                          <div className="text-gray-600 font-bold text-2xl">
-                            {playlist.name}
-                          </div>
-                        )}
+                    <Link href={`/playlist/${playlist.id}`} key={playlist.id}>
+                      <div className="bg-[#191C23] rounded-2xl shadow hover:shadow-lg transition p-4 flex flex-col border border-[#23272F]">
+                        <div className="relative w-full h-48 mb-4 rounded-xl overflow-hidden bg-[#23272F] flex items-center justify-center">
+                          {playlist.coverPhoto ? (
+                            <Image
+                              src={playlist.coverPhoto}
+                              alt={playlist.name}
+                              fill
+                              className="object-cover"
+                            />
+                          ) : (
+                            <div className="text-gray-600 font-bold text-2xl">
+                              {playlist.name}
+                            </div>
+                          )}
+                        </div>
+                        <h3 className="font-bold text-lg mb-1 text-white truncate">
+                          {playlist.name}
+                        </h3>
+                        <div className="flex justify-between items-center text-xs text-gray-400">
+                          <span>0 tracks</span>
+                          <span>🎵 0</span>
+                          <span>❤️ 0</span>
+                        </div>
                       </div>
-                      <h3 className="font-bold text-lg mb-1 text-white truncate">
-                        {playlist.name}
-                      </h3>
-                      <div className="flex justify-between items-center text-xs text-gray-400">
-                        <span>0 tracks</span>
-                        <span>🎵 0</span>
-                        <span>❤️ 0</span>
-                      </div>
-                    </div>
+                    </Link>
                   ))
                 ) : (
                   <div className="col-span-3 text-center text-gray-600">

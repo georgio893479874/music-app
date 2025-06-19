@@ -47,17 +47,19 @@ model User {
   ArtistSubscription    ArtistSubscription[]
   subscriptionsFromUser UserSubscription[]   @relation("subscriptionsFromUser")
   subscriptionsToUser   UserSubscription[]   @relation("subscriptionsToUser")
+  FavoritePlaylist      FavoritePlaylist[]
 }
 
 model Playlist {
-  id         String         @id @default(uuid())
-  createdAt  DateTime       @default(now())
-  name       String
-  userId     String
-  user       User           @relation(fields: [userId], references: [id])
-  tracks     Track[]        @relation("PlaylistTracks")
-  access     PlaylistAccess @default(PRIVATE)
-  coverPhoto String?
+  id               String             @id @default(uuid())
+  createdAt        DateTime           @default(now())
+  name             String
+  userId           String
+  user             User               @relation(fields: [userId], references: [id])
+  tracks           Track[]            @relation("PlaylistTracks")
+  access           PlaylistAccess     @default(PRIVATE)
+  coverPhoto       String?
+  FavoritePlaylist FavoritePlaylist[]
 }
 
 model Track {
@@ -102,6 +104,7 @@ model Artist {
   Track              Track[]              @relation(name: "ArtistToTrack")
   podcasts           Podcast[]            @relation("ArtistPodcasts")
   ArtistSubscription ArtistSubscription[]
+  avatar             String?
 }
 
 model Genre {
@@ -190,4 +193,15 @@ model UserSubscription {
   subscribedTo   User     @relation("subscriptionsToUser", fields: [subscribedToId], references: [id])
 
   @@unique([subscriberId, subscribedToId])
+}
+
+model FavoritePlaylist {
+  id         String   @id @default(uuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  playlistId String
+  playlist   Playlist @relation(fields: [playlistId], references: [id])
+  createdAt  DateTime @default(now())
+
+  @@unique([userId, playlistId])
 }

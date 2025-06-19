@@ -139,7 +139,7 @@ const ArtistPage = () => {
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl bg-white">
                 <Image
-                  src={artist.coverPhoto}
+                  src={artist?.avatar || "/placeholder"}
                   alt={artist.name}
                   fill
                   className="object-cover"

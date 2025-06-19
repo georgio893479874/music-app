@@ -6,33 +6,54 @@ import axios from 'axios';
 import { Playlist } from '@/types';
 import ListOfSongs from '@/components/ListOfSongs';
 import { usePlayerContext } from '@/contexts/PlayerContext';
-import { API_URL } from '@/constants';
+import { API_URL, getUserId } from '@/constants';
 
 export default function PlaylistPage() {
   const { playlistId } = useParams();
   const { setSelectedSong } = usePlayerContext();
+  const userId = getUserId();
   const [playlist, setPlaylist] = useState<Playlist | null>(null);
   const [isFavorite, setIsFavorite] = useState<boolean>(false);
-
-  const toggleFavorite = () => {
-    setIsFavorite((prev) => !prev);
-  };
+  const [favoritesCount, setFavoritesCount] = useState<number>(0);
 
   useEffect(() => {
-    if (!playlistId) return;
+    if (!playlistId || !userId) return;
 
-    const fetchPlaylist = async () => {
+    const fetchData = async () => {
       try {
-        const response = await axios.get<Playlist>(`${API_URL}/playlist/${playlistId}`);
-        setPlaylist(response.data);
-      } 
-      catch (error) {
+        const [playlistRes, isFavRes, countRes] = await Promise.all([
+          axios.get<Playlist>(`${API_URL}/playlist/${playlistId}`),
+          axios.get<boolean>(`${API_URL}/playlist/${playlistId}/likes/is-favorite`, { params: { userId } }),
+          axios.get<number>(`${API_URL}/playlist/${playlistId}/likes/count`),
+        ]);
+        setPlaylist(playlistRes.data);
+        setIsFavorite(isFavRes.data);
+        setFavoritesCount(countRes.data);
+      } catch (error) {
         console.error(error);
       }
     };
 
-    fetchPlaylist();
-  }, [playlistId]);
+    fetchData();
+  }, [playlistId, userId]);
+
+  const toggleFavorite = async () => {
+    if (!userId || !playlistId) return;
+
+    try {
+      if (isFavorite) {
+        await axios.delete(`${API_URL}/playlist/${playlistId}/like`, { params: { userId } });
+        setIsFavorite(false);
+        setFavoritesCount((count) => count - 1);
+      } else {
+        await axios.post(`${API_URL}/playlist/${playlistId}/like`, { userId });
+        setIsFavorite(true);
+        setFavoritesCount((count) => count + 1);
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   if (!playlist) return null;
 
@@ -45,8 +66,9 @@ export default function PlaylistPage() {
       isFavorite={isFavorite}
       onToggleFavorite={toggleFavorite}
       label="Playlist"
-      showFavoriteButton={true} 
+      showFavoriteButton={true}
       onSongClick={setSelectedSong}
+      favoritesCount={favoritesCount}
     />
   );
 }

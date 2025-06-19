@@ -12,6 +12,7 @@ export default function ListOfSongs({
   label = "Playlist",
   showFavoriteButton = true,
   onSongClick,
+  favoritesCount,
 }: ListOfSongsProps) {
   const hasCover = Boolean(coverPhoto);
 
@@ -51,6 +52,9 @@ export default function ListOfSongs({
                 <Heart fill={isFavorite ? "currentColor" : "none"} />
               </button>
             )}
+            <span className="text-gray-400 text-sm">
+              {favoritesCount} likes
+            </span>
             <span className="text-gray-400 text-sm">
               {tracks?.length} tracks
             </span>

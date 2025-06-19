@@ -12,4 +12,8 @@ export class CreatePerformerDto {
   @IsString()
   @IsOptional()
   photoUrl?: string;
+
+  @IsString()
+  @IsOptional()
+  avatar?: string;
 }

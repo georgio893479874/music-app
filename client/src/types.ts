@@ -38,6 +38,7 @@ export interface Artist {
   id: string;
   name: string;
   coverPhoto: string;
+  avatar: string;
 }
 
 export interface Genre {
@@ -98,6 +99,7 @@ export interface ListOfSongsProps {
   label?: string;
   showFavoriteButton?: boolean;
   onSongClick?: (song: Track) => void;
+  favoritesCount: number;
 }
 
 

@@ -60,4 +60,33 @@ export class PlaylistController {
   remove(@Param('id') id: string) {
     return this.playlistService.remove(id);
   }
+
+  @Post(':id/like')
+  likePlaylist(
+    @Param('id') playlistId: string,
+    @Body('userId') userId: string,
+  ) {
+    return this.playlistService.likePlaylist(userId, playlistId);
+  }
+
+  @Delete(':id/like')
+  unlikePlaylist(
+    @Param('id') playlistId: string,
+    @Query('userId') userId: string,
+  ) {
+    return this.playlistService.unlikePlaylist(userId, playlistId);
+  }
+
+  @Get(':id/likes/count')
+  countPlaylistLikes(@Param('id') playlistId: string) {
+    return this.playlistService.countPlaylistLikes(playlistId);
+  }
+
+  @Get(':id/likes/is-favorite')
+  isPlaylistLiked(
+    @Param('id') playlistId: string,
+    @Query('userId') userId: string,
+  ) {
+    return this.playlistService.isPlaylistLiked(userId, playlistId);
+  }
 }
