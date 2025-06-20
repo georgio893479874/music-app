@@ -1,7 +1,5 @@
 "use client";
 
-"use client";
-
 import { useState, useEffect, Suspense } from "react";
 import axios from "axios";
 import { API_URL, genres } from "@/constants";
@@ -9,14 +7,36 @@ import Link from "next/link";
 import { Album, Artist, Playlist, Track } from "@/types";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
+import { usePlayerContext } from "@/contexts/PlayerContext";
 
 type SearchResult = Track | Album | Artist | Playlist;
+
+function isTrack(item: SearchResult): item is Track {
+  return (item as Track).audioFilePath !== undefined;
+}
+
+function isAlbum(item: SearchResult): item is Album {
+  return (item as Album).coverUrl !== undefined;
+}
+
+function isArtist(item: SearchResult): item is Artist {
+  return (item as Artist).coverPhoto !== undefined && !(item as Playlist).coverPhoto;
+}
+
+function isPlaylist(item: SearchResult): item is Playlist {
+  return (item as Playlist).coverPhoto !== undefined;
+}
 
 function SearchPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("query") || "";
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const { setSongs, setSelectedSong } = usePlayerContext();
+
+  useEffect(() => {
+  console.log("searchResults", searchResults);
+}, [searchResults]);
 
   useEffect(() => {
     setSearchQuery(initialQuery);
@@ -54,6 +74,29 @@ function SearchPageContent() {
       setSearchResults([]);
     }
   }, [searchQuery]);
+
+  // Play handler for local and YouTube tracks
+  const playSong = async (track: Track) => {
+    if (track.type === "yt" && track.audioFilePath.startsWith("http")) {
+      // Fetch audio stream url from backend
+      try {
+        const { data } = await axios.get(`${API_URL}/import/audio`, {
+          params: { url: track.audioFilePath }
+        });
+        if (data.streamUrl) {
+          const ytTrack = { ...track, audioFilePath: data.streamUrl };
+          setSongs([ytTrack]);
+          setSelectedSong(ytTrack);
+        }
+      } catch {
+        alert("Не вдалося отримати аудіо з YouTube");
+      }
+    } else {
+      setSongs([track]);
+      setSelectedSong(track);
+    }
+  };
+
   return (
     <div className="flex-1">
       <div className="pb-4">
@@ -92,39 +135,49 @@ function SearchPageContent() {
             ) : (
               <div className="space-y-6 flex flex-col gap-3">
                 {searchResults.map((result: SearchResult) => {
-                  if ("title" in result) {
-                    if ("coverUrl" in result) {
-                      return (
-                        <Link
-                          href={`/album/${result.id}`}
-                          key={result.id}
-                          passHref
-                        >
-                          <div className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer">
-                            <Image
-                              src={result.coverUrl}
-                              alt={result.title}
-                              width={50}
-                              height={50}
-                              className="rounded-md"
-                            />
-                            <div>
-                              <p className="text-lg font-semibold">
-                                {result.title}
-                              </p>
-                              <p className="text-sm text-gray-400">
-                                {result.artistName}
-                              </p>
-                            </div>
-                          </div>
-                        </Link>
-                      );
-                    } else {
-                      return (
-                        <div
-                          key={result.id}
-                          className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md"
-                        >
+                  if (isTrack(result)) {
+                    return (
+                      <div
+                        key={result.id}
+                        className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer"
+                        onClick={() => playSong(result)}
+                      >
+                        <Image
+                          src={result.coverImagePath || "/default-cover.jpg"}
+                          alt={result.title}
+                          width={50}
+                          height={50}
+                          className="rounded-md"
+                        />
+                        <div>
+                          <p className="text-lg font-semibold">
+                            {result.title}
+                          </p>
+                          <p className="text-sm text-gray-400">
+                            {result.artistName}
+                          </p>
+                          {result.type === "yt" && (
+                            <span className="px-2 py-1 bg-red-600 text-white rounded text-xs ml-2">YouTube</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  }
+                  if (isAlbum(result)) {
+                    return (
+                      <Link
+                        href={`/album/${result.id}`}
+                        key={result.id}
+                        passHref
+                      >
+                        <div className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer">
+                          <Image
+                            src={result.coverUrl}
+                            alt={result.title}
+                            width={50}
+                            height={50}
+                            className="rounded-md"
+                          />
                           <div>
                             <p className="text-lg font-semibold">
                               {result.title}
@@ -134,59 +187,58 @@ function SearchPageContent() {
                             </p>
                           </div>
                         </div>
-                      );
-                    }
+                      </Link>
+                    );
                   }
-                  if ("name" in result) {
-                    if ("photoUrl" in result) {
-                      return (
-                        <Link
-                          href={`/performer/${result.id}`}
-                          key={result.id}
-                          passHref
-                        >
-                          <div className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer">
-                            <Image
-                              src={result.coverPhoto}
-                              alt={result.name}
-                              width={40}
-                              height={40}
-                              className="rounded-full"
-                            />
-                            <div>
-                              <p className="text-lg font-semibold">
-                                {result.name}
-                              </p>
-                              <p className="text-sm text-gray-400">Artist</p>
-                            </div>
+                  if (isArtist(result)) {
+                    return (
+                      <Link
+                        href={`/performer/${result.id}`}
+                        key={result.id}
+                        passHref
+                      >
+                        <div className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer">
+                          <Image
+                            src={result.coverPhoto}
+                            alt={result.name}
+                            width={40}
+                            height={40}
+                            className="rounded-full"
+                          />
+                          <div>
+                            <p className="text-lg font-semibold">
+                              {result.name}
+                            </p>
+                            <p className="text-sm text-gray-400">Artist</p>
                           </div>
-                        </Link>
-                      );
-                    } else {
-                      return (
-                        <Link
-                          href={`/playlist/${result.id}`}
-                          key={result.id}
-                          passHref
-                        >
-                          <div className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer">
-                            <Image
-                              src={result.coverPhoto}
-                              alt={result.name}
-                              width={50}
-                              height={50}
-                              className="rounded-md"
-                            />
-                            <div>
-                              <p className="text-lg font-semibold">
-                                {result.name}
-                              </p>
-                              <p className="text-sm text-gray-400">Playlist</p>
-                            </div>
+                        </div>
+                      </Link>
+                    );
+                  }
+                  if (isPlaylist(result)) {
+                    return (
+                      <Link
+                        href={`/playlist/${result.id}`}
+                        key={result.id}
+                        passHref
+                      >
+                        <div className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer">
+                          <Image
+                            src={result.coverPhoto}
+                            alt={result.name}
+                            width={50}
+                            height={50}
+                            className="rounded-md"
+                          />
+                          <div>
+                            <p className="text-lg font-semibold">
+                              {result.name}
+                            </p>
+                            <p className="text-sm text-gray-400">Playlist</p>
                           </div>
-                        </Link>
-                      );
-                    }
+                        </div>
+                      </Link>
+                    );
                   }
                   return null;
                 })}

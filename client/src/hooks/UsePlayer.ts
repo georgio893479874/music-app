@@ -56,7 +56,13 @@ const usePlayer = ({
       navigator.mediaSession.metadata = new window.MediaMetadata({
         title: songs[currentSongIndex].title,
         artwork: [
-          { src: songs[currentSongIndex].coverImagePath, type: "image/jpg" },
+          {
+            src:
+              songs[currentSongIndex].coverImagePath ||
+              songs[currentSongIndex].coverImagePath ||
+              "/default-cover.jpg",
+            type: "image/jpg",
+          },
         ],
       });
 

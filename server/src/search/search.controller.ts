@@ -7,9 +7,7 @@ export class SearchController {
 
   @Get()
   async search(@Query('query') query: string) {
-    if (!query) {
-      return { tracks: [], albums: [], performers: [], playlists: [] };
-    }
+    if (!query) return { tracks: [], albums: [], performers: [], playlists: [] };
     return this.searchService.search(query);
   }
 }

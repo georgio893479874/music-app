@@ -1,7 +1,6 @@
 import { JSX } from "react";
 
 export interface Track {
-  duration: number;
 	id: string;
 	title: string;
 	audioFilePath: string;
@@ -10,6 +9,7 @@ export interface Track {
 	album?: Album;
 	artistName?: string;
   listens?: number;
+  type?: 'yt' | 'db';
 }
 
 export interface Album {
@@ -99,7 +99,7 @@ export interface ListOfSongsProps {
   label?: string;
   showFavoriteButton?: boolean;
   onSongClick?: (song: Track) => void;
-  favoritesCount: number;
+  favoritesCount?: number;
 }
 
 

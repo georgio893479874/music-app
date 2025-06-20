@@ -5,11 +5,11 @@ import { ImportService } from './import.service';
 export class ImportController {
   constructor(private readonly importService: ImportService) {}
 
-  @Get('song')
-  async getSong(@Query('title') title: string) {
-    if (!title) return { error: 'title query is required' };
-    const result = await this.importService.findSongWithAudio(title);
-    if (!result) return { error: 'Song not found or audio unavailable' };
-    return result;
+  @Get('audio')
+  async getAudio(@Query('url') url: string) {
+    if (!url) return { error: 'url query is required' };
+    const streamUrl = await this.importService.getYoutubeAudioStreamUrl(url);
+    if (!streamUrl) return { error: 'Audio not available' };
+    return { streamUrl };
   }
 }
