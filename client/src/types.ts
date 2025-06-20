@@ -54,14 +54,16 @@ export interface AuthFormProps {
 }
 
 export interface AuthFormValues {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
   rememberMe: boolean;
 }
 
 export interface SignUpFormValues {
-  fullName: string;
+  firstName: string;
+  lastName: string;
   email: string;
   password: string;
 }

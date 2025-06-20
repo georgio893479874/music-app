@@ -27,53 +27,52 @@ function isPlaylist(item: SearchResult): item is Playlist {
   return (item as Playlist).coverPhoto !== undefined;
 }
 
+type SearchSource = "all" | "local" | "youtube";
+
 function SearchPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
+  const [searchSource, setSearchSource] = useState<SearchSource>("all");
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("query") || "";
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const { setSongs, setSelectedSong } = usePlayerContext();
 
   useEffect(() => {
-  console.log("searchResults", searchResults);
-}, [searchResults]);
-
-  useEffect(() => {
     setSearchQuery(initialQuery);
   }, [initialQuery]);
 
-  const handleSearch = async (query: string) => {
-    if (query.trim() === "") return;
+const handleSearch = async (query: string, source: SearchSource) => {
+  if (query.trim() === "") return;
 
-    try {
-      const { data } = await axios.get(
-        `${API_URL}/search`,
-        {
-          params: { query },
-        }
-      );
+  try {
+    const { data } = await axios.get(
+      `${API_URL}/search`,
+      {
+        params: { query, source },
+      }
+    );
 
-      const results: SearchResult[] = [
-        ...(data.tracks || []),
-        ...(data.albums || []),
-        ...(data.performers || []),
-        ...(data.playlists || []),
-      ];
+    const results: SearchResult[] = [
+      ...(data.tracks || []),
+      ...(data.albums || []),
+      ...(data.performers || []),
+      ...(data.playlists || []),
+    ];
 
-      setSearchResults(results);
-    } catch (error) {
-      console.error(error);
-    }
-  };
+    setSearchResults(results);
+  } catch (error) {
+    console.error(error);
+  }
+};
 
   useEffect(() => {
     if (searchQuery) {
-      const timeoutId = setTimeout(() => handleSearch(searchQuery), 500);
+      const timeoutId = setTimeout(() => handleSearch(searchQuery, searchSource), 500);
       return () => clearTimeout(timeoutId);
     } else {
       setSearchResults([]);
     }
-  }, [searchQuery]);
+  }, [searchQuery, searchSource]);
 
   const playSong = async (track: Track) => {
     if (track.type === "yt" && track.audioFilePath.startsWith("http")) {
@@ -98,6 +97,19 @@ function SearchPageContent() {
   return (
     <div className="flex-1">
       <div className="pb-4">
+        <div className="mb-4 flex items-center gap-4">
+          <label htmlFor="search-source" className="text-white">Search in:</label>
+          <select
+            id="search-source"
+            className="rounded-md px-2 py-1 bg-[#212121] text-white"
+            value={searchSource}
+            onChange={e => setSearchSource(e.target.value as SearchSource)}
+          >
+            <option value="all">All</option>
+            <option value="local">Local</option>
+            <option value="youtube">YouTube Music</option>
+          </select>
+        </div>
         {!searchQuery && (
           <>
             <h2 className="text-xl font-semibold text-white mb-4">

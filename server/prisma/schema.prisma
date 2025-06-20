@@ -70,7 +70,7 @@ model Track {
   authorId         String?
   album            Album              @relation(fields: [albumId], references: [id])
   author           Artist?            @relation(name: "ArtistToTrack", fields: [authorId], references: [id])
-  audioFilePath    String
+  audioFilePath    String             @unique
   users            User[]
   playlists        Playlist[]         @relation("PlaylistTracks")
   favorites        Favorite[]

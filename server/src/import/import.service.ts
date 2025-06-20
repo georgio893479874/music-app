@@ -2,14 +2,16 @@ import { Injectable } from '@nestjs/common';
 import { exec } from 'child_process';
 import * as util from 'util';
 import axios from 'axios';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 const execPromise = util.promisify(exec);
 const ytSearch = require('yt-search');
 
-const YT_COVER_BASE = "https://i.ytimg.com/vi";
+const YT_COVER_BASE = 'https://i.ytimg.com/vi';
 
 @Injectable()
 export class ImportService {
+  constructor(private readonly prisma: PrismaService) {}
   async getFirstAvailableCover(videoId: string): Promise<string> {
     const covers = [
       `${YT_COVER_BASE}/${videoId}/maxresdefault.jpg`,
@@ -23,7 +25,7 @@ export class ImportService {
           return url;
         }
       } catch (err) {
-        console.error(err)
+        console.error(err);
       }
     }
     return '/default-cover.jpg';
@@ -81,7 +83,7 @@ export class ImportService {
           coverImagePath: await this.getFirstAvailableCover(item.videoId),
           duration: item.seconds || 0,
           type: 'yt',
-        }))
+        })),
       );
 
       return mapped;
@@ -105,10 +107,12 @@ export class ImportService {
   async searchYoutubeArtists(query: string) {
     try {
       const res = await ytSearch({ query, type: 'channel' });
-      const performers = (res.channels || []).filter((ch: { name: string; subCount: number; }) => {
-        const name = ch.name?.toLowerCase() || '';
-        return name.includes(query.toLowerCase()) || ch.subCount > 1000;
-      });
+      const performers = (res.channels || []).filter(
+        (ch: { name: string; subCount: number }) => {
+          const name = ch.name?.toLowerCase() || '';
+          return name.includes(query.toLowerCase()) || ch.subCount > 1000;
+        },
+      );
 
       return performers.map((item) => ({
         id: `yt_ch_${item.channelId}`,

@@ -6,8 +6,8 @@ export class SearchController {
   constructor(private readonly searchService: SearchService) {}
 
   @Get()
-  async search(@Query('query') query: string) {
+  async search(@Query('query') query: string, @Query('source') source?: string) {
     if (!query) return { tracks: [], albums: [], performers: [], playlists: [] };
-    return this.searchService.search(query);
+    return this.searchService.search(query, source);
   }
 }

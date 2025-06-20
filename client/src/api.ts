@@ -22,15 +22,15 @@ export const fetchSongsByAlbumId = async (
 };
 
 export const signup = async (
-  fullName: string,
+  firstName: string,
+  lastName: string,
   email: string,
   password: string
 ) => {
   try {
-    const [firstname, lastname] = fullName.split(" ");
     await axios.post(`${API_URL}/auth/signup`, {
-      firstname,
-      lastname,
+      firstName,
+      lastName,
       email,
       password,
     });

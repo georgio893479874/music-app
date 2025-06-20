@@ -1,4 +1,4 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { ImportService } from './import.service';
 
 @Controller('import')
@@ -16,19 +16,14 @@ export class ImportController {
   @Get('search')
   async search(@Query('query') query: string) {
     if (!query) return { error: 'query is required' };
-
-    // Пошук треків та артистів
     const [tracks, performers] = await Promise.all([
       this.importService.searchYoutubeTracks(query),
       this.importService.searchYoutubeArtists(query)
     ]);
 
-    // Можеш додати альбоми, плейлисти, якщо потрібно
-
     return {
       tracks,
       performers
-      // albums, playlists...
     };
   }
 }
