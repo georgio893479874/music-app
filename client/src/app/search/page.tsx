@@ -75,10 +75,8 @@ function SearchPageContent() {
     }
   }, [searchQuery]);
 
-  // Play handler for local and YouTube tracks
   const playSong = async (track: Track) => {
     if (track.type === "yt" && track.audioFilePath.startsWith("http")) {
-      // Fetch audio stream url from backend
       try {
         const { data } = await axios.get(`${API_URL}/import/audio`, {
           params: { url: track.audioFilePath }
@@ -143,7 +141,7 @@ function SearchPageContent() {
                         onClick={() => playSong(result)}
                       >
                         <Image
-                          src={result.coverImagePath || "/default-cover.jpg"}
+                          src={result.coverImagePath}
                           alt={result.title}
                           width={50}
                           height={50}

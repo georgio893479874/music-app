@@ -1,12 +1,34 @@
 import { Injectable } from '@nestjs/common';
 import { exec } from 'child_process';
 import * as util from 'util';
+import axios from 'axios';
 
 const execPromise = util.promisify(exec);
 const ytSearch = require('yt-search');
 
+const YT_COVER_BASE = "https://i.ytimg.com/vi";
+
 @Injectable()
 export class ImportService {
+  async getFirstAvailableCover(videoId: string): Promise<string> {
+    const covers = [
+      `${YT_COVER_BASE}/${videoId}/maxresdefault.jpg`,
+      `${YT_COVER_BASE}/${videoId}/hqdefault.jpg`,
+      `${YT_COVER_BASE}/${videoId}/default.jpg`,
+    ];
+    for (const url of covers) {
+      try {
+        const res = await axios.head(url, { timeout: 2000 });
+        if (res.status === 200) {
+          return url;
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    }
+    return '/default-cover.jpg';
+  }
+
   async searchYoutubeTracks(query: string) {
     try {
       const musicQuery = query + ' official audio';
@@ -50,19 +72,19 @@ export class ImportService {
         return false;
       });
 
-      return filtered.map((item) => ({
-        id: `yt_${item.videoId}`,
-        title: item.title,
-        artistName: item.author.name || '',
-        audioFilePath: `https://www.youtube.com/watch?v=${item.videoId}`,
-        coverUrls: [
-          `https://i.ytimg.com/vi/${item.videoId}/maxresdefault.jpg`,
-          `https://i.ytimg.com/vi/${item.videoId}/hqdefault.jpg`,
-          `https://i.ytimg.com/vi/${item.videoId}/default.jpg`,
-        ],
-        duration: item.seconds || 0,
-        type: 'yt',
-      }));
+      const mapped = await Promise.all(
+        filtered.map(async (item) => ({
+          id: `yt_${item.videoId}`,
+          title: item.title,
+          artistName: item.author.name || '',
+          audioFilePath: `https://www.youtube.com/watch?v=${item.videoId}`,
+          coverImagePath: await this.getFirstAvailableCover(item.videoId),
+          duration: item.seconds || 0,
+          type: 'yt',
+        }))
+      );
+
+      return mapped;
     } catch (e) {
       console.error('YouTube search error:', e);
       return [];
@@ -77,6 +99,28 @@ export class ImportService {
       return stdout.trim();
     } catch (e) {
       return null;
+    }
+  }
+
+  async searchYoutubeArtists(query: string) {
+    try {
+      const res = await ytSearch({ query, type: 'channel' });
+      const performers = (res.channels || []).filter((ch: { name: string; subCount: number; }) => {
+        const name = ch.name?.toLowerCase() || '';
+        return name.includes(query.toLowerCase()) || ch.subCount > 1000;
+      });
+
+      return performers.map((item) => ({
+        id: `yt_ch_${item.channelId}`,
+        name: item.name,
+        coverPhoto: item.avatar,
+        type: 'yt_artist',
+        subscribers: item.subCount,
+        url: `https://www.youtube.com/channel/${item.channelId}`,
+      }));
+    } catch (e) {
+      console.error('YouTube artist search error:', e);
+      return [];
     }
   }
 }

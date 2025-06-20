@@ -12,4 +12,23 @@ export class ImportController {
     if (!streamUrl) return { error: 'Audio not available' };
     return { streamUrl };
   }
+
+  @Get('search')
+  async search(@Query('query') query: string) {
+    if (!query) return { error: 'query is required' };
+
+    // Пошук треків та артистів
+    const [tracks, performers] = await Promise.all([
+      this.importService.searchYoutubeTracks(query),
+      this.importService.searchYoutubeArtists(query)
+    ]);
+
+    // Можеш додати альбоми, плейлисти, якщо потрібно
+
+    return {
+      tracks,
+      performers
+      // albums, playlists...
+    };
+  }
 }

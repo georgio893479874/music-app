@@ -274,7 +274,9 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
                   <PiDotsThreeOutlineFill className="text-white cursor-pointer" />
                 </div>
               </div>
-              <span className="text-xs text-gray-400 truncate max-w-[150px] lg:max-w-[250px]">{selectedSong?.title}</span>
+              <span className="text-xs text-gray-400 truncate max-w-[150px] lg:max-w-[250px]">
+                {selectedSong?.title}
+              </span>
               <span className="text-xs text-gray-500 lg:inline hidden truncate max-w-[180px]">
                 PLAYING FROM: {selectedSong?.album?.title}
               </span>
@@ -282,10 +284,14 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
           </div>
           <div className="flex flex-col items-center justify-center flex-1 mx-4 min-w-0">
             <div className="flex items-center gap-4 mb-1 justify-center">
-              <p className="md:flex hidden text-sm w-10 text-right">{currentFormatted}</p>
+              <p className="md:flex hidden text-sm w-10 text-right">
+                {currentFormatted}
+              </p>
               <Shuffle
                 onClick={shuffleSongs}
-                className={`text-xl cursor-pointer ${isShuffling ? "text-blue-400" : "text-gray-400"} sm:flex hidden`}
+                className={`text-xl cursor-pointer ${
+                  isShuffling ? "text-blue-400" : "text-gray-400"
+                } sm:flex hidden`}
               />
               <BsFillSkipStartCircleFill
                 onClick={skipBegin}
@@ -306,7 +312,10 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
                 onClick={skipEnd}
                 className="text-2xl cursor-pointer text-gray-200"
               />
-              <div onClick={toggleRepeatMode} className="cursor-pointer sm:flex hidden">
+              <div
+                onClick={toggleRepeatMode}
+                className="cursor-pointer sm:flex hidden"
+              >
                 {repeatMode === "off" && <Repeat className="text-gray-400" />}
                 {repeatMode === "one" && <Repeat1 className="text-blue-400" />}
                 {repeatMode === "all" && <Repeat className="text-blue-400" />}
@@ -323,7 +332,9 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
                 ref={progressBar}
                 className="w-full h-1 bg-gray-500 rounded-full appearance-none cursor-pointer"
                 style={{
-                  backgroundSize: `${(currentTime / (duration || 1)) * 100}% 100%`,
+                  backgroundSize: `${
+                    (currentTime / (duration || 1)) * 100
+                  }% 100%`,
                   backgroundImage: "linear-gradient(to right, white, white)",
                 }}
               />
