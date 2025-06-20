@@ -66,13 +66,11 @@ model Track {
   id               String             @id @default(uuid())
   createdAt        DateTime           @default(now())
   title            String
-  duration         Int
   albumId          String
   authorId         String?
   album            Album              @relation(fields: [albumId], references: [id])
   author           Artist?            @relation(name: "ArtistToTrack", fields: [authorId], references: [id])
   audioFilePath    String
-  coverImagePath   String
   users            User[]
   playlists        Playlist[]         @relation("PlaylistTracks")
   favorites        Favorite[]

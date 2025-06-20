@@ -4,9 +4,6 @@ export class CreateTrackDto {
   @IsString()
   title: string;
 
-  @IsInt()
-  duration: number;
-
   @IsUUID()
   albumId: string;
 
@@ -15,7 +12,4 @@ export class CreateTrackDto {
 
   @IsString()
   audioFilePath: string;
-
-  @IsString()
-  coverImagePath: string;
 }

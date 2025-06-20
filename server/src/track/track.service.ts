@@ -11,10 +11,9 @@ export class TrackService {
     const track = await this.prisma.track.create({
       data: {
         title: createTrackDto.title,
-        duration: createTrackDto.duration,
         albumId: createTrackDto.albumId,
         audioFilePath: createTrackDto.audioFilePath,
-        coverImagePath: createTrackDto.coverImagePath,
+        authorId: createTrackDto.authorId,
       },
     });
     return track;

@@ -15,6 +15,7 @@ import { UploadModule } from './upload/upload.module';
 import { HistoryModule } from './history/history.module';
 import { PodcastModule } from './podcast/podcast.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { ImportModule } from './import/import.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { ScheduleModule } from '@nestjs/schedule';
     UploadModule,
     HistoryModule,
     PodcastModule,
+    ImportModule,
   ],
 })
 export class AppModule {}
