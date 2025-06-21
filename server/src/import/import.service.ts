@@ -114,14 +114,40 @@ export class ImportService {
         },
       );
 
-      return performers.map((item) => ({
-        id: `yt_ch_${item.channelId}`,
-        name: item.name,
-        coverPhoto: item.avatar,
-        type: 'yt_artist',
-        subscribers: item.subCount,
-        url: `https://www.youtube.com/channel/${item.channelId}`,
-      }));
+      return performers
+        .filter((item) => {
+          const lowerName = item.name.toLowerCase();
+          const possibleMusic =
+            lowerName.includes('music') ||
+            lowerName.includes('band') ||
+            lowerName.includes('vevo') ||
+            lowerName.includes('official') ||
+            lowerName.includes('topic') ||
+            lowerName.includes('records') ||
+            (item.description &&
+              item.description.toLowerCase().includes('music')) ||
+            (item.category && item.category.toLowerCase().includes('music'));
+
+          if (lowerName.endsWith(' - topic')) return true;
+          if (possibleMusic) return true;
+          if (item.channelId?.startsWith('UC') && possibleMusic) return true;
+          if (item.verified && possibleMusic) return true;
+
+          return false;
+        })
+        .map((item, idx) => ({
+          id: item.channelId
+            ? `yt_ch_${item.channelId}`
+            : `yt_ch_${item.name.replace(/\W/g, '')}_${idx}`,
+          name: item.name,
+          coverPhoto:
+            item.avatar || item.image || item.thumbnail || '/default-cover.jpg',
+          type: 'yt_artist',
+          subscribers: item.subCount,
+          url: item.channelId
+            ? `https://www.youtube.com/channel/${item.channelId}`
+            : '',
+        }));
     } catch (e) {
       console.error('YouTube artist search error:', e);
       return [];
