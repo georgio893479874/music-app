@@ -1,8 +1,9 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { exec } from 'child_process';
 import * as util from 'util';
 import axios from 'axios';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { v4 as uuidv4 } from 'uuid';
 
 const execPromise = util.promisify(exec);
 const ytSearch = require('yt-search');
@@ -12,6 +13,7 @@ const YT_COVER_BASE = 'https://i.ytimg.com/vi';
 @Injectable()
 export class ImportService {
   constructor(private readonly prisma: PrismaService) {}
+
   async getFirstAvailableCover(videoId: string): Promise<string> {
     const covers = [
       `${YT_COVER_BASE}/${videoId}/maxresdefault.jpg`,
@@ -25,7 +27,7 @@ export class ImportService {
           return url;
         }
       } catch (err) {
-        console.error(err);
+        console.log(err);
       }
     }
     return '/default-cover.jpg';
@@ -34,9 +36,7 @@ export class ImportService {
   async searchYoutubeTracks(query: string) {
     try {
       const musicQuery = query + ' official audio';
-
       const res = await ytSearch(musicQuery);
-
       const filtered = (res.videos || []).filter((v) => {
         const title = v.title.toLowerCase();
         const author = v.author.name?.toLowerCase() || '';
@@ -54,7 +54,6 @@ export class ImportService {
           'performance',
         ];
         if (excludeWords.some((word) => title.includes(word))) return false;
-
         if (v.seconds < 60 || v.seconds > 600) return false;
 
         const includeWords = [
@@ -67,10 +66,8 @@ export class ImportService {
         ];
         if (author.includes('topic')) return true;
         if (includeWords.some((word) => title.includes(word))) return true;
-
         if (title.includes('official') || author.includes('official'))
           return true;
-
         return false;
       });
 
@@ -134,59 +131,65 @@ export class ImportService {
   }
 
   async importYoutubeArtist(channelId: string) {
-    let artist = await this.prisma.artist.findUnique({
-      where: { id: channelId },
-    });
-    if (artist) return artist;
+    const id = uuidv4();
+    let ytArtist = null;
+    try {
+      const res = await ytSearch({ query: channelId, type: 'channel' });
+      ytArtist = (res.channels || [])[0] || null;
+    } catch (e) {
+      ytArtist = null;
+    }
 
-    const res = await ytSearch({ query: channelId, type: 'channel' });
-    const ytArtist = (res.channels || []).find(
-      (ch) => ch.channelId === channelId,
-    );
-    if (!ytArtist) throw new NotFoundException('Artist not found');
-
-    artist = await this.prisma.artist.create({
+    const name = ytArtist?.name || `YouTube Artist`;
+    const coverPhoto = ytArtist?.avatar || '/default-cover.jpg';
+    const artist = await this.prisma.artist.create({
       data: {
-        name: ytArtist.name,
-        coverPhoto: ytArtist.avatar || '/default-cover.jpg',
-        id: channelId,
+        id,
+        name,
+        coverPhoto,
       },
     });
 
-    const playlistsRes = await ytSearch({
-      query: ytArtist.name,
-      type: 'playlist',
-    });
-    const artistPlaylists = (playlistsRes.playlists || []).filter(
-      (pl) =>
-        pl.author?.name === ytArtist.name &&
-        (pl.title.toLowerCase().includes('album') ||
-          pl.title.toLowerCase().includes('lp') ||
-          pl.title.toLowerCase().includes('ep')),
-    );
-
-    for (const playlist of artistPlaylists) {
-      const album = await this.prisma.album.create({
-        data: {
-          title: playlist.title,
-          artistId: artist.id,
-          coverUrl: playlist.thumbnail || '/default-cover.jpg',
-          type: 'ALBUM',
-          releaseDate: new Date(),
-          genreId: null,
-        },
-      });
-
-      const playlistDetails = await ytSearch({ listId: playlist.listId });
-      for (const video of playlistDetails.videos || []) {
-        await this.prisma.track.create({
-          data: {
-            title: video.title,
-            albumId: album.id,
-            authorId: artist.id,
-            audioFilePath: `https://www.youtube.com/watch?v=${video.videoId}`,
-          },
+    if (ytArtist) {
+      try {
+        const playlistsRes = await ytSearch({
+          query: ytArtist.name,
+          type: 'playlist',
         });
+        const artistPlaylists = (playlistsRes.playlists || []).filter(
+          (pl) =>
+            pl.author?.name === ytArtist.name &&
+            (pl.title.toLowerCase().includes('album') ||
+              pl.title.toLowerCase().includes('lp') ||
+              pl.title.toLowerCase().includes('ep')),
+        );
+
+        for (const playlist of artistPlaylists) {
+          const album = await this.prisma.album.create({
+            data: {
+              title: playlist.title,
+              artistId: artist.id,
+              coverUrl: playlist.thumbnail || '/default-cover.jpg',
+              type: 'ALBUM',
+              releaseDate: new Date(),
+              genreId: null,
+            },
+          });
+
+          const playlistDetails = await ytSearch({ listId: playlist.listId });
+          for (const video of playlistDetails.videos || []) {
+            await this.prisma.track.create({
+              data: {
+                title: video.title,
+                albumId: album.id,
+                authorId: artist.id,
+                audioFilePath: `https://www.youtube.com/watch?v=${video.videoId}`,
+              },
+            });
+          }
+        }
+      } catch (e) {
+        console.log(e);
       }
     }
 

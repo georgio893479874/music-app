@@ -229,7 +229,7 @@ const PlaylistGallery = () => {
                     />
                   ) : (
                     <div>
-                      <svg style={{ width: 38, height: 38, opacity: 0.5 }} viewBox="0 0 24 24" fill="none"><path d="M12 5v14m7-7H5" stroke="#6366f1" strokeWidth="2" strokeLinecap="round" /></svg>
+                      <svg style={{ width: 38, height: 38, opacity: 0.5 }} viewBox="0 0 24 24" fill="none"><path d="M12 5v14m7-7H5" stroke="#6366f1" strokeWidth="2" strokeLinecap="round"/></svg>
                       <div style={{ color: "#6366f1", fontWeight: 500, marginTop: 8 }}>
                         Click to select or drag photos
                       </div>
