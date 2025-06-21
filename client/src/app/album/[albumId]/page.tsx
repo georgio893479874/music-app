@@ -68,7 +68,7 @@ export default function AlbumPage() {
   }
   const totalSongs = album.tracks.length;
   const totalSeconds = album.tracks.reduce(
-    (acc, t) => acc + (t.duration || 0),
+    (acc) => acc,
     0
   );
   const totalDuration = `${
