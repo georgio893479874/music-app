@@ -18,12 +18,17 @@ export class ImportController {
     if (!query) return { error: 'query is required' };
     const [tracks, performers] = await Promise.all([
       this.importService.searchYoutubeTracks(query),
-      this.importService.searchYoutubeArtists(query)
+      this.importService.searchYoutubeArtists(query),
     ]);
 
     return {
       tracks,
-      performers
+      performers,
     };
+  }
+
+  @Post('artist')
+  async importArtist(@Body('youtubeChannelId') channelId: string) {
+    return this.importService.importYoutubeArtist(channelId);
   }
 }

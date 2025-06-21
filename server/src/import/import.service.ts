@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { exec } from 'child_process';
 import * as util from 'util';
 import axios from 'axios';
@@ -131,5 +131,68 @@ export class ImportService {
       console.error('YouTube artist search error:', e);
       return [];
     }
+  }
+
+  async importYoutubeArtist(channelId: string) {
+    let artist = await this.prisma.artist.findUnique({
+      where: { id: channelId },
+    });
+    if (artist) return artist;
+
+    const res = await ytSearch({ query: channelId, type: 'channel' });
+    const ytArtist = (res.channels || []).find(
+      (ch) => ch.channelId === channelId,
+    );
+    if (!ytArtist) throw new NotFoundException('Artist not found');
+
+    artist = await this.prisma.artist.create({
+      data: {
+        name: ytArtist.name,
+        coverPhoto: ytArtist.avatar || '/default-cover.jpg',
+        id: channelId,
+      },
+    });
+
+    const playlistsRes = await ytSearch({
+      query: ytArtist.name,
+      type: 'playlist',
+    });
+    const artistPlaylists = (playlistsRes.playlists || []).filter(
+      (pl) =>
+        pl.author?.name === ytArtist.name &&
+        (pl.title.toLowerCase().includes('album') ||
+          pl.title.toLowerCase().includes('lp') ||
+          pl.title.toLowerCase().includes('ep')),
+    );
+
+    for (const playlist of artistPlaylists) {
+      const album = await this.prisma.album.create({
+        data: {
+          title: playlist.title,
+          artistId: artist.id,
+          coverUrl: playlist.thumbnail || '/default-cover.jpg',
+          type: 'ALBUM',
+          releaseDate: new Date(),
+          genreId: null,
+        },
+      });
+
+      const playlistDetails = await ytSearch({ listId: playlist.listId });
+      for (const video of playlistDetails.videos || []) {
+        await this.prisma.track.create({
+          data: {
+            title: video.title,
+            albumId: album.id,
+            authorId: artist.id,
+            audioFilePath: `https://www.youtube.com/watch?v=${video.videoId}`,
+          },
+        });
+      }
+    }
+
+    return await this.prisma.artist.findUnique({
+      where: { id: artist.id },
+      include: { albums: { include: { tracks: true } } },
+    });
   }
 }

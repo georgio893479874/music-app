@@ -8,6 +8,7 @@ import { Album, Artist, Playlist, Track } from "@/types";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import { usePlayerContext } from "@/contexts/PlayerContext";
+import { useRouter, useParams } from "next/navigation";
 
 type SearchResult = Track | Album | Artist | Playlist;
 
@@ -43,10 +44,26 @@ function SearchPageContent() {
   const initialQuery = searchParams.get("query") || "";
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const { setSongs, setSelectedSong } = usePlayerContext();
+  const router = useRouter();
+  const params = useParams<{ id?: string }>();
 
   useEffect(() => {
     setSearchQuery(initialQuery);
   }, [initialQuery]);
+  useEffect(() => {
+    if (
+      params.id &&
+      typeof params.id === "string" &&
+      params.id.startsWith("yt_ch_")
+    ) {
+      const channelId = params.id.replace("yt_ch_", "");
+      axios
+        .post(`${API_URL}/import/artist`, { youtubeChannelId: channelId })
+        .then((res) => {
+          router.replace(`/artist/${res.data.id}`);
+        });
+    }
+  }, [params.id, router]);
 
   const handleSearch = async (query: string, source: SearchSource) => {
     if (query.trim() === "") return;
@@ -80,7 +97,6 @@ function SearchPageContent() {
     }
   }, [searchQuery, searchSource]);
 
-  // Фільтрація результатів по типу
   const filteredResults = searchResults.filter((result) => {
     if (resultFilter === "all") return true;
     if (resultFilter === "albums") return isAlbum(result);
@@ -113,7 +129,6 @@ function SearchPageContent() {
   return (
     <div className="flex-1">
       <div className="pb-4">
-        {/* Перемикачі */}
         <div className="mb-4 flex flex-wrap items-center gap-4">
           <div>
             <label htmlFor="search-source" className="text-white mr-2">

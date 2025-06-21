@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { FaPlay } from "react-icons/fa";
 import Link from "next/link";
@@ -13,7 +13,11 @@ import { API_URL, getUserId } from "@/constants";
 import clsx from "clsx";
 
 const ArtistPage = () => {
-  const { artistId } = useParams();
+  const params = useParams();
+  const router = useRouter();
+  const artistId = Array.isArray(params.artistId)
+    ? params.artistId[0]
+    : params.artistId;
   const [artist, setArtist] = useState<Artist | null>(null);
   const [albums, setAlbums] = useState<Album[]>([]);
   const [tracks, setTracks] = useState<Track[]>([]);
@@ -23,6 +27,22 @@ const ArtistPage = () => {
   const userId = getUserId();
 
   useEffect(() => {
+    if (!artistId) return;
+    if (typeof artistId === "string" && artistId.startsWith("yt_ch_")) {
+      axios
+        .post(`${API_URL}/import/artist`, {
+          youtubeChannelId: artistId.replace("yt_ch_", ""),
+        })
+        .then((res) => {
+          router.replace(`/artist/${res.data.id}`);
+        });
+      return;
+    }
+  }, [artistId, router]);
+
+  useEffect(() => {
+    if (!artistId) return;
+    if (typeof artistId === "string" && artistId.startsWith("yt_ch_")) return;
     const fetchAll = async () => {
       try {
         const [{ data: artistData }, { data: albumData }, { data: trackData }] =
@@ -49,10 +69,15 @@ const ArtistPage = () => {
         console.error(error);
       }
     };
-    if (artistId) fetchAll();
+    fetchAll();
   }, [artistId]);
 
   useEffect(() => {
+    if (
+      !artistId ||
+      (typeof artistId === "string" && artistId.startsWith("yt_ch_"))
+    )
+      return;
     const fetchMonthly = async () => {
       try {
         const { data } = await axios.get(
@@ -63,10 +88,15 @@ const ArtistPage = () => {
         setMonthlyListens(null);
       }
     };
-    if (artistId) fetchMonthly();
+    fetchMonthly();
   }, [artistId]);
 
   useEffect(() => {
+    if (
+      !artistId ||
+      (typeof artistId === "string" && artistId.startsWith("yt_ch_"))
+    )
+      return;
     const checkSubscription = async () => {
       try {
         const { data } = await axios.get(
@@ -78,7 +108,7 @@ const ArtistPage = () => {
         setIsSubscribed(false);
       }
     };
-    if (artistId) checkSubscription();
+    checkSubscription();
   }, [artistId, userId]);
 
   const handleSubscribe = async () => {
