@@ -41,8 +41,8 @@ export default function Sidebar({
         <SidebarItem
           icon={<Compass className="w-5 h-5" />}
           label="Explore"
-          href="/explore"
-          active={isActive("/explore")}
+          href="/dashboard"
+          active={isActive("/dashboard")}
           collapsed={collapsed}
         />
         <SidebarItem

@@ -255,7 +255,7 @@ function SearchPageContent() {
                   if (isArtist(result)) {
                     return (
                       <Link
-                        href={`/performer/${result.id}`}
+                        href={`/artist/${result.id}`}
                         key={result.id}
                         passHref
                       >

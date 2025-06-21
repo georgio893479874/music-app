@@ -135,7 +135,7 @@ const ArtistPage = () => {
             sizes="100vw"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-white/70"></div>
-          <div className="absolute left-1/2 top-[56%] -translate-x-1/2 flex items-end gap-8 w-full px-8 max-w-7xl mx-auto">
+          <div className="absolute left-1/2 top-[68%] -translate-x-1/2 flex items-end gap-8 w-full px-8 max-w-7xl mx-auto">
             <div className="flex flex-col sm:flex-row items-center gap-6">
               <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white shadow-xl bg-white">
                 <Image

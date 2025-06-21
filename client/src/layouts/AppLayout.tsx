@@ -44,7 +44,7 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <PanelResizeHandle className="w-1 bg-gray-700 cursor-col-resize" />
         <Panel className="flex-1 flex flex-col min-h-0" style={{ height: "calc(100vh - 80px)" }}>
           <Header />
-          <main className="flex-1 overflow-y-auto bg-[#212121] rounded-2xl m-4 shadow-lg">
+          <main className="flex-1 overflow-y-auto rounded-2xl m-4 shadow-lg">
             {children}
           </main>
         </Panel>
