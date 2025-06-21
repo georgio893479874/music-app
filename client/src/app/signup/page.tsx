@@ -7,7 +7,7 @@ import { signup } from '@/api';
 export default function SignUpPage() {
   const handleSignUpSubmit = async (values: SignUpFormValues) => {
     try {
-      await signup(values.fullName, values.email, values.password);
+      await signup(values.firstName, values.lastName, values.email, values.password);
     } catch (error) {
       throw error;
     }
