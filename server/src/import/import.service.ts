@@ -141,7 +141,7 @@ export class ImportService {
     }
 
     const name = ytArtist?.name || `YouTube Artist`;
-    const coverPhoto = ytArtist?.avatar || '/default-cover.jpg';
+    const coverPhoto = ytArtist.avatar || ytArtist.image || ytArtist.thumbnail || '/default-cover.jpg';
     const artist = await this.prisma.artist.create({
       data: {
         id,

@@ -11,7 +11,7 @@ import { usePlayerContext } from "@/contexts/PlayerContext";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const noSidebarRoutes = ["/login", "/signup", "/", "/admin"];
+  const noSidebarRoutes = ["/login", "/signup", "/"];
   const shouldShowSidebar = !noSidebarRoutes.includes(pathname);
   const [isQueueVisible, setIsQueueVisible] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(200);

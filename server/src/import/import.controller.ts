@@ -6,10 +6,11 @@ export class ImportController {
   constructor(private readonly importService: ImportService) {}
 
   @Get('audio')
-  async getAudio(@Query('url') url: string) {
-    if (!url) return { error: 'url query is required' };
+  async getYoutubeAudio(@Query('url') url: string) {
     const streamUrl = await this.importService.getYoutubeAudioStreamUrl(url);
-    if (!streamUrl) return { error: 'Audio not available' };
+    if (!streamUrl) {
+      return { streamUrl: null };
+    }
     return { streamUrl };
   }
 

@@ -87,8 +87,8 @@ model Album {
   artistId    String
   artist      Artist    @relation(fields: [artistId], references: [id])
   tracks      Track[]
-  genreId     String
-  genre       Genre     @relation(fields: [genreId], references: [id])
+  genreId     String?
+  genre       Genre?     @relation(fields: [genreId], references: [id])
   coverUrl    String?
   type        AlbumType @default(ALBUM)
 }

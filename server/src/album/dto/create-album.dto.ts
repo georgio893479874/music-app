@@ -14,7 +14,8 @@ export class CreateAlbumDto {
 
   @IsString()
   @IsNotEmpty()
-  genreId: string;
+  @IsOptional()
+  genreId?: string;
 
   @IsString()
   @IsOptional()

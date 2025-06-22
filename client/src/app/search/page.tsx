@@ -43,13 +43,14 @@ function SearchPageContent() {
   const searchParams = useSearchParams();
   const initialQuery = searchParams.get("query") || "";
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const { setSongs, setSelectedSong } = usePlayerContext();
+  const { setSelectedSong } = usePlayerContext();
   const router = useRouter();
   const params = useParams<{ id?: string }>();
 
   useEffect(() => {
     setSearchQuery(initialQuery);
   }, [initialQuery]);
+  
   useEffect(() => {
     if (
       params.id &&
@@ -106,25 +107,21 @@ function SearchPageContent() {
     return true;
   });
 
-  const playSong = async (track: Track) => {
+  async function playSong(track: Track) {
     if (track.type === "yt" && track.audioFilePath.startsWith("http")) {
-      try {
-        const { data } = await axios.get(`${API_URL}/import/audio`, {
-          params: { url: track.audioFilePath },
-        });
-        if (data.streamUrl) {
-          const ytTrack = { ...track, audioFilePath: data.streamUrl };
-          setSongs([ytTrack]);
-          setSelectedSong(ytTrack);
-        }
-      } catch {
+      const { data } = await axios.get(`${API_URL}/import/audio`, {
+        params: { url: track.audioFilePath },
+      });
+      if (data.streamUrl) {
+        const ytTrack = { ...track, audioFilePath: data.streamUrl };
+        setSelectedSong(ytTrack);
+      } else {
         alert("Не вдалося отримати аудіо з YouTube");
       }
     } else {
-      setSongs([track]);
       setSelectedSong(track);
     }
-  };
+  }
 
   return (
     <div className="flex-1">
