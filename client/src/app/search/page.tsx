@@ -50,7 +50,7 @@ function SearchPageContent() {
   useEffect(() => {
     setSearchQuery(initialQuery);
   }, [initialQuery]);
-  
+
   useEffect(() => {
     if (
       params.id &&
@@ -123,6 +123,10 @@ function SearchPageContent() {
     }
   }
 
+  const uniqueFilteredResults = filteredResults.filter(
+    (item, index, self) => self.findIndex((v) => v.id === item.id) === index
+  );
+
   return (
     <div className="flex-1">
       <div className="pb-4">
@@ -194,7 +198,7 @@ function SearchPageContent() {
               </p>
             ) : (
               <div className="space-y-6 flex flex-col gap-3">
-                {filteredResults.map((result: SearchResult) => {
+                {uniqueFilteredResults.map((result: SearchResult) => {
                   if (isTrack(result)) {
                     return (
                       <div

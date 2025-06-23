@@ -7,17 +7,20 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class AlbumService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createAlbumDto: CreateAlbumDto) {
-    return this.prisma.album.create({
-      data: {
-        title: createAlbumDto.title,
-        releaseDate: createAlbumDto.releaseDate,
-        artistId: createAlbumDto.artistId,
-        genreId: createAlbumDto.genreId,
-        coverUrl: createAlbumDto.coverUrl,
-      },
-    });
+async create(createAlbumDto: CreateAlbumDto) {
+  const data: any = {
+    title: createAlbumDto.title,
+    releaseDate: createAlbumDto.releaseDate,
+    artist: { connect: { id: createAlbumDto.artistId } },
+    coverUrl: createAlbumDto.coverUrl,
+  };
+
+  if (createAlbumDto.genreId) {
+    data.genre = { connect: { id: createAlbumDto.genreId } };
   }
+
+  return this.prisma.album.create({ data });
+}
 
   async findAll(query: string) {
     return this.prisma.album.findMany({

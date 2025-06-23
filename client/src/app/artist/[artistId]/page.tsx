@@ -34,8 +34,16 @@ const ArtistPage = () => {
           youtubeChannelId: artistId.replace("yt_ch_", ""),
         })
         .then((res) => {
-          router.replace(`/artist/${res.data.id}`);
-        });
+  if (res.data && res.data.id) {
+    router.replace(`/artist/${res.data.id}`);
+  } else {
+    alert("Не вдалося імпортувати артиста!");
+    // Можна зробити router.replace('/'), або залишити на сторінці
+  }
+})
+.catch(() => {
+  alert("Сталася помилка при імпорті артиста!");
+});
       return;
     }
   }, [artistId, router]);

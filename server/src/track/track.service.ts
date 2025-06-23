@@ -7,7 +7,7 @@ import { UpdateTrackDto } from './dto/update-track.dto';
 export class TrackService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async create(createTrackDto: CreateTrackDto & { audioFilePath: string }) {
+  async create(createTrackDto: CreateTrackDto) {
     const track = await this.prisma.track.create({
       data: {
         title: createTrackDto.title,

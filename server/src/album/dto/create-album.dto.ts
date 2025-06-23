@@ -6,18 +6,17 @@ export class CreateAlbumDto {
   title: string;
 
   @IsDateString()
-  releaseDate: Date;
+  releaseDate: string; // <-- має бути string
 
   @IsString()
   @IsNotEmpty()
   artistId: string;
 
   @IsString()
-  @IsNotEmpty()
   @IsOptional()
   genreId?: string;
 
   @IsString()
   @IsOptional()
-  coverUrl: string;
+  coverUrl?: string;
 }

@@ -68,7 +68,7 @@ model Track {
   title            String
   albumId          String
   authorId         String?
-  album            Album              @relation(fields: [albumId], references: [id])
+  album            Album?              @relation(fields: [albumId], references: [id])
   author           Artist?            @relation(name: "ArtistToTrack", fields: [authorId], references: [id])
   audioFilePath    String             @unique
   users            User[]
