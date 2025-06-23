@@ -29,8 +29,8 @@ export const signup = async (
 ) => {
   try {
     await axios.post(`${API_URL}/auth/signup`, {
-      firstName,
-      lastName,
+      firstname: firstName,
+      lastname: lastName,
       email,
       password,
     });
