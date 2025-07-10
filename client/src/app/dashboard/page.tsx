@@ -107,7 +107,7 @@ export default function DashboardPage() {
       <section style={{ maxWidth: 1200, margin: '32px auto 0', background: '#fff', borderRadius: 20, boxShadow: '0 4px 24px 0 rgba(37,98,185,0.05)', padding: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18 }}>
           <div style={{ fontSize: 24, fontWeight: 700 }}>Latest releases</div>
-          <a href="/tracks/latest" style={{ color: '#2b8fe5', fontWeight: 600, fontSize: 16 }}>View all</a>
+          <a href="/tracks-latest" style={{ color: '#2b8fe5', fontWeight: 600, fontSize: 16 }}>View all</a>
         </div>
         <div style={{ display: 'flex', flexWrap: 'wrap' }}>
           <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 10px' }}>
@@ -143,7 +143,7 @@ export default function DashboardPage() {
       <section style={{ maxWidth: 1200, margin: '32px auto 0', padding: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, paddingLeft: 12 }}>
           <div style={{ fontSize: 22, fontWeight: 700 }}>Recommended albums</div>
-          <a href="/albums/recommended" style={{ color: '#2b8fe5', fontWeight: 600, fontSize: 16 }}>View all</a>
+          <a href="/albums-recommended" style={{ color: '#2b8fe5', fontWeight: 600, fontSize: 16 }}>View all</a>
         </div>
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
           {loading ? "Loading..." : recommendedAlbums.map(album =>
@@ -161,7 +161,7 @@ export default function DashboardPage() {
       <section style={{ maxWidth: 1200, margin: '32px auto 0', padding: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, paddingLeft: 12 }}>
           <div style={{ fontSize: 22, fontWeight: 700 }}>Popular playlists</div>
-          <a href="/playlists/popular" style={{ color: '#2b8fe5', fontWeight: 600, fontSize: 16 }}>View all</a>
+          <a href="/playlists-popular" style={{ color: '#2b8fe5', fontWeight: 600, fontSize: 16 }}>View all</a>
         </div>
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
           {loading ? "Loading..." : popularPlaylists.map(playlist =>
@@ -178,7 +178,7 @@ export default function DashboardPage() {
       <section style={{ maxWidth: 1200, margin: '32px auto 32px', padding: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 18, paddingLeft: 12 }}>
           <div style={{ fontSize: 22, fontWeight: 700 }}>Popular artists</div>
-          <a href="/artists/popular" style={{ color: '#2b8fe5', fontWeight: 600, fontSize: 16 }}>View all</a>
+          <a href="/artists-popular" style={{ color: '#2b8fe5', fontWeight: 600, fontSize: 16 }}>View all</a>
         </div>
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
           {loading ? "Loading..." : popularArtists.map(artist =>
