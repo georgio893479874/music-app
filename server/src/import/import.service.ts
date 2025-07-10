@@ -59,11 +59,11 @@ export class ImportService {
 
   async getYoutubeAudioStreamUrl(youtubeUrl: string): Promise<string | null> {
     try {
-      const { stdout } = await execPromise(
-        `yt-dlp -f bestaudio -g "${youtubeUrl}"`,
-      );
-      return stdout.trim();
-    } catch {
+      const { stdout } = await execPromise(`yt-dlp -f ba -g "${youtubeUrl}"`);
+
+      return stdout;
+    } catch (e) {
+      console.error('yt-dlp error:', e);
       return null;
     }
   }
@@ -86,17 +86,25 @@ export class ImportService {
     albumTitle?: string;
     source?: string;
   }) {
-    let artist = await this.prisma.artist.findFirst({
-      where: { name: meta.artistName },
-    });
-    if (!artist) {
-      artist = await this.prisma.artist.create({
-        data: {
+    let artist;
+    try {
+      artist = await this.prisma.artist.upsert({
+        where: { name: meta.artistName },
+        update: {},
+        create: {
           id: uuidv4(),
           name: meta.artistName,
           coverPhoto: meta.coverImagePath || '/default-cover.jpg',
         },
       });
+    } catch (e: any) {
+      if (e.code === 'P2002') {
+        artist = await this.prisma.artist.findUnique({
+          where: { name: meta.artistName },
+        });
+      } else {
+        throw e;
+      }
     }
 
     const finalAlbumTitle = meta.albumTitle || 'Single';
@@ -119,11 +127,8 @@ export class ImportService {
       });
     }
 
-    let track = await this.prisma.track.findUnique({
-      where: { audioFilePath: meta.audioFilePath },
-    });
-
-    if (!track) {
+    let track;
+    try {
       track = await this.prisma.track.create({
         data: {
           id: uuidv4(),
@@ -133,6 +138,14 @@ export class ImportService {
           authorId: artist.id,
         },
       });
+    } catch (e: any) {
+      if (e.code === 'P2002') {
+        track = await this.prisma.track.findUnique({
+          where: { audioFilePath: meta.audioFilePath },
+        });
+      } else {
+        throw e;
+      }
     }
     return track;
   }
@@ -164,24 +177,36 @@ export class ImportService {
         filtered.map(async (item) => {
           const artistName = item.author.name || 'Unknown Artist';
           const albumTitle = item.albumTitle || 'Single';
+          const coverImagePath = await this.getFirstAvailableCover(
+            item.videoId,
+          );
+          const streamUrl = await this.getYoutubeAudioStreamUrl(
+            `https://www.youtube.com/watch?v=${item.videoId}`,
+          );
+          if (!streamUrl) {
+            console.warn(
+              `Could not get streamUrl for ${item.title} (${item.videoId})`,
+            );
+            return null;
+          }
           const track = await this.importTrack({
             title: item.title,
             artistName,
-            audioFilePath: `https://www.youtube.com/watch?v=${item.videoId}`,
+            audioFilePath: streamUrl,
             albumTitle,
-            coverImagePath: await this.getFirstAvailableCover(item.videoId),
+            coverImagePath,
             source: 'yt',
           });
           return {
             ...track,
-            coverImagePath: await this.getFirstAvailableCover(item.videoId),
+            coverImagePath,
             type: 'yt',
             duration: item.seconds,
             artistName,
           };
         }),
       );
-      return mapped;
+      return mapped.filter(Boolean);
     } catch (e) {
       console.error('YouTube search error:', e);
       return [];
@@ -197,10 +222,15 @@ export class ImportService {
           const artistName =
             item.author?.name || item.user?.username || 'Unknown Artist';
           const albumTitle = item.albumTitle || 'Single';
+          const streamUrl = await this.getSoundcloudAudioStreamUrl(item.url);
+          if (!streamUrl) {
+            console.warn(`Could not get streamUrl for ${item.title}`);
+            return null;
+          }
           const track = await this.importTrack({
             title: item.title,
             artistName,
-            audioFilePath: item.url,
+            audioFilePath: streamUrl,
             albumTitle,
             coverImagePath: item.thumbnail || '/default-cover.jpg',
             source: 'sc',
@@ -214,7 +244,7 @@ export class ImportService {
           };
         }),
       );
-      return tracks;
+      return tracks.filter(Boolean);
     } catch (e) {
       console.error('SoundCloud search error:', e);
       return [];
@@ -286,6 +316,13 @@ export class ImportService {
 
         const playlistDetails = await ytSearch({ listId: playlist.listId });
         for (const video of playlistDetails.videos || []) {
+          const streamUrl = await this.getYoutubeAudioStreamUrl(
+            `https://www.youtube.com/watch?v=${video.videoId}`,
+          );
+          if (!streamUrl) {
+            console.warn(`Could not get streamUrl for ${video.title}`);
+            continue;
+          }
           const exists = await this.prisma.track.findFirst({
             where: {
               title: video.title,
@@ -299,7 +336,7 @@ export class ImportService {
                 title: video.title,
                 albumId: album.id,
                 authorId: artist.id,
-                audioFilePath: `https://www.youtube.com/watch?v=${video.videoId}`,
+                audioFilePath: streamUrl,
               },
             });
           }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import axios from "axios";
 import { API_URL, genres } from "@/constants";
 import Link from "next/link";
@@ -36,6 +36,127 @@ function isPlaylist(item: SearchResult): item is Playlist {
 type SearchSource = "all" | "local" | "youtube";
 type ResultFilter = "all" | "albums" | "tracks" | "artists" | "playlists";
 
+function SearchResultsBeautiful({
+  filteredResults,
+  playSong,
+}: {
+  filteredResults: SearchResult[];
+  playSong: (track: Track) => void;
+}) {
+  const songs = filteredResults.filter(isTrack);
+  const albums = filteredResults.filter(isAlbum);
+  const artists = filteredResults.filter(isArtist);
+
+  function splitInColumns<T>(arr: T[], cols = 2): T[][] {
+    const out: T[][] = Array.from({ length: cols }, () => []);
+    arr.forEach((item, i) => {
+      out[i % cols].push(item);
+    });
+    return out;
+  }
+
+  const songCols = splitInColumns(songs, 2);
+  const albumCols = splitInColumns(albums, 2);
+
+  return (
+    <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl py-8 px-6 shadow-lg min-h-[500px]">
+      {songs.length > 0 && (
+        <div>
+          <h3 className="uppercase text-[#50e3c2] text-sm font-bold tracking-wide mb-2 pl-1">
+            Songs
+          </h3>
+          <div className="grid grid-cols-2 gap-x-8">
+            {songCols.map((col, colIdx) => (
+              <div key={colIdx}>
+                {col.map((result: Track) => (
+                  <div
+                    className="flex items-center py-2 px-2 rounded-lg hover:bg-[#f7f7f7] transition group"
+                    key={result.id}
+                    onClick={() => playSong(result)}
+                    style={{ cursor: "pointer" }}
+                  >
+                    <Image
+                      src={result.coverImagePath || "/noimg.png"}
+                      alt={result.title}
+                      width={45}
+                      height={45}
+                      className="rounded-md object-cover shadow"
+                    />
+                    <div className="flex-1 ml-4 overflow-hidden">
+                      <div className="font-medium text-[#3a3a3a] group-hover:text-[#222] leading-tight truncate">
+                        {result.title}
+                      </div>
+                      <div className="text-xs text-[#b2b2b2] truncate">
+                        {result.artistName}
+                      </div>
+                    </div>
+                    <button className="ml-auto p-2 rounded-full hover:bg-[#ededed]">
+                      <span className="text-2xl text-[#b2b2b2]">+</span>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {albums.length > 0 && (
+        <div className="mt-8">
+          <h3 className="uppercase text-[#50e3c2] text-sm font-bold tracking-wide mb-2 pl-1">
+            Album
+          </h3>
+          <div className="grid grid-cols-2 gap-x-8">
+            {albumCols.map((col, colIdx) => (
+              <div key={colIdx}>
+                {col.map((result: Album) => (
+                  <Link href={`/album/${result.id}`} key={result.id} passHref>
+                    <div className="flex items-center py-2 px-2 rounded-lg hover:bg-[#f7f7f7] transition group cursor-pointer">
+                      <Image
+                        src={result.coverUrl || "/noimg.png"}
+                        alt={result.title}
+                        width={45}
+                        height={45}
+                        className="rounded-md object-cover shadow"
+                      />
+                      <div className="flex-1 ml-4 overflow-hidden">
+                        <div className="font-medium text-[#3a3a3a] group-hover:text-[#222] leading-tight truncate">
+                          {result.title}
+                        </div>
+                        <div className="text-xs text-[#b2b2b2] truncate">
+                          {result.artistName}
+                        </div>
+                      </div>
+                      <button className="ml-auto p-2 rounded-full hover:bg-[#ededed]">
+                        <span className="text-2xl text-[#b2b2b2]">+</span>
+                      </button>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      {artists.length > 0 && (
+        <div className="mt-8">
+          <h3 className="uppercase text-[#50e3c2] text-sm font-bold tracking-wide mb-2 pl-1">
+            Artist
+          </h3>
+          <div className="flex flex-wrap gap-3">
+            {artists.map((result: Artist) => (
+              <Link href={`/artist/${result.id}`} key={result.id} passHref>
+                <div className="px-5 py-2 rounded-full bg-[#f0f0f0] text-[#b2b2b2] font-medium text-sm hover:bg-[#e0e0e0] cursor-pointer transition">
+                  {result.name}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function SearchPageContent() {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSource, setSearchSource] = useState<SearchSource>("all");
@@ -46,6 +167,7 @@ function SearchPageContent() {
   const { setSelectedSong } = usePlayerContext();
   const router = useRouter();
   const params = useParams<{ id?: string }>();
+  const abortControllerRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     setSearchQuery(initialQuery);
@@ -68,10 +190,16 @@ function SearchPageContent() {
 
   const handleSearch = async (query: string, source: SearchSource) => {
     if (query.trim() === "") return;
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+    const controller = new AbortController();
+    abortControllerRef.current = controller;
 
     try {
       const { data } = await axios.get(`${API_URL}/search`, {
         params: { query, source },
+        signal: controller.signal,
       });
       const results: SearchResult[] = [
         ...(data.tracks || []),
@@ -79,10 +207,12 @@ function SearchPageContent() {
         ...(data.performers || []),
         ...(data.playlists || []),
       ];
-      console.log(data.performers);
       setSearchResults(results);
     } catch (error) {
-      console.error(error);
+      if (axios.isCancel(error)) {
+      } else {
+        console.error(error);
+      }
     }
   };
 
@@ -107,20 +237,8 @@ function SearchPageContent() {
     return true;
   });
 
-  async function playSong(track: Track) {
-    if (track.type === "yt" && track.audioFilePath.startsWith("http")) {
-      const { data } = await axios.get(`${API_URL}/import/audio`, {
-        params: { url: track.audioFilePath },
-      });
-      if (data.streamUrl) {
-        const ytTrack = { ...track, audioFilePath: data.streamUrl };
-        setSelectedSong(ytTrack);
-      } else {
-        alert("Не вдалося отримати аудіо з YouTube");
-      }
-    } else {
-      setSelectedSong(track);
-    }
+  function playSong(track: Track) {
+    setSelectedSong(track);
   }
 
   const uniqueFilteredResults = filteredResults.filter(
@@ -128,16 +246,19 @@ function SearchPageContent() {
   );
 
   return (
-    <div className="flex-1">
-      <div className="pb-4">
-        <div className="mb-4 flex flex-wrap items-center gap-4">
+    <div className="flex-1 min-h-screen bg-gradient-to-b from-[#f6f6f6] to-[#eaeaea]">
+      <div className="pb-4 pt-10">
+        <div className="mb-8 flex flex-wrap items-center gap-4 justify-center">
           <div>
-            <label htmlFor="search-source" className="text-white mr-2">
+            <label
+              htmlFor="search-source"
+              className="text-[#868686] mr-2 font-medium"
+            >
               Search in:
             </label>
             <select
               id="search-source"
-              className="rounded-md px-2 py-1 bg-[#212121] text-white"
+              className="rounded-md px-2 py-1 bg-[#f2f2f2] text-[#333] border border-[#e1e1e1]"
               value={searchSource}
               onChange={(e) => setSearchSource(e.target.value as SearchSource)}
             >
@@ -147,12 +268,15 @@ function SearchPageContent() {
             </select>
           </div>
           <div>
-            <label htmlFor="result-filter" className="text-white mr-2">
+            <label
+              htmlFor="result-filter"
+              className="text-[#868686] mr-2 font-medium"
+            >
               Show:
             </label>
             <select
               id="result-filter"
-              className="rounded-md px-2 py-1 bg-[#212121] text-white"
+              className="rounded-md px-2 py-1 bg-[#f2f2f2] text-[#333] border border-[#e1e1e1]"
               value={resultFilter}
               onChange={(e) => setResultFilter(e.target.value as ResultFilter)}
             >
@@ -166,10 +290,10 @@ function SearchPageContent() {
         </div>
         {!searchQuery && (
           <>
-            <h2 className="text-xl font-semibold text-white mb-4">
+            <h2 className="text-xl font-semibold text-[#333] mb-4 text-center">
               Explore Genres
             </h2>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-5xl mx-auto">
               {genres.map((genre, index) => (
                 <div
                   key={index}
@@ -188,151 +312,16 @@ function SearchPageContent() {
           </>
         )}
         {searchQuery && (
-          <div className="mt-6 text-white rounded-2xl p-6 shadow-lg">
-            <h2 className="text-2xl font-bold mb-6 border-b pb-2">
-              Search Results
-            </h2>
-            {filteredResults.length === 0 ? (
-              <p className="text-gray-400 text-center text-lg">
+          <div className="mt-6 flex justify-center">
+            {uniqueFilteredResults.length === 0 ? (
+              <div className="w-full max-w-4xl mx-auto bg-white rounded-2xl py-16 px-6 shadow-lg text-gray-500 text-center text-lg">
                 No results found
-              </p>
-            ) : (
-              <div className="space-y-6 flex flex-col gap-3">
-                {uniqueFilteredResults.map((result: SearchResult) => {
-                  if (isTrack(result)) {
-                    return (
-                      <div
-                        key={result.id}
-                        className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer"
-                        onClick={() => playSong(result)}
-                      >
-                        {result.coverImagePath ? (
-                          <Image
-                            src={result.coverImagePath}
-                            alt={result.title}
-                            width={50}
-                            height={50}
-                            className="rounded-md"
-                          />
-                        ) : (
-                          <div className="w-[50px] h-[50px] bg-gray-700 rounded-md flex items-center justify-center text-gray-400">
-                            No Image
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-lg font-semibold">
-                            {result.title}
-                          </p>
-                          <p className="text-sm text-gray-400">
-                            {result.artistName}
-                          </p>
-                          {result.type === "yt" && (
-                            <span className="px-2 py-1 bg-red-600 text-white rounded text-xs ml-2">
-                              YouTube
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  }
-                  if (isAlbum(result)) {
-                    return (
-                      <Link
-                        href={`/album/${result.id}`}
-                        key={result.id}
-                        passHref
-                      >
-                        <div className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer">
-                          {result.coverUrl ? (
-                            <Image
-                              src={result.coverUrl}
-                              alt={result.title}
-                              width={50}
-                              height={50}
-                              className="rounded-md"
-                            />
-                          ) : (
-                            <div className="w-[50px] h-[50px] bg-gray-700 rounded-md flex items-center justify-center text-gray-400">
-                              No Image
-                            </div>
-                          )}
-                          <div>
-                            <p className="text-lg font-semibold">
-                              {result.title}
-                            </p>
-                            <p className="text-sm text-gray-400">
-                              {result.artistName}
-                            </p>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  }
-                  if (isArtist(result)) {
-                    return (
-                      <Link
-                        href={`/artist/${result.id}`}
-                        key={result.id}
-                        passHref
-                      >
-                        <div className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer">
-                          {result.coverPhoto ? (
-                            <Image
-                              src={result.coverPhoto}
-                              alt={result.name}
-                              width={40}
-                              height={40}
-                              className="rounded-full"
-                            />
-                          ) : (
-                            <div className="w-[40px] h-[40px] bg-gray-700 rounded-full flex items-center justify-center text-gray-400">
-                              No Image
-                            </div>
-                          )}
-                          <div>
-                            <p className="text-lg font-semibold">
-                              {result.name}
-                            </p>
-                            <p className="text-sm text-gray-400">Artist</p>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  }
-                  if (isPlaylist(result)) {
-                    return (
-                      <Link
-                        href={`/playlist/${result.id}`}
-                        key={result.id}
-                        passHref
-                      >
-                        <div className="flex items-center gap-4 p-4 bg-[#312f2f] rounded-xl shadow-md cursor-pointer">
-                          {result.coverPhoto ? (
-                            <Image
-                              src={result.coverPhoto}
-                              alt={result.name}
-                              width={50}
-                              height={50}
-                              className="rounded-md"
-                            />
-                          ) : (
-                            <div className="w-[50px] h-[50px] bg-gray-700 rounded-md flex items-center justify-center text-gray-400">
-                              No Image
-                            </div>
-                          )}
-                          <div>
-                            <p className="text-lg font-semibold">
-                              {result.name}
-                            </p>
-                            <p className="text-sm text-gray-400">Playlist</p>
-                          </div>
-                        </div>
-                      </Link>
-                    );
-                  }
-                  return null;
-                })}
               </div>
+            ) : (
+              <SearchResultsBeautiful
+                filteredResults={uniqueFilteredResults}
+                playSong={playSong}
+              />
             )}
           </div>
         )}

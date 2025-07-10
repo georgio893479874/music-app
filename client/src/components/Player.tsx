@@ -60,6 +60,7 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
     if (selectedSong?.album?.id) {
       fetchSongs(selectedSong.album.id);
     }
+    console.log(audioPlayer)
   }, [selectedSong, audioPlayer]);
 
   useEffect(() => {
