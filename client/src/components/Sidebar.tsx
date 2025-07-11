@@ -12,6 +12,8 @@ import {
   Folder,
   Settings,
   LogOut,
+  Home,
+  Library,
 } from "lucide-react";
 
 export default function Sidebar({
@@ -24,96 +26,99 @@ export default function Sidebar({
   const pathname = usePathname();
   const isActive = (path: string) => pathname === path;
   return (
-    <div
-      className="h-full bg-[#212121] flex flex-col py-4 transition-all duration-300 flex-shrink-0"
-      style={{ width }}
-    >
-      <div className="flex items-center px-4 mb-6">
-        {!collapsed && (
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="w-28 h-auto object-contain filter invert"
+    <>
+      <div
+        className="h-full bg-[#212121] flex-col py-4 transition-all duration-300 flex-shrink-0 hidden md:flex"
+        style={{ width }}
+      >
+        <div className="flex items-center px-4 mb-6">
+          {!collapsed && (
+            <img
+              src="/logo.png"
+              alt="Logo"
+              className="w-28 h-auto object-contain filter invert"
+            />
+          )}
+        </div>
+        <SidebarSection title="MENU" collapsed={collapsed}>
+          <SidebarItem
+            icon={<Compass className="w-5 h-5" />}
+            label="Explore"
+            href="/dashboard"
+            active={isActive("/dashboard")}
+            collapsed={collapsed}
           />
-        )}
+          <SidebarItem
+            icon={<Album className="w-5 h-5" />}
+            label="Albums"
+            href="/albums"
+            active={isActive("/albums")}
+            collapsed={collapsed}
+          />
+          <SidebarItem
+            icon={<ListMusic className="w-5 h-5" />}
+            label="Genres"
+            href="/search"
+            active={isActive("/genres")}
+            collapsed={collapsed}
+          />
+          <SidebarItem
+            icon={<User className="w-5 h-5" />}
+            label="Artists"
+            href="/artists"
+            active={isActive("/artists")}
+            collapsed={collapsed}
+          />
+        </SidebarSection>
+        <SidebarSection title="LIBRARY" collapsed={collapsed}>
+          <SidebarItem
+            icon={<Clock className="w-5 h-5" />}
+            label="Recent"
+            href="/recent"
+            active={isActive("/recent")}
+            collapsed={collapsed}
+          />
+          <SidebarItem
+            icon={<ListMusic className="w-5 h-5" />}
+            label="All Playlists"
+            href="/playlists"
+            active={isActive("/playlists")}
+            collapsed={collapsed}
+          />
+          <SidebarItem
+            icon={<Heart className="w-5 h-5" />}
+            label="Favorites"
+            href="/favorites"
+            active={isActive("/favorites")}
+            collapsed={collapsed}
+          />
+          <SidebarItem
+            icon={<Folder className="w-5 h-5" />}
+            label="Local"
+            href="/local"
+            active={isActive("/local")}
+            collapsed={collapsed}
+          />
+        </SidebarSection>
+        <SidebarSection title="SETTING" collapsed={collapsed}>
+          <SidebarItem
+            icon={<Settings className="w-5 h-5" />}
+            label="Account"
+            href="/account"
+            active={isActive("/account")}
+            collapsed={collapsed}
+          />
+          <SidebarItem
+            icon={<LogOut className="w-5 h-5" />}
+            label="Logout"
+            href="/logout"
+            active={isActive("/logout")}
+            collapsed={collapsed}
+          />
+        </SidebarSection>
       </div>
-      <SidebarSection title="MENU" collapsed={collapsed}>
-        <SidebarItem
-          icon={<Compass className="w-5 h-5" />}
-          label="Explore"
-          href="/dashboard"
-          active={isActive("/dashboard")}
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<Album className="w-5 h-5" />}
-          label="Albums"
-          href="/albums"
-          active={isActive("/albums")}
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<ListMusic className="w-5 h-5" />}
-          label="Genres"
-          href="/search"
-          active={isActive("/genres")}
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<User className="w-5 h-5" />}
-          label="Artists"
-          href="/artists"
-          active={isActive("/artists")}
-          collapsed={collapsed}
-        />
-      </SidebarSection>
-      <SidebarSection title="LIBRARY" collapsed={collapsed}>
-        <SidebarItem
-          icon={<Clock className="w-5 h-5" />}
-          label="Recent"
-          href="/recent"
-          active={isActive("/recent")}
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<ListMusic className="w-5 h-5" />}
-          label="All Playlists"
-          href="/playlists"
-          active={isActive("/playlists")}
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<Heart className="w-5 h-5" />}
-          label="Favorites"
-          href="/favorites"
-          active={isActive("/favorites")}
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<Folder className="w-5 h-5" />}
-          label="Local"
-          href="/local"
-          active={isActive("/local")}
-          collapsed={collapsed}
-        />
-      </SidebarSection>
-      <SidebarSection title="SETTING" collapsed={collapsed}>
-        <SidebarItem
-          icon={<Settings className="w-5 h-5" />}
-          label="Account"
-          href="/account"
-          active={isActive("/account")}
-          collapsed={collapsed}
-        />
-        <SidebarItem
-          icon={<LogOut className="w-5 h-5" />}
-          label="Logout"
-          href="/logout"
-          active={isActive("/logout")}
-          collapsed={collapsed}
-        />
-      </SidebarSection>
-    </div>
+      <MobileSidebar />
+    </>
   );
 }
 
@@ -168,5 +173,34 @@ function SidebarItem({
         {!collapsed && <span>{label}</span>}
       </div>
     </Link>
+  );
+}
+
+function MobileSidebar() {
+  const pathname = usePathname();
+  const isActive = (path: string) => pathname === path;
+
+  const navItems = [
+    { label: "Home", href: "/dashboard", icon: <Home className="w-6 h-6" /> },
+    { label: "Library", href: "/library", icon: <Library className="w-6 h-6" /> },
+    { label: "Account", href: "/account", icon: <User className="w-6 h-6" /> },
+    { label: "Settings", href: "/settings", icon: <Settings className="w-6 h-6" /> },
+  ];
+
+  return (
+    <nav className="fixed bottom-0 left-0 w-full bg-[#212121] border-t border-gray-800 z-50 flex justify-around items-center py-2 md:hidden">
+      {navItems.map((item) => (
+        <Link key={item.label} href={item.href}>
+          <div
+            className={`flex flex-col items-center gap-1 cursor-pointer px-2
+              ${isActive(item.href) ? "text-cyan-400" : "text-gray-400 hover:text-white"}
+            `}
+          >
+            {item.icon}
+            <span className="text-xs">{item.label}</span>
+          </div>
+        </Link>
+      ))}
+    </nav>
   );
 }

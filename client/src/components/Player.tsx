@@ -239,7 +239,7 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
 
   return (
     <>
-      <div className="fixed bottom-0 left-0 w-full h-20 lg:h-24 bg-[#212121] text-white shadow-lg z-50 px-4">
+      <div className="fixed bottom-0 left-0 w-full h-20 lg:h-24 bg-[#212121] text-white shadow-lg z-49 px-4">
         <div className="flex flex-row items-center justify-between w-full h-full gap-4">
           <div className="flex flex-row items-center gap-4 min-w-0 flex-shrink-0">
             {selectedSong?.coverImagePath ? (

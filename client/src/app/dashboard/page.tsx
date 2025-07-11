@@ -33,11 +33,9 @@ export default function DashboardPage() {
   const [recommendedAlbums, setRecommendedAlbums] = useState<Album[]>([]);
   const [popularPlaylists, setPopularPlaylists] = useState<Playlist[]>([]);
   const [popularArtists, setPopularArtists] = useState<Artist[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchAll() {
-      setLoading(true);
       const userId = localStorage.getItem('userId');
       const [
         latestTracksRes,
@@ -54,7 +52,6 @@ export default function DashboardPage() {
       setRecommendedAlbums(albumsRes.data);
       setPopularPlaylists(playlistsRes.data);
       setPopularArtists(artistsRes.data);
-      setLoading(false);
     }
     fetchAll();
   }, []);
@@ -112,9 +109,7 @@ export default function DashboardPage() {
         <div style={{ display: 'flex', flexWrap: 'wrap' }}>
           <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 10px' }}>
             <tbody>
-              {loading ? (
-                <tr><td>Loading...</td></tr>
-              ) : latestTracks.map((track, i) => (
+              {latestTracks.map((track, i) => (
                 <tr key={track.id} style={{ background: i % 2 === 0 ? '#f8fbff' : '#fff', borderRadius: 10, boxShadow: '0 1px 3px 0 rgba(43,143,229,0.04)' }}>
                   <td style={{ width: 44, textAlign: 'center' }}>
                     <button style={{
@@ -146,7 +141,7 @@ export default function DashboardPage() {
           <a href="/albums-recommended" style={{ color: '#2b8fe5', fontWeight: 600, fontSize: 16 }}>View all</a>
         </div>
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
-          {loading ? "Loading..." : recommendedAlbums.map(album =>
+          {recommendedAlbums.map(album =>
             <div key={album.id} style={{
               width: 160, borderRadius: 14, background: '#fff',
               boxShadow: '0 2px 12px 0 rgba(43,143,229,0.07)', padding: 14, textAlign: 'center'
@@ -164,7 +159,7 @@ export default function DashboardPage() {
           <a href="/playlists-popular" style={{ color: '#2b8fe5', fontWeight: 600, fontSize: 16 }}>View all</a>
         </div>
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
-          {loading ? "Loading..." : popularPlaylists.map(playlist =>
+          {popularPlaylists.map(playlist =>
             <div key={playlist.id} style={{
               width: 160, borderRadius: 14, background: '#fff',
               boxShadow: '0 2px 12px 0 rgba(43,143,229,0.07)', padding: 14, textAlign: 'center'
@@ -181,7 +176,7 @@ export default function DashboardPage() {
           <a href="/artists-popular" style={{ color: '#2b8fe5', fontWeight: 600, fontSize: 16 }}>View all</a>
         </div>
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
-          {loading ? "Loading..." : popularArtists.map(artist =>
+          {popularArtists.map(artist =>
             <div key={artist.id} style={{
               width: 120, borderRadius: 14, background: '#fff',
               boxShadow: '0 2px 12px 0 rgba(43,143,229,0.07)', padding: 14, textAlign: 'center'

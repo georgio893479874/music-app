@@ -31,7 +31,6 @@ type ArtistSubscription = {
 export default function UserPage() {
   const { userId } = useParams();
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const [bannerPreview, setBannerPreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -48,7 +47,6 @@ export default function UserPage() {
     if (!userId) return;
     axios.get(`${API_URL}/user/${userId}`).then((res) => {
       setUser(res.data);
-      setLoading(false);
     });
   }, [userId]);
 
@@ -130,12 +128,6 @@ export default function UserPage() {
   const handleFollow = () => {};
   const handleMessage = () => {};
 
-  if (loading)
-    return (
-      <div className="flex justify-center items-center h-96 bg-[#181A20] text-white">
-        Loading...
-      </div>
-    );
   if (!user)
     return (
       <div className="text-center text-red-500 bg-[#181A20]">
