@@ -16,6 +16,7 @@ import { HistoryModule } from './history/history.module';
 import { PodcastModule } from './podcast/podcast.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ImportModule } from './import/import.module';
+import { ApiController } from './api';
 
 @Module({
   imports: [
@@ -37,5 +38,6 @@ import { ImportModule } from './import/import.module';
     PodcastModule,
     ImportModule,
   ],
+  controllers: [ApiController],
 })
 export class AppModule {}

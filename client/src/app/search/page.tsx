@@ -218,11 +218,7 @@ function SearchPageContent() {
 
   useEffect(() => {
     if (searchQuery) {
-      const timeoutId = setTimeout(
-        () => handleSearch(searchQuery, searchSource),
-        500
-      );
-      return () => clearTimeout(timeoutId);
+      handleSearch(searchQuery, searchSource);
     } else {
       setSearchResults([]);
     }

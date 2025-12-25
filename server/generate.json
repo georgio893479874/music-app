@@ -1,0 +1,5 @@
+{
+  "client": "rtk-query",
+  "input": "./openapi.json",
+  "output": "./src/api/index.ts"
+}
