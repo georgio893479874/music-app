@@ -12,4 +12,7 @@ export class CreateTrackDto {
 
   @IsString()
   audioFilePath: string;
+
+  duration: number;
+  coverUrl: string;
 }

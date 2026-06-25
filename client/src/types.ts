@@ -3,12 +3,14 @@ import { JSX } from "react";
 export interface Track {
 	id: string;
 	title: string;
-	audioFilePath: string;
+  audioFilePath: string;
+  isPreview?: boolean;
 	authorId?: string;
 	coverImagePath: string;
 	album?: Album;
 	artistName?: string;
   listens?: number;
+  duration: number;
   type?: 'yt' | 'db';
 }
 

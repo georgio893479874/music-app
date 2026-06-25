@@ -38,7 +38,6 @@ const ArtistPage = () => {
     router.replace(`/artist/${res.data.id}`);
   } else {
     alert("Не вдалося імпортувати артиста!");
-    // Можна зробити router.replace('/'), або залишити на сторінці
   }
 })
 .catch(() => {

@@ -1,6 +1,20 @@
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import { PlayerService } from "@/types";
+import { API_URL } from "@/constants";
 import { useRef, useState, useEffect } from "react";
+
+const getAudioSource = (path: string) => {
+  try {
+    const parsed = new URL(path);
+    const allowedHosts = ['archive.org', 'jamendo', 'deezer.com', 'cdn.jamendo.com', 'dzcdn.net'];
+    if (allowedHosts.some((host) => parsed.hostname.includes(host))) {
+      return `${API_URL}/import/proxy?url=${encodeURIComponent(path)}`;
+    }
+  } catch {
+    // not an absolute URL
+  }
+  return path;
+};
 
 const usePlayer = ({
   songs,
@@ -32,7 +46,14 @@ const usePlayer = ({
 
     const handleLoadedMetadata = () => {
       if (audio) {
-        setDuration(audio.duration);
+        // prefer the source-provided duration if it exists and is noticeably larger
+        const sourceDuration = songs?.[currentSongIndex]?.duration;
+        const audioDur = isFinite(audio.duration) ? audio.duration : 0;
+        if (sourceDuration && Math.abs(sourceDuration - audioDur) > 5) {
+          setDuration(sourceDuration);
+        } else {
+          setDuration(audioDur);
+        }
       }
     };
 
@@ -47,7 +68,7 @@ const usePlayer = ({
         audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
       }
     };
-  }, [audioPlayer]);
+  }, [audioPlayer, songs, currentSongIndex]);
 
   useEffect(() => {
     const audio = audioPlayer.current;
@@ -132,7 +153,7 @@ const usePlayer = ({
         const song = songs[currentSongIndex];
         if (audioPlayer.current) {
           const previousTime = audioPlayer.current.currentTime;
-          audioPlayer.current.src = song.audioFilePath;
+          audioPlayer.current.src = getAudioSource(song.audioFilePath);
           audioPlayer.current.load();
           audioPlayer.current.currentTime = previousTime;
           if (isPlaying) {

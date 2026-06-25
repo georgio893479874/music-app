@@ -1,4 +1,5 @@
-import { Controller, Get, Post, Body, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, Param, Res, HttpException, HttpStatus } from '@nestjs/common';
+import { Response } from 'express';
 import { ImportService } from './import.service';
 
 @Controller('import')
@@ -6,75 +7,111 @@ export class ImportController {
   constructor(private readonly importService: ImportService) {}
 
   @Get('search')
+  @Get('search/:query')
   async search(
-    @Query('query') query: string,
-    @Query('source') source?: string,
+    @Param('query') pathQuery?: string,
+    @Query('query') query?: string,
+    @Query('source') source: string = 'all',
   ) {
-    if (!query) return { error: 'query is required' };
-    if (!source || source === 'all') {
-      const [ytTracks, scTracks, ytArtists] = await Promise.all([
-        this.importService.searchYoutubeTracks(query),
-        this.importService.searchSoundcloudTracks(query),
-        this.importService.searchYoutubeArtists(query),
-      ]);
-      return {
-        tracks: [...ytTracks, ...scTracks],
-        performers: ytArtists,
-      };
-    }
-    if (source === 'youtube') {
-      const [ytTracks, ytArtists] = await Promise.all([
-        this.importService.searchYoutubeTracks(query),
-        this.importService.searchYoutubeArtists(query),
-      ]);
-      return {
-        tracks: ytTracks,
-        performers: ytArtists,
-      };
-    }
-    if (source === 'soundcloud') {
-      const scTracks = await this.importService.searchSoundcloudTracks(query);
-      return { tracks: scTracks, performers: [] };
+    const q = (pathQuery || query || '').toString().trim();
+
+    if (!q) {
+      return { error: 'query is required' };
     }
 
-    return { error: 'Not implemented for local search in import controller.' };
+    return this.importService.searchAll(q, source);
+  }
+
+  @Post('track')
+  async importTrack(
+    @Body()
+    body: {
+      id: string;
+      title: string;
+      artist: string;
+      duration?: number;
+      coverUrl?: string;
+      source: string; 
+    },
+  ) {
+    return this.importService.importTrack(body);
+  }
+
+  @Get('track/:source/:id')
+  async getExternalTrack(
+    @Param('source') source: string,
+    @Param('id') id: string,
+  ) {
+    return this.importService.getExternalTrackInfo(id, source);
+  }
+
+  @Get('proxy')
+  async proxy(@Query('url') url: string, @Res() res: Response) {
+    if (!url) {
+      throw new HttpException('url is required', HttpStatus.BAD_REQUEST);
+    }
+
+    let parsed: URL;
+    try {
+      parsed = new URL(url);
+    } catch (e) {
+      throw new HttpException('invalid url', HttpStatus.BAD_REQUEST);
+    }
+
+    const allowed = ['archive.org', 'jamendo', 'deezer.com', 'cdn.jamendo.com', 'dzcdn.net'];
+    const ok = allowed.some((a) => parsed.hostname.includes(a));
+    if (!ok) {
+      throw new HttpException('host not allowed', HttpStatus.FORBIDDEN);
+    }
+
+    try {
+      const r = await (await import('axios')).default.get(url, { responseType: 'stream', timeout: 15000 });
+      const contentType = r.headers['content-type'] || 'audio/mpeg';
+      if (r.headers['content-length']) {
+        res.setHeader('Content-Length', r.headers['content-length']);
+      }
+      res.setHeader('Content-Type', contentType);
+      r.data.pipe(res);
+    } catch (e) {
+      throw new HttpException('failed to fetch remote audio', HttpStatus.BAD_GATEWAY);
+    }
+    return;
+  }
+
+  @Post('from-search')
+  async importFromSearch(@Body('query') query: string) {
+    if (!query) {
+      return { error: 'query is required' };
+    }
+
+    return this.importService.importFromSearch(query);
   }
 
   @Post('artist')
-  async importArtist(@Body('youtubeChannelId') channelId: string) {
-    return this.importService.importYoutubeArtist(channelId);
-  }
-
-  @Post('playlist')
-  async importPlaylist(
-    @Body()
-    body: {
-      name: string;
-      userId: string;
-      coverPhoto?: string;
-      trackMetas: Array<{
-        title: string;
-        artistName: string;
-        audioFilePath: string;
-        coverImagePath?: string;
-      }>;
-    },
+  async importArtist(
+    @Body('name') name: string,
   ) {
-    return this.importService.importPlaylist(body);
+    if (!name) {
+      return { error: 'artist name is required' };
+    }
+    return this.importService.importArtistByName(name);
   }
 
-  @Get('audio')
-  async getAudio(@Query('url') url: string) {
-    if (!url) return { streamUrl: null };
-    if (url.includes('youtube.com') || url.includes('youtu.be')) {
-      const streamUrl = await this.importService.getYoutubeAudioStreamUrl(url);
-      return { streamUrl };
-    }
-    if (url.includes('soundcloud.com')) {
-      const streamUrl =
-        await this.importService.getSoundcloudAudioStreamUrl(url);
-      return { streamUrl };
-    }
-    return { streamUrl: null };
+  @Post('ensure-artist')
+  async ensureArtist(
+    @Body() body: { name: string; coverUrl?: string },
+  ) {
+    const { name, coverUrl } = body || {};
+    if (!name) return { error: 'artist name is required' };
+    return this.importService.ensureArtistByName(name, coverUrl);
+  }
+
+  @Post('ensure-album')
+  async ensureAlbum(
+    @Body() body: { artistName: string; albumTitle: string; coverUrl?: string },
+  ) {
+    const { artistName, albumTitle, coverUrl } = body || {};
+    if (!albumTitle) return { error: 'album title is required' };
+    return this.importService.ensureAlbumForArtist(artistName, albumTitle, coverUrl);
   }
 }

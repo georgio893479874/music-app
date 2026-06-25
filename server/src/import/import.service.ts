@@ -1,395 +1,502 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { v4 as uuidv4 } from 'uuid';
-import { exec } from 'child_process';
-import * as util from 'util';
 import axios from 'axios';
-const ytSearch = require('yt-search');
-const soundcloud = require('soundcloud-scraper');
-
-const execPromise = util.promisify(exec);
-const YT_COVER_BASE = 'https://i.ytimg.com/vi';
+import * as https from 'https';
 
 @Injectable()
 export class ImportService {
   constructor(private readonly prisma: PrismaService) {}
+  private mbClient = axios.create({
+    baseURL: 'https://musicbrainz.org/ws/2',
+    timeout: 8000,
+    headers: {
+      Accept: 'application/json',
+      'User-Agent': 'Notent-App/1.0 (contact: you@example.com)',
+    },
+    httpsAgent: new https.Agent({ keepAlive: true }),
+  });
 
-  async getFirstAvailableCover(videoId: string): Promise<string> {
-    const covers = [
-      `${YT_COVER_BASE}/${videoId}/maxresdefault.jpg`,
-      `${YT_COVER_BASE}/${videoId}/hqdefault.jpg`,
-      `${YT_COVER_BASE}/${videoId}/default.jpg`,
-    ];
-    for (const url of covers) {
+  private async mbGetWithRetries(path: string, params: any, retries = 2) {
+    let lastErr: any = null;
+    for (let attempt = 0; attempt <= retries; attempt++) {
       try {
-        const res = await axios.head(url, { timeout: 2000 });
-        if (res.status === 200) return url;
-      } catch {}
+        const res = await this.mbClient.get(path, { params: { ...params, fmt: 'json' } });
+        return res.data;
+      } catch (err) {
+        lastErr = err;
+        await new Promise((r) => setTimeout(r, 200 * (attempt + 1)));
+      }
     }
-    return '/default-cover.jpg';
+    throw lastErr;
+  }
+  async searchMusicBrainz(query: string) {
+    try {
+      const data = await this.mbGetWithRetries('/recording', { query, limit: 10 });
+
+      const recordings = data.recordings || [];
+
+      const results = await Promise.all(
+        recordings.map(async (r: any) => {
+          const title = r.title;
+          const artist = r['artist-credit']?.[0]?.name || 'Unknown Artist';
+          try {
+            const dq = `${artist} ${title}`;
+            const dres = await axios.get('https://api.deezer.com/search', { params: { q: dq, limit: 1 } });
+            const first = dres.data?.data?.[0];
+            if (first) {
+              const details = await this.fetchDeezerTrackDetails(String(first.id));
+              return Object.assign(
+                {
+                  id: r.id,
+                  title,
+                  artist,
+                  duration: details?.duration || (r.length ? Math.floor(r.length / 1000) : null),
+                  source: 'musicbrainz',
+                  coverUrl: details?.coverUrl || null,
+                  album: details?.album || (r.releases?.[0] ? { id: r.releases[0].id, title: r.releases[0].title } : null),
+                },
+                details?.audioFilePath ? { audioFilePath: details?.audioFilePath } : {},
+              );
+            }
+          } catch (e) {
+          }
+
+          return Object.assign(
+            {
+              id: r.id,
+              title,
+              artist,
+              duration: r.length ? Math.floor(r.length / 1000) : null,
+              source: 'musicbrainz',
+              coverUrl: null,
+              album: r.releases?.[0] ? { id: r.releases[0].id, title: r.releases[0].title } : null,
+            },
+            {},
+          );
+        }),
+      );
+
+      return results;
+    } catch (e) {
+      console.error('MusicBrainz search error:', e);
+      return [];
+    }
   }
 
-  async searchYoutubeArtists(query: string) {
+  private async fetchDeezerTrackDetails(id: string) {
     try {
-      const res = await ytSearch({ query, type: 'channel' });
-      const performers = (res.channels || []).filter(
-        (ch: { name: string; subCount: number }) => {
-          const name = ch.name?.toLowerCase() || '';
-          return name.includes(query.toLowerCase()) || ch.subCount > 1000;
-        },
-      );
-      return performers.map((item, idx) => ({
-        id: item.channelId
-          ? `yt_ch_${item.channelId}`
-          : `yt_ch_${item.name.replace(/\W/g, '')}_${idx}`,
-        name: item.name,
-        coverPhoto:
-          item.avatar || item.image || item.thumbnail || '/default-cover.jpg',
-        type: 'yt_artist',
-        subscribers: item.subCount,
-        url: item.channelId
-          ? `https://www.youtube.com/channel/${item.channelId}`
-          : '',
+      const { data } = await axios.get(`https://api.deezer.com/track/${id}`);
+      return {
+        id: String(data.id),
+        title: data.title,
+        artist: data.artist?.name,
+        duration: data.duration,
+        coverUrl: data.album?.cover_big || data.album?.cover_medium,
+        audioFilePath: data.preview || null,
+        isPreview: !!data.preview,
+        album: data.album ? { id: String(data.album.id), title: data.album.title, coverUrl: data.album.cover_big } : null,
+      };
+    } catch (e) {
+      return null;
+    }
+  }
+
+  async searchDeezer(query: string) {
+    try {
+      const { data } = await axios.get(`https://api.deezer.com/search`, { params: { q: query, limit: 10 } });
+      const results = data.data || [];
+      const detailed = await Promise.all(results.map((r: any) => this.fetchDeezerTrackDetails(String(r.id))));
+
+      return (detailed.filter(Boolean) as any[]).map((d) => ({
+        id: d.id,
+        title: d.title,
+        artist: d.artist,
+        duration: d.duration,
+        coverUrl: d.coverUrl,
+        source: 'deezer',
+        audioFilePath: d.audioFilePath,
+        isPreview: !!d.isPreview,
+        album: d.album,
       }));
     } catch (e) {
-      console.error('YouTube artist search error:', e);
+      console.error('Deezer search error:', e);
       return [];
     }
   }
 
-  async getYoutubeAudioStreamUrl(youtubeUrl: string): Promise<string | null> {
+  async searchJamendo(query: string) {
+    const clientId = process.env.JAMENDO_CLIENT_ID;
+    if (!clientId) return [];
     try {
-      const { stdout } = await execPromise(`yt-dlp -f ba -g "${youtubeUrl}"`);
-
-      return stdout;
+      const url = `https://api.jamendo.com/v3.0/tracks/?client_id=${clientId}&format=json&limit=10&search=${encodeURIComponent(
+        query,
+      )}`;
+      const { data } = await axios.get(url);
+      const results = data.results || data.releases || [];
+      return (results || []).map((r: any) => ({
+        id: String(r.id),
+        title: r.name || r.title,
+        artist: r.artist_name || r.artist || (r.artists && r.artists[0]?.name) || 'Unknown',
+        duration: r.duration || null,
+        coverUrl: r.album_image || r.album_image_high || r.image || null,
+        source: 'jamendo',
+        audioFilePath: r.audio || r.audio_download || r.stream || null,
+        isPreview: false,
+        album: r.album_name ? { id: String(r.album_id || r.album), title: r.album_name, coverUrl: r.album_image } : null,
+      }));
     } catch (e) {
-      console.error('yt-dlp error:', e);
-      return null;
+      console.error('Jamendo search error:', e);
+      return [];
     }
   }
 
-  async getSoundcloudAudioStreamUrl(trackUrl: string): Promise<string | null> {
+  async searchArchiveOrg(query: string) {
     try {
-      const client = new soundcloud.Client();
-      const track = await client.getSongInfo(trackUrl);
-      return track.downloadable ? track.downloadURL : track.streamURL;
-    } catch {
-      return null;
+      const q = `(${query}) AND mediatype:(audio)`;
+      const searchUrl = `https://archive.org/advancedsearch.php?q=${encodeURIComponent(q)}&fl[]=identifier,title,creator&rows=10&page=1&output=json`;
+      const { data } = await axios.get(searchUrl);
+      const docs = data.response?.docs || [];
+      const results = await Promise.all(
+        docs.map(async (d: any) => {
+          try {
+            const metaUrl = `https://archive.org/metadata/${d.identifier}`;
+            const { data: m } = await axios.get(metaUrl);
+            const files = m.files || [];
+            const mp3 = files.find((f: any) => /mp3/i.test(f.format));
+            const fileName = mp3?.name;
+            const audioUrl = fileName ? `https://archive.org/download/${d.identifier}/${fileName}` : null;
+            return {
+              id: d.identifier,
+              title: d.title,
+              artist: d.creator || null,
+              duration: null,
+              coverUrl: m.metadata?.image || null,
+              source: 'archiveorg',
+              audioFilePath: audioUrl,
+              isPreview: false,
+              album: null,
+            };
+          } catch (e) {
+            return null;
+          }
+        }),
+      );
+      return (results.filter(Boolean) as any[]);
+    } catch (e) {
+      console.error('Archive.org search error:', e);
+      return [];
     }
   }
 
-  async importTrack(meta: {
-    title: string;
-    artistName: string;
-    audioFilePath: string;
-    coverImagePath?: string;
-    albumTitle?: string;
-    source?: string;
-  }) {
-    let artist;
-    try {
-      artist = await this.prisma.artist.upsert({
-        where: { name: meta.artistName },
-        update: {},
-        create: {
-          id: uuidv4(),
-          name: meta.artistName,
-          coverPhoto: meta.coverImagePath || '/default-cover.jpg',
-        },
-      });
-    } catch (e: any) {
-      if (e.code === 'P2002') {
-        artist = await this.prisma.artist.findUnique({
-          where: { name: meta.artistName },
-        });
-      } else {
-        throw e;
+  async searchAll(query: string, source: string = 'all') {
+    const s = (source || 'all').toString().toLowerCase();
+
+    let mb: any[] = [];
+    let deezer: any[] = [];
+    let jamendo: any[] = [];
+    let archive: any[] = [];
+
+    const tasks: Promise<any>[] = [];
+
+    if (s === 'all' || s === 'jamendo') {
+      tasks.push(this.searchJamendo(query).then((r) => (jamendo = r || [])));
+    }
+    if (s === 'all' || s === 'archive' || s === 'archiveorg') {
+      tasks.push(this.searchArchiveOrg(query).then((r) => (archive = r || [])));
+    }
+    if (s === 'all' || s === 'deezer') {
+      tasks.push(this.searchDeezer(query).then((r) => (deezer = r || [])));
+    }
+    if (s === 'all' || s === 'musicbrainz' || s === 'mb') {
+      tasks.push(this.searchMusicBrainz(query).then((r) => (mb = r || [])));
+    }
+
+    await Promise.all(tasks);
+
+    const tracks = [...(jamendo || []), ...(archive || []), ...(deezer || []), ...(mb || [])];
+    const performerMap = new Map<string, any>();
+    const albumMap = new Map<string, any>();
+
+    tracks.forEach((t: any) => {
+      if (t.artist) {
+        const pid = `external:artist:${encodeURIComponent(t.artist)}`;
+        if (!performerMap.has(pid)) {
+          performerMap.set(pid, { id: pid, name: t.artist, coverPhoto: t.coverUrl || '' });
+        }
       }
+      if (t.album) {
+        const aid = String(t.album.id || `${t.source}:${t.id}`);
+        if (!albumMap.has(aid)) {
+          albumMap.set(aid, { id: aid, title: t.album.title || t.title, coverUrl: t.album?.coverUrl || t.coverUrl || '' });
+        }
+      }
+    });
+
+    return {
+      tracks,
+      albums: Array.from(albumMap.values()),
+      performers: Array.from(performerMap.values()),
+      playlists: [],
+    };
+  }
+
+  async importTrack(track: {
+    id: string;
+    title: string;
+    artist: string;
+    duration?: number;
+    coverUrl?: string;
+    source: string;
+    audioFilePath?: string | null;
+    album?: { id?: string; title?: string; coverUrl?: string } | null;
+  }) {
+    if (!track.audioFilePath || track.audioFilePath.startsWith('external:')) {
+      return null;
     }
 
-    const finalAlbumTitle = meta.albumTitle || 'Single';
-    let album = await this.prisma.album.findFirst({
+    const existing = await this.prisma.track.findFirst({
       where: {
-        artistId: artist.id,
-        title: finalAlbumTitle,
+        externalId: track.id,
+        source: track.source,
       },
     });
-    if (!album) {
-      album = await this.prisma.album.create({
-        data: {
-          id: uuidv4(),
-          title: finalAlbumTitle,
-          artistId: artist.id,
-          coverUrl: meta.coverImagePath || '/default-cover.jpg',
-          releaseDate: new Date(),
-          type: 'ALBUM',
-        },
-      });
-    }
 
-    let track;
-    try {
-      track = await this.prisma.track.create({
-        data: {
-          id: uuidv4(),
-          title: meta.title,
-          audioFilePath: meta.audioFilePath,
-          albumId: album.id,
-          authorId: artist.id,
-        },
-      });
-    } catch (e: any) {
-      if (e.code === 'P2002') {
-        track = await this.prisma.track.findUnique({
-          where: { audioFilePath: meta.audioFilePath },
-        });
+    if (existing) return existing;
+
+    const artist = await this.prisma.artist.upsert({
+      where: { name: track.artist },
+      update: {},
+      create: {
+        name: track.artist,
+      },
+    });
+
+    let albumConnect = undefined;
+    if (track.album && track.album.title) {
+      const albumName = track.album.title;
+      const existingAlbum = await this.prisma.album.findFirst({ where: { title: albumName, artistId: artist.id } });
+      if (existingAlbum) {
+        albumConnect = { connect: { id: existingAlbum.id } };
       } else {
-        throw e;
+        const created = await this.prisma.album.create({ data: { title: albumName, artistId: artist.id, releaseDate: new Date(), coverUrl: track.album.coverUrl || track.coverUrl || undefined } });
+        albumConnect = { connect: { id: created.id } };
       }
     }
-    return track;
+
+    const audioPath = track.audioFilePath;
+
+    return this.prisma.track.create({
+      data: {
+        title: track.title,
+        duration: track.duration,
+        coverUrl: track.coverUrl,
+        audioFilePath: audioPath,
+        externalId: track.id,
+        source: track.source,
+        author: { connect: { id: artist.id } },
+        ...(albumConnect ? { album: albumConnect } : {}),
+      },
+    });
   }
 
-  async searchYoutubeTracks(query: string) {
-    try {
-      const musicQuery = query + ' official audio';
-      const res = await ytSearch(musicQuery);
-      const filtered = (res.videos || []).filter((v) => {
-        const title = v.title.toLowerCase();
-        const excludeWords = [
-          'live',
-          'cover',
-          'karaoke',
-          'remix',
-          'instrumental',
-          'reaction',
-          'tribute',
-          'edit',
-          'concert',
-          'performance',
-        ];
-        if (excludeWords.some((word) => title.includes(word))) return false;
-        if (v.seconds < 60 || v.seconds > 600) return false;
-        return true;
-      });
+  async importFromSearch(query: string) {
+    const { tracks } = await this.searchAll(query);
 
-      const mapped = await Promise.all(
-        filtered.map(async (item) => {
-          const artistName = item.author.name || 'Unknown Artist';
-          const albumTitle = item.albumTitle || 'Single';
-          const coverImagePath = await this.getFirstAvailableCover(
-            item.videoId,
-          );
-          const streamUrl = await this.getYoutubeAudioStreamUrl(
-            `https://www.youtube.com/watch?v=${item.videoId}`,
-          );
-          if (!streamUrl) {
-            console.warn(
-              `Could not get streamUrl for ${item.title} (${item.videoId})`,
-            );
-            return null;
+    const imported = await Promise.all(tracks.map((t) => this.importTrack(t)));
+    return imported.filter(Boolean);
+  }
+
+  async importAllFromSearch(query: string, source: string = 'all') {
+    const { tracks = [], albums = [], performers = [] } = await this.searchAll(query, source);
+
+    for (const p of performers) {
+      try {
+        if (!p || !p.name) continue;
+        await this.prisma.artist.upsert({
+          where: { name: p.name },
+          update: {},
+          create: { name: p.name, coverPhoto: p.coverPhoto || undefined },
+        });
+      } catch (e) {
+      }
+    }
+
+    for (const a of albums) {
+      try {
+        if (!a || !a.title) continue;
+        const matchingTrack = tracks.find((t: any) => {
+          if (!t.album) return false;
+          if (t.album.id && a.id && String(t.album.id) === String(a.id)) return true;
+          return (t.album.title && a.title && t.album.title === a.title);
+        });
+
+        let artistName = matchingTrack?.artist || (a as any).artistName || 'Unknown Artist';
+        const artist = await this.ensureArtistByName(artistName, a.coverUrl || (a as any).coverUrl);
+        if (!artist) continue;
+
+        const existing = await this.prisma.album.findFirst({ where: { title: a.title, artistId: artist.id } });
+        if (!existing) {
+          await this.prisma.album.create({ data: { title: a.title, artistId: artist.id, releaseDate: new Date(), coverUrl: a.coverUrl || (a as any).coverUrl || undefined } });
+        }
+      } catch (e) {
+      }
+    }
+
+    for (const t of tracks) {
+      try {
+        await this.importTrack(t);
+      } catch (e) {
+      }
+    }
+
+    return { artists: performers.length, albums: albums.length, tracks: tracks.length };
+  }
+
+  async ensureArtistByName(name: string, coverUrl?: string) {
+    if (!name) return null;
+    const existing = await this.prisma.artist.findUnique({ where: { name } });
+    if (existing) return existing;
+
+    const fromMb = await this.importArtistByName(name);
+    if (fromMb) return fromMb;
+
+    return this.prisma.artist.create({ data: { name, coverPhoto: coverUrl || undefined } });
+  }
+
+  async ensureAlbumForArtist(artistName: string, albumTitle: string, coverUrl?: string) {
+    if (!albumTitle) return null;
+    const artist = await this.ensureArtistByName(artistName || 'Unknown Artist');
+    if (!artist) return null;
+
+    const existing = await this.prisma.album.findFirst({ where: { title: albumTitle, artistId: artist.id } });
+    if (existing) return existing;
+
+    return this.prisma.album.create({ data: { title: albumTitle, artistId: artist.id, releaseDate: new Date(), coverUrl: coverUrl || undefined } });
+  }
+
+  async getExternalTrackInfo(id: string, source: string) {
+    if (source === 'deezer') {
+      const { data } = await axios.get(`https://api.deezer.com/track/${id}`);
+
+      return {
+        id: String(data.id),
+        title: data.title,
+        artist: data.artist?.name,
+        duration: data.duration,
+        coverUrl: data.album?.cover_big,
+        source: 'deezer',
+        audioFilePath: data.preview || null,
+        album: data.album ? { id: String(data.album.id), title: data.album.title, coverUrl: data.album.cover_big } : null,
+      };
+    }
+
+    if (source === 'musicbrainz') {
+      try {
+        const data = await this.mbGetWithRetries(`/recording/${id}`, {}, 2);
+        const title = data.title;
+        const artist = data['artist-credit']?.[0]?.name || 'Unknown';
+
+        try {
+          const dq = `${artist} ${title}`;
+          const dres = await axios.get('https://api.deezer.com/search', { params: { q: dq, limit: 1 } });
+          const first = dres.data?.data?.[0];
+          if (first) {
+            const details = await this.fetchDeezerTrackDetails(String(first.id));
+            if (details) {
+              return Object.assign({ id: data.id, title, artist, duration: details.duration || (data.length ? Math.floor(data.length / 1000) : null), source: 'musicbrainz' }, details.audioFilePath ? { audioFilePath: details.audioFilePath } : {}, details.album ? { album: details.album } : {});
+            }
           }
-          const track = await this.importTrack({
-            title: item.title,
-            artistName,
-            audioFilePath: streamUrl,
-            albumTitle,
-            coverImagePath,
-            source: 'yt',
-          });
-          return {
-            ...track,
-            coverImagePath,
-            type: 'yt',
-            duration: item.seconds,
-            artistName,
-          };
-        }),
-      );
-      return mapped.filter(Boolean);
-    } catch (e) {
-      console.error('YouTube search error:', e);
-      return [];
+        } catch (e) {
+        }
+
+        return {
+          id: data.id,
+          title: data.title,
+          artist: data['artist-credit']?.[0]?.name || 'Unknown',
+          duration: data.length ? Math.floor(data.length / 1000) : null,
+          source: 'musicbrainz',
+        };
+      } catch (e) {
+        console.error('MusicBrainz get recording error:', e);
+        return null;
+      }
     }
+
+    if (source === 'jamendo') {
+      const clientId = process.env.JAMENDO_CLIENT_ID;
+      if (!clientId) return null;
+      try {
+        const url = `https://api.jamendo.com/v3.0/tracks/?client_id=${clientId}&format=json&id=${id}`;
+        const { data } = await axios.get(url);
+        const t = data.results && data.results[0];
+        if (!t) return null;
+        return {
+          id: String(t.id),
+          title: t.name || t.title,
+          artist: t.artist_name || t.artist || null,
+          duration: t.duration || null,
+          coverUrl: t.album_image || t.album_image_high || null,
+          source: 'jamendo',
+          audioFilePath: t.audio || t.audio_download || t.stream || null,
+          isPreview: false,
+          album: t.album_name ? { id: String(t.album_id || t.album), title: t.album_name, coverUrl: t.album_image } : null,
+        };
+      } catch (e) {
+        return null;
+      }
+    }
+
+    if (source === 'archiveorg' || source === 'archive') {
+      try {
+        const metaUrl = `https://archive.org/metadata/${id}`;
+        const { data: m } = await axios.get(metaUrl);
+        const files = m.files || [];
+        const mp3 = files.find((f: any) => /mp3/i.test(f.format));
+        const fileName = mp3?.name;
+        const audioUrl = fileName ? `https://archive.org/download/${id}/${fileName}` : null;
+        return {
+          id,
+          title: m.metadata?.title || id,
+          artist: m.metadata?.creator || null,
+          duration: null,
+          coverUrl: m.metadata?.image || null,
+          source: 'archiveorg',
+          audioFilePath: audioUrl,
+          isPreview: false,
+          album: null,
+        };
+      } catch (e) {
+        return null;
+      }
+    }
+
+    return null;
   }
 
-  async searchSoundcloudTracks(query: string) {
-    try {
-      const client = new soundcloud.Client();
-      const results = await client.search(query, 'track');
-      const tracks = await Promise.all(
-        results.slice(0, 10).map(async (item: any) => {
-          const artistName =
-            item.author?.name || item.user?.username || 'Unknown Artist';
-          const albumTitle = item.albumTitle || 'Single';
-          const streamUrl = await this.getSoundcloudAudioStreamUrl(item.url);
-          if (!streamUrl) {
-            console.warn(`Could not get streamUrl for ${item.title}`);
-            return null;
-          }
-          const track = await this.importTrack({
-            title: item.title,
-            artistName,
-            audioFilePath: streamUrl,
-            albumTitle,
-            coverImagePath: item.thumbnail || '/default-cover.jpg',
-            source: 'sc',
-          });
-          return {
-            ...track,
-            coverImagePath: item.thumbnail,
-            type: 'sc',
-            duration: item.duration / 1000,
-            artistName,
-          };
-        }),
-      );
-      return tracks.filter(Boolean);
-    } catch (e) {
-      console.error('SoundCloud search error:', e);
-      return [];
-    }
-  }
+  async importArtistByName(name: string) {
+  try {
+    const data = await this.mbGetWithRetries('/artist', { query: name, limit: 1 }, 2);
 
-  async importYoutubeArtist(channelId: string) {
-    let ytArtist = null;
-    try {
-      const res = await ytSearch({ query: channelId, type: 'channel' });
-      ytArtist = (res.channels || [])[0] || null;
-    } catch {
-      ytArtist = null;
-    }
+    const artistData = data.artists?.[0];
 
-    if (!ytArtist || !ytArtist.name) {
+    if (!artistData) {
       return null;
     }
-    let artist = await this.prisma.artist.findUnique({
-      where: { name: ytArtist.name },
+
+    const existing = await this.prisma.artist.findUnique({
+      where: { name: artistData.name },
     });
-    if (!artist) {
-      artist = await this.prisma.artist.create({
-        data: {
-          id: uuidv4(),
-          name: ytArtist.name,
-          coverPhoto:
-            ytArtist.avatar ||
-            ytArtist.image ||
-            ytArtist.thumbnail ||
-            '/default-cover.jpg',
-        },
-      });
-    }
 
-    try {
-      const playlistsRes = await ytSearch({
-        query: ytArtist.name,
-        type: 'playlist',
-      });
-      const artistPlaylists = (playlistsRes.playlists || []).filter(
-        (pl) =>
-          pl.author?.name === ytArtist.name &&
-          (pl.title.toLowerCase().includes('album') ||
-            pl.title.toLowerCase().includes('lp') ||
-            pl.title.toLowerCase().includes('ep')),
-      );
+    if (existing) return existing;
 
-      for (const playlist of artistPlaylists) {
-        let album = await this.prisma.album.findFirst({
-          where: {
-            artistId: artist.id,
-            title: playlist.title,
-          },
-        });
-        if (!album) {
-          album = await this.prisma.album.create({
-            data: {
-              id: uuidv4(),
-              title: playlist.title,
-              artistId: artist.id,
-              coverUrl: playlist.thumbnail || '/default-cover.jpg',
-              type: 'ALBUM',
-              releaseDate: new Date(),
-              genreId: null,
-            },
-          });
-        }
-
-        const playlistDetails = await ytSearch({ listId: playlist.listId });
-        for (const video of playlistDetails.videos || []) {
-          const streamUrl = await this.getYoutubeAudioStreamUrl(
-            `https://www.youtube.com/watch?v=${video.videoId}`,
-          );
-          if (!streamUrl) {
-            console.warn(`Could not get streamUrl for ${video.title}`);
-            continue;
-          }
-          const exists = await this.prisma.track.findFirst({
-            where: {
-              title: video.title,
-              albumId: album.id,
-            },
-          });
-          if (!exists) {
-            await this.prisma.track.create({
-              data: {
-                id: uuidv4(),
-                title: video.title,
-                albumId: album.id,
-                authorId: artist.id,
-                audioFilePath: streamUrl,
-              },
-            });
-          }
-        }
-      }
-    } catch (e) {}
-
-    return await this.prisma.artist.findUnique({
-      where: { id: artist.id },
-      include: { albums: { include: { tracks: true } } },
+    return this.prisma.artist.create({
+      data: {
+        name: artistData.name,
+      },
     });
+  } catch (e) {
+    console.error('importArtistByName error:', e);
+    return null;
   }
-
-  async importPlaylist(meta: {
-    name: string;
-    userId: string;
-    coverPhoto?: string;
-    trackMetas: Array<{
-      title: string;
-      artistName: string;
-      audioFilePath: string;
-      coverImagePath?: string;
-      albumTitle?: string;
-    }>;
-  }) {
-    let playlist = await this.prisma.playlist.findFirst({
-      where: { name: meta.name, userId: meta.userId },
-    });
-    if (!playlist) {
-      playlist = await this.prisma.playlist.create({
-        data: {
-          id: uuidv4(),
-          name: meta.name,
-          userId: meta.userId,
-          coverPhoto: meta.coverPhoto || '/default-cover.jpg',
-        },
-      });
-    }
-    for (const trackMeta of meta.trackMetas) {
-      const track = await this.importTrack({
-        ...trackMeta,
-        albumTitle: trackMeta.albumTitle || 'Single',
-      });
-      await this.prisma.playlist.update({
-        where: { id: playlist.id },
-        data: {
-          tracks: { connect: { id: track.id } },
-        },
-      });
-    }
-    return await this.prisma.playlist.findUnique({
-      where: { id: playlist.id },
-      include: { tracks: true },
-    });
-  }
+}
 }

@@ -27,6 +27,19 @@ import FullscreenPlayer from "./FullscreenPlayer";
 import { API_URL } from "@/constants";
 import { fetchSongsByAlbumId } from "@/api";
 
+const getAudioSource = (path: string) => {
+  try {
+    const parsed = new URL(path);
+    const allowedHosts = ['archive.org', 'jamendo', 'deezer.com', 'cdn.jamendo.com', 'dzcdn.net'];
+    if (allowedHosts.some((host) => parsed.hostname.includes(host))) {
+      return `${API_URL}/import/proxy?url=${encodeURIComponent(path)}`;
+    }
+  } catch {
+    // not an absolute URL
+  }
+  return path;
+};
+
 const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
   const { selectedSong, songs, setSongs } = usePlayerContext();
   const [currentSongIndex, setCurrentSongIndex] = useState<number>(0);
@@ -65,7 +78,7 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
 
   useEffect(() => {
     if (selectedSong && audioPlayer.current) {
-      audioPlayer.current.src = selectedSong.audioFilePath;
+      audioPlayer.current.src = getAudioSource(selectedSong.audioFilePath);
       audioPlayer.current.load();
       audioPlayer.current.play().catch((error) => {
         console.error("Failed to play audio:", error);
@@ -94,7 +107,7 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
     };
 
     if (selectedSong && audioPlayer.current) {
-      audioPlayer.current.src = selectedSong.audioFilePath;
+      audioPlayer.current.src = getAudioSource(selectedSong.audioFilePath);
       audioPlayer.current.load();
       audioPlayer.current
         .play()
@@ -258,7 +271,7 @@ const Player = ({ onQueueToggle }: { onQueueToggle: () => void }) => {
             <div className="flex flex-col min-w-0">
               <div className="flex items-center gap-2">
                 <span className="text-base font-bold truncate max-w-[120px] lg:max-w-[180px]">
-                  {selectedSong?.album?.artist.name}
+                  {selectedSong?.album?.artist?.name}
                 </span>
                 <div className="gap-2 hidden sm:flex">
                   {isFavorite ? (

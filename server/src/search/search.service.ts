@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { TrackService } from 'src/track/track.service';
 import { AlbumService } from 'src/album/album.service';
 import { PerformerService } from 'src/performer/performer.service';
@@ -6,6 +6,7 @@ import { PlaylistService } from 'src/playlist/playlist.service';
 import { ImportService } from 'src/import/import.service';
 @Injectable()
 export class SearchService {
+  private readonly logger = new Logger(SearchService.name);
   constructor(
     private readonly trackService: TrackService,
     private readonly albumService: AlbumService,
@@ -15,50 +16,49 @@ export class SearchService {
   ) {}
 
   async search(query: string, source: string = 'all') {
-    const [youtubeTracks, youtubeArtists] = await Promise.all([
-      this.importService.searchYoutubeTracks(query),
-      this.importService.searchYoutubeArtists(query),
-    ]);
+  const external = await this.importService.searchAll(query, source);
 
-    const [tracksFromDb, albums, performers, playlists] = await Promise.all([
+  if (external && (external.tracks?.length || external.albums?.length || external.performers?.length)) {
+    this.importService
+      .importAllFromSearch(query, source)
+      .then((res) => this.logger.log(`Background import completed for query: ${query} (artists:${res.artists} albums:${res.albums} tracks:${res.tracks})`))
+      .catch((err) => this.logger.warn(`Background import failed for query "${query}": ${err?.message || err}`));
+  }
+
+  const [tracksFromDb, albums, performers, playlists] =
+    await Promise.all([
       this.trackService.findAll(query),
       this.albumService.findAll(query),
       this.performerService.findAll(query),
       this.playlistService.findAll(query),
     ]);
 
-    if (source === 'all' || !source) {
-      return {
-        tracks: [...tracksFromDb, ...youtubeTracks],
-        albums,
-        performers: [...performers, ...youtubeArtists],
-        playlists,
-      };
-    }
-
-    if (source === 'local') {
-      return {
-        tracks: tracksFromDb,
-        albums,
-        performers,
-        playlists,
-      };
-    }
-
-    if (source === 'youtube') {
-      return {
-        tracks: youtubeTracks,
-        albums: [],
-        performers: youtubeArtists,
-        playlists: [],
-      };
-    }
-
+  if (source === 'local') {
     return {
-      tracks: [...tracksFromDb, ...youtubeTracks],
+      tracks: tracksFromDb,
       albums,
-      performers: [...performers, ...youtubeArtists],
+      performers,
       playlists,
     };
   }
+
+  if (source === 'external') {
+    return {
+      tracks: external.tracks,
+      albums: external.albums || [],
+      performers: external.performers || [],
+      playlists: [],
+    };
+  }
+
+  return {
+    tracks: [...tracksFromDb, ...(external.tracks || [])],
+    albums: [...albums, ...(external.albums || [])],
+    performers: [
+      ...performers,
+      ...(external.performers || []),
+    ],
+    playlists,
+  };
+}
 }

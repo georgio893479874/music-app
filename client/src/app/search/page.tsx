@@ -13,7 +13,10 @@ import { useRouter, useParams } from "next/navigation";
 type SearchResult = Track | Album | Artist | Playlist;
 
 function isTrack(item: SearchResult): item is Track {
-  return (item as Track).audioFilePath !== undefined;
+  return (
+    typeof (item as Track).audioFilePath === 'string' &&
+    (item as Track).audioFilePath.length > 0
+  );
 }
 function isAlbum(item: SearchResult): item is Album {
   return (item as Album).coverUrl !== undefined;
@@ -33,10 +36,10 @@ function isPlaylist(item: SearchResult): item is Playlist {
   );
 }
 
-type SearchSource = "all" | "local" | "youtube";
+type SearchSource = "all" | "local" | "youtube" | "jamendo" | "archive";
 type ResultFilter = "all" | "albums" | "tracks" | "artists" | "playlists";
 
-function SearchResultsBeautiful({
+function SearchResults({
   filteredResults,
   playSong,
 }: {
@@ -72,7 +75,11 @@ function SearchResultsBeautiful({
                   <div
                     className="flex items-center py-2 px-2 rounded-lg hover:bg-[#f7f7f7] transition group"
                     key={result.id}
-                    onClick={() => playSong(result)}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      playSong(result);
+                    }}
                     style={{ cursor: "pointer" }}
                   >
                     <Image
@@ -90,7 +97,11 @@ function SearchResultsBeautiful({
                         {result.artistName}
                       </div>
                     </div>
-                    <button className="ml-auto p-2 rounded-full hover:bg-[#ededed]">
+                    <button
+                      type="button"
+                      onClick={(e) => e.stopPropagation()}
+                      className="ml-auto p-2 rounded-full hover:bg-[#ededed]"
+                    >
                       <span className="text-2xl text-[#b2b2b2]">+</span>
                     </button>
                   </div>
@@ -234,7 +245,19 @@ function SearchPageContent() {
   });
 
   function playSong(track: Track) {
-    setSelectedSong(track);
+    // If clicked track is a preview, try to find a full version in current results
+    const fullVersion = searchResults.find((r) => {
+      if (!isTrack(r)) return false;
+      const candidate = r as Track;
+      return (
+        candidate.title === track.title &&
+        candidate.artistName === track.artistName &&
+        !!candidate.audioFilePath &&
+        !candidate.isPreview
+      );
+    }) as Track | undefined;
+
+    setSelectedSong(fullVersion || track);
   }
 
   const uniqueFilteredResults = filteredResults.filter(
@@ -261,6 +284,8 @@ function SearchPageContent() {
               <option value="all">All</option>
               <option value="local">Local</option>
               <option value="youtube">YouTube Music</option>
+              <option value="jamendo">Jamendo (full tracks)</option>
+              <option value="archive">Archive.org (full tracks)</option>
             </select>
           </div>
           <div>
@@ -314,7 +339,7 @@ function SearchPageContent() {
                 No results found
               </div>
             ) : (
-              <SearchResultsBeautiful
+              <SearchResults
                 filteredResults={uniqueFilteredResults}
                 playSong={playSong}
               />

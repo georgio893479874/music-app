@@ -66,17 +66,22 @@ model Track {
   id               String             @id @default(uuid())
   createdAt        DateTime           @default(now())
   title            String
-  albumId          String
+  albumId          String?
   authorId         String?
   album            Album?              @relation(fields: [albumId], references: [id])
   author           Artist?            @relation(name: "ArtistToTrack", fields: [authorId], references: [id])
-  audioFilePath    String             @unique
+  audioFilePath    String?            @unique
   users            User[]
   playlists        Playlist[]         @relation("PlaylistTracks")
   favorites        Favorite[]
   ListeningHistory ListeningHistory[]
   Recommendation   Recommendation[]
   Lyric            Lyric[]
+  coverUrl         String?
+  duration         Int?
+  externalId String?
+  source     String?
+  @@index([externalId, source])
 }
 
 model Album {

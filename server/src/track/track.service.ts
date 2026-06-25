@@ -14,6 +14,8 @@ export class TrackService {
         albumId: createTrackDto.albumId,
         audioFilePath: createTrackDto.audioFilePath,
         authorId: createTrackDto.authorId,
+        coverUrl: createTrackDto.coverUrl,
+        duration: createTrackDto.duration,
       },
     });
     return track;
