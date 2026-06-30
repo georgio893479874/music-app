@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import axios from 'axios';
+import Link from 'next/link';
 import { API_URL } from '@/constants';
 import { Artist } from '@/types';
 
@@ -142,14 +143,16 @@ export default function DashboardPage() {
         </div>
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
           {recommendedAlbums.map(album =>
-            <div key={album.id} style={{
-              width: 160, borderRadius: 14, background: '#fff',
-              boxShadow: '0 2px 12px 0 rgba(43,143,229,0.07)', padding: 14, textAlign: 'center'
-            }}>
-              <img src={album.coverUrl} alt={album.title} style={{ width: 132, height: 132, borderRadius: 10, objectFit: 'cover', marginBottom: 10 }} />
-              <div style={{ fontWeight: 600 }}>{album.title}</div>
-              <div style={{ color: '#888', fontSize: 14 }}>{album.artist.name}</div>
-            </div>
+             <Link key={album.id} href={`/album/${album.id}`}>
+              <div style={{
+                width: 160, borderRadius: 14, background: '#fff',
+                boxShadow: '0 2px 12px 0 rgba(43,143,229,0.07)', padding: 14, textAlign: 'center'
+              }}>
+                <img src={album.coverUrl} alt={album.title} style={{ width: 132, height: 132, borderRadius: 10, objectFit: 'cover', marginBottom: 10 }} />
+                <div style={{ fontWeight: 600 }}>{album.title}</div>
+                <div style={{ color: '#888', fontSize: 14 }}>{album.artist.name}</div>
+              </div>
+            </Link>
           )}
         </div>
       </section>
@@ -160,13 +163,15 @@ export default function DashboardPage() {
         </div>
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
           {popularPlaylists.map(playlist =>
-            <div key={playlist.id} style={{
-              width: 160, borderRadius: 14, background: '#fff',
-              boxShadow: '0 2px 12px 0 rgba(43,143,229,0.07)', padding: 14, textAlign: 'center'
-            }}>
-              <img src={playlist.coverPhoto} alt={playlist.name} style={{ width: 132, height: 132, borderRadius: 10, objectFit: 'cover', marginBottom: 10 }} />
-              <div style={{ fontWeight: 600 }}>{playlist.name}</div>
-            </div>
+            <Link key={playlist.id} href={`/playlist/${playlist.id}`}>
+              <div style={{
+                width: 160, borderRadius: 14, background: '#fff',
+                boxShadow: '0 2px 12px 0 rgba(43,143,229,0.07)', padding: 14, textAlign: 'center'
+              }}>
+                <img src={playlist.coverPhoto} alt={playlist.name} style={{ width: 132, height: 132, borderRadius: 10, objectFit: 'cover', marginBottom: 10 }} />
+                <div style={{ fontWeight: 600 }}>{playlist.name}</div>
+              </div>
+            </Link>
           )}
         </div>
       </section>
@@ -177,13 +182,15 @@ export default function DashboardPage() {
         </div>
         <div style={{ display: 'flex', gap: 22, flexWrap: 'wrap' }}>
           {popularArtists.map(artist =>
-            <div key={artist.id} style={{
-              width: 120, borderRadius: 14, background: '#fff',
-              boxShadow: '0 2px 12px 0 rgba(43,143,229,0.07)', padding: 14, textAlign: 'center'
-            }}>
-              <img src={artist.coverPhoto} alt={artist.name} style={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover', marginBottom: 10 }} />
-              <div style={{ fontWeight: 600 }}>{artist.name}</div>
-            </div>
+            <Link key={artist.id} href={`/artist/${artist.id}`}>
+              <div style={{
+                width: 120, borderRadius: 14, background: '#fff',
+                boxShadow: '0 2px 12px 0 rgba(43,143,229,0.07)', padding: 14, textAlign: 'center'
+              }}>
+                <img src={artist.coverPhoto} alt={artist.name} style={{ width: 96, height: 96, borderRadius: '50%', objectFit: 'cover', marginBottom: 10 }} />
+                <div style={{ fontWeight: 600 }}>{artist.name}</div>
+              </div>
+            </Link>
           )}
         </div>
       </section>

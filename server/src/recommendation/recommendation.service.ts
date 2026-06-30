@@ -343,7 +343,7 @@ export class RecommendationService {
   private async getUserFavoriteGenres(userId: string, history: any[]) {
     const genreCount: Record<string, number> = {};
     for (const item of history) {
-      const genreId = item.track.album.genreId;
+      const genreId = item.track.album?.genreId;
       if (genreId) genreCount[genreId] = (genreCount[genreId] || 0) + 1;
     }
     const topGenreIds = Object.entries(genreCount)
@@ -356,7 +356,8 @@ export class RecommendationService {
   private async getUserFavoriteArtists(userId: string, history: any[]) {
     const artistCount: Record<string, number> = {};
     for (const item of history) {
-      const artistId = item.track.authorId || item.track.album.artistId;
+      const artistId =
+        item.track.authorId || item.track.album?.artistId || item.track.author?.id;
       if (artistId) artistCount[artistId] = (artistCount[artistId] || 0) + 1;
     }
     const topArtistIds = Object.entries(artistCount)

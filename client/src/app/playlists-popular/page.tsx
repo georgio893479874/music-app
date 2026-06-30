@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "@/constants";
+import Link from "next/link";
 
 type Playlist = {
   id: string;
@@ -31,30 +32,31 @@ export default function PlaylistsPopularPage() {
       </h1>
       <div style={{ display: "flex", gap: 22, flexWrap: "wrap" }}>
         {playlists.map((playlist) => (
-          <div
-            key={playlist.id}
-            style={{
-              width: 160,
-              borderRadius: 14,
-              background: "#fff",
-              boxShadow: "0 2px 12px 0 rgba(43,143,229,0.07)",
-              padding: 14,
-              textAlign: "center",
-            }}
-          >
-            <img
-              src={playlist.coverPhoto}
-              alt={playlist.name}
+          <Link key={playlist.id} href={`/playlist/${playlist.id}`}>
+            <div
               style={{
-                width: 132,
-                height: 132,
-                borderRadius: 10,
-                objectFit: "cover",
-                marginBottom: 10,
+                width: 160,
+                borderRadius: 14,
+                background: "#fff",
+                boxShadow: "0 2px 12px 0 rgba(43,143,229,0.07)",
+                padding: 14,
+                textAlign: "center",
               }}
-            />
-            <div style={{ fontWeight: 600 }}>{playlist.name}</div>
-          </div>
+            >
+              <img
+                src={playlist.coverPhoto}
+                alt={playlist.name}
+                style={{
+                  width: 132,
+                  height: 132,
+                  borderRadius: 10,
+                  objectFit: "cover",
+                  marginBottom: 10,
+                }}
+              />
+              <div style={{ fontWeight: 600 }}>{playlist.name}</div>
+            </div>
+          </Link>
         ))}
       </div>
     </div>

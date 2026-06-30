@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "@/constants";
 import { Artist } from "@/types";
+import Link from "next/link";
 
 type Album = {
   id: string;
@@ -33,33 +34,34 @@ export default function AlbumsRecommendedPage() {
       </h1>
       <div style={{ display: "flex", gap: 22, flexWrap: "wrap" }}>
         {albums.map((album) => (
-          <div
-            key={album.id}
-            style={{
-              width: 160,
-              borderRadius: 14,
-              background: "#fff",
-              boxShadow: "0 2px 12px 0 rgba(43,143,229,0.07)",
-              padding: 14,
-              textAlign: "center",
-            }}
-          >
-            <img
-              src={album.coverUrl}
-              alt={album.title}
+          <Link key={album.id} href={`/album/${album.id}`}>
+            <div
               style={{
-                width: 132,
-                height: 132,
-                borderRadius: 10,
-                objectFit: "cover",
-                marginBottom: 10,
+                width: 160,
+                borderRadius: 14,
+                background: "#fff",
+                boxShadow: "0 2px 12px 0 rgba(43,143,229,0.07)",
+                padding: 14,
+                textAlign: "center",
               }}
-            />
-            <div style={{ fontWeight: 600 }}>{album.title}</div>
-            <div style={{ color: "#888", fontSize: 14 }}>
-              {album.artist.name}
+            >
+              <img
+                src={album.coverUrl}
+                alt={album.title}
+                style={{
+                  width: 132,
+                  height: 132,
+                  borderRadius: 10,
+                  objectFit: "cover",
+                  marginBottom: 10,
+                }}
+              />
+              <div style={{ fontWeight: 600 }}>{album.title}</div>
+              <div style={{ color: "#888", fontSize: 14 }}>
+                {album.artist.name}
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import { API_URL } from "@/constants";
 import { Artist } from "@/types";
+import Link from "next/link";
 
 export default function ArtistsPopularPage() {
   const [artists, setArtists] = useState<Artist[]>([]);
@@ -26,30 +27,31 @@ export default function ArtistsPopularPage() {
       </h1>
       <div style={{ display: "flex", gap: 22, flexWrap: "wrap" }}>
         {artists.map((artist) => (
-          <div
-            key={artist.id}
-            style={{
-              width: 120,
-              borderRadius: 14,
-              background: "#fff",
-              boxShadow: "0 2px 12px 0 rgba(43,143,229,0.07)",
-              padding: 14,
-              textAlign: "center",
-            }}
-          >
-            <img
-              src={artist.coverPhoto}
-              alt={artist.name}
+          <Link key={artist.id} href={`/artist/${artist.id}`}>
+            <div
               style={{
-                width: 96,
-                height: 96,
-                borderRadius: "50%",
-                objectFit: "cover",
-                marginBottom: 10,
+                width: 120,
+                borderRadius: 14,
+                background: "#fff",
+                boxShadow: "0 2px 12px 0 rgba(43,143,229,0.07)",
+                padding: 14,
+                textAlign: "center",
               }}
-            />
-            <div style={{ fontWeight: 600 }}>{artist.name}</div>
-          </div>
+            >
+              <img
+                src={artist.coverPhoto}
+                alt={artist.name}
+                style={{
+                  width: 96,
+                  height: 96,
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  marginBottom: 10,
+                }}
+              />
+              <div style={{ fontWeight: 600 }}>{artist.name}</div>
+            </div>
+          </Link>
         ))}
       </div>
     </div>
