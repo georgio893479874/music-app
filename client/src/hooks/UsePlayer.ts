@@ -10,9 +10,7 @@ const getAudioSource = (path: string) => {
     if (allowedHosts.some((host) => parsed.hostname.includes(host))) {
       return `${API_URL}/import/proxy?url=${encodeURIComponent(path)}`;
     }
-  } catch {
-    // not an absolute URL
-  }
+  } catch {}
   return path;
 };
 
@@ -46,7 +44,6 @@ const usePlayer = ({
 
     const handleLoadedMetadata = () => {
       if (audio) {
-        // prefer the source-provided duration if it exists and is noticeably larger
         const sourceDuration = songs?.[currentSongIndex]?.duration;
         const audioDur = isFinite(audio.duration) ? audio.duration : 0;
         if (sourceDuration && Math.abs(sourceDuration - audioDur) > 5) {

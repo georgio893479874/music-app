@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 import { FaPlay } from "react-icons/fa";
 import Link from "next/link";
-import ShareButton from "@/components/ShareButton";
+import ShareButton from "@/components/ShareButton/ShareButton";
 import Head from "next/head";
 import { Album, Artist, Track } from "@/types";
 import Image from "next/image";

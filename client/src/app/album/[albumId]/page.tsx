@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import Head from "next/head";
-import ShareButton from "@/components/ShareButton";
+import ShareButton from "@/components/ShareButton/ShareButton";
 import { Album } from "@/types";
 import Image from "next/image";
 import { API_URL } from "@/constants";
@@ -185,7 +185,7 @@ export default function AlbumPage() {
                     {listeningCounts[track.id] ?? "-"}
                   </td>
                   <td className="py-1">
-                    <ShareButton trackId={track.id} />
+                    <ShareButton/>
                   </td>
                 </tr>
               ))}

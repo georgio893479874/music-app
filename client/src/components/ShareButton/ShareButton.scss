@@ -1,0 +1,227 @@
+:root {
+  --tint: var(--indigo);
+  --gray: oklch(0.5 0 0);
+  --red: oklch(0.6 0.181447 27.0726);
+  --background-color: #f8f8f8;
+  --gray-50: #ffffff;
+  --lightness-100: 98.1187%; --lightness-200: 95.2045%; --lightness-300: 91.1434%;
+  --lightness-400: 85.1751%; --lightness-500: 79.1773%; --lightness-600: 72.3297%;
+  --lightness-1000: 51.9076%; --lightness-1200: 41.0821%; --lightness-1300: 35.3616%; --lightness-1400: 29.6725%;
+  --tint-100: oklch(from var(--tint) var(--lightness-100) calc(var(--lightness-100) * c * 0.5) h);
+  --tint-200: oklch(from var(--tint) var(--lightness-200) calc(var(--lightness-200) * c * 0.6) h);
+  --tint-1000: oklch(from var(--tint) var(--lightness-1000) c h);
+  --tint-1200: oklch(from var(--tint) var(--lightness-1200) c h);
+  --tint-1300: oklch(from var(--tint) var(--lightness-1300) c h);
+  --gray-100: oklch(from var(--gray) var(--lightness-100) c h);
+  --gray-200: oklch(from var(--gray) var(--lightness-200) c h);
+  --gray-300: oklch(from var(--gray) var(--lightness-300) c h);
+  --gray-400: oklch(from var(--gray) var(--lightness-400) c h);
+  --gray-500: oklch(from var(--gray) var(--lightness-500) c h);
+  --gray-600: oklch(from var(--gray) var(--lightness-600) c h);
+  --gray-1000: oklch(from var(--gray) var(--lightness-1000) c h);
+  --gray-1200: oklch(from var(--gray) var(--lightness-1200) c h);
+  --gray-1300: oklch(from var(--gray) var(--lightness-1300) c h);
+  --gray-1400: oklch(from var(--gray) var(--lightness-1400) c h);
+  --highlight-hover: rgb(0 0 0 / 0.07);
+  --highlight-pressed: rgb(0 0 0 / 0.15);
+  --overlay-background: var(--gray-50);
+  --overlay-border: rgb(0 0 0 / 0.06);
+  --popover-shadow: 0 8px 20px rgba(0 0 0 / 0.12);
+  --focus-ring-color: var(--tint-1000);
+  --text-color: var(--gray-1200);
+  --text-color-disabled: var(--gray-600);
+  --border-color: var(--gray-400);
+  --button-background: var(--tint-100);
+  --button-background-pressed: var(--tint-200);
+  --highlight-background: oklch(from var(--tint) 55% c h);
+  --highlight-foreground: white;
+  --font-size: 0.875rem; --font-size-sm: 0.75rem;
+  --radius-sm: 6px; --radius-lg: 10px;
+  --spacing: 0.25rem;
+  --spacing-1: var(--spacing);
+  --spacing-2: calc(2 * var(--spacing));
+  --spacing-3: calc(3 * var(--spacing));
+  --spacing-4: calc(4 * var(--spacing));
+  --spacing-6: calc(6 * var(--spacing));
+  --spacing-8: calc(8 * var(--spacing));
+
+  @media (prefers-color-scheme: dark) {
+    --background-color: #1b1b1b;
+    --gray-50: oklch(22% 0 0);
+    --lightness-100: 29.6725%; --lightness-200: 35.3616%; --lightness-300: 41.0821%;
+    --lightness-400: 46.9058%; --lightness-500: 51.9076%; --lightness-600: 57.9699%;
+    --lightness-1000: 67.0121%; --lightness-1200: 79.1773%; --lightness-1300: 85.1751%; --lightness-1400: 91.1434%;
+    --highlight-hover: rgb(255 255 255 / 0.1);
+    --highlight-pressed: rgb(255 255 255 / 0.2);
+    --overlay-background: var(--gray-100);
+    --overlay-border: rgb(255 255 255 / 0.2);
+    --popover-shadow: 0 8px 20px rgba(0 0 0 / 0.5);
+  }
+
+  @media (forced-colors: active) {
+    --background-color: Canvas; --overlay-background: Canvas;
+    --text-color: ButtonText; --text-color-disabled: GrayText;
+    --border-color: ButtonBorder; --overlay-border: ButtonBorder;
+    --button-background: ButtonFace; --button-background-pressed: ButtonFace;
+    --highlight-background: Highlight; --highlight-foreground: HighlightText;
+  }
+
+  @media (min-resolution: 200dpi) {
+    --spacing: calc(0.25rem * 1.25);
+    --font-size: 1.0625rem;
+    --font-size-sm: 0.9375rem;
+  }
+}
+
+%menu-grid-base {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: var(--spacing-3) var(--check-width, 0) auto 1fr auto var(--spacing-3);
+  &:has(> [data-selection-mode]) { --check-width: var(--spacing-6); }
+}
+
+.react-aria-Menu {
+  @extend %menu-grid-base;
+  min-height: 0;
+  max-height: inherit;
+  overflow: auto;
+  min-width: 150px;
+  box-sizing: border-box;
+  outline: none;
+  border-radius: inherit;
+  grid-auto-rows: max-content;
+
+  &[data-empty] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-style: italic;
+    min-height: var(--spacing-8);
+  }
+
+  .react-aria-Separator {
+    grid-column: 1 / -1;
+    margin: 0 var(--spacing-2);
+    border: 0;
+    border-top: 0.5px solid var(--border-color);
+
+    .react-aria-MenuItem + & { margin-block-start: var(--spacing-1); }
+    &:has(+ .react-aria-MenuItem) { margin-block-end: var(--spacing-1); }
+  }
+}
+
+.react-aria-MenuItem {
+  margin-inline: var(--spacing-1);
+  padding: calc((var(--spacing-8) - 1lh) / 2) 0;
+  border-radius: calc(var(--radius-lg) - var(--spacing-1));
+  outline: none;
+  cursor: default;
+  color: var(--text-color);
+  font: var(--font-size) system-ui;
+  position: relative;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-areas: '. check icon label end .' '. . . desc end .';
+  grid-template-columns: subgrid;
+  align-items: center;
+  forced-color-adjust: none;
+
+  > svg:not(.lucide-check, .lucide-dot, .lucide-chevron-right) {
+    grid-area: icon;
+    width: var(--spacing-4);
+    height: var(--spacing-4);
+    justify-self: center;
+    margin-inline-end: var(--spacing-2);
+  }
+
+  &:first-of-type { margin-top: var(--spacing); }
+  &:last-of-type { margin-bottom: var(--spacing); }
+  &[data-open], &[data-pressed] { background: var(--highlight-hover); }
+  &[data-focused] {
+    background: var(--highlight-background);
+    color: var(--highlight-foreground);
+    kbd { background: rgb(255 255 255 / 0.1); border-color: rgb(255 255 255 / 0.2); }
+  }
+
+  &[data-selection-mode] {
+    .lucide-check, .lucide-dot { grid-area: check; width: var(--spacing-4); height: var(--spacing-4); }
+    .lucide-check { stroke-width: 3px; }
+    .lucide-dot { scale: 3; }
+  }
+
+  &[href] { text-decoration: none; cursor: pointer; }
+  &[data-disabled] { color: var(--text-color-disabled); }
+  .react-aria-Text:not([slot]), [slot='label'] { grid-area: label; font-weight: 500; }
+  [slot='description'] { font-size: var(--font-size-sm); grid-area: desc; }
+
+  kbd {
+    grid-area: end; justify-self: end;
+    margin-inline-start: var(--spacing-4);
+    font: var(--font-size-sm) system-ui;
+    text-align: end;
+    background: var(--highlight-hover);
+    border: 0.5px solid var(--highlight-pressed);
+    padding: 0 var(--spacing-1);
+    border-radius: var(--radius-sm);
+  }
+
+  .lucide-chevron-right {
+    grid-area: end; justify-self: end;
+    margin-left: var(--spacing-1);
+    width: var(--spacing-4); height: var(--spacing-4);
+  }
+}
+
+.react-aria-MenuSection {
+  @extend %menu-grid-base;
+
+  .react-aria-Header {
+    grid-column: 1 / -1;
+    font: 600 var(--font-size-sm) system-ui;
+    padding: var(--spacing-1) var(--spacing-3);
+    background: var(--gray-100);
+    border-block: 0.5px solid var(--gray-400);
+    cursor: default;
+    user-select: none;
+    box-shadow: inset 0 1px 0 white, inset 0 -4px 8px var(--gray-200);
+
+    @media (prefers-color-scheme: dark) { box-shadow: inset 0 4px 8px var(--gray-200); }
+  }
+  &:first-child .react-aria-Header { margin-top: -0.5px; }
+}
+
+.react-aria-Popover {
+  --background-color: var(--overlay-background);
+  outline: 1px solid var(--overlay-border);
+  box-sizing: border-box;
+  filter: drop-shadow(var(--popover-shadow));
+  border-radius: var(--radius-lg);
+  background: var(--background-color);
+  color: var(--text-color);
+  transition: transform 200ms, opacity 200ms;
+  font: var(--font-size) system-ui;
+  padding: 8px;
+
+  &[data-trigger*='MenuTrigger'] { padding: 0; }
+
+  .react-aria-OverlayArrow svg {
+    display: block; fill: var(--background-color); stroke: var(--overlay-border);
+    paint-order: stroke; stroke-width: 2px;
+  }
+
+  &[data-entering], &[data-exiting] { transform: var(--origin); opacity: 0; }
+
+  &[data-placement='top'] { --origin: translateY(8px); &:has(.react-aria-OverlayArrow) { margin-bottom: 6px; } }
+  &[data-placement='bottom'] {
+    --origin: translateY(-8px); &:has(.react-aria-OverlayArrow) { margin-top: 6px; }
+    .react-aria-OverlayArrow svg { transform: rotate(180deg); }
+  }
+  &[data-placement='right'] {
+    --origin: translateX(-8px); &:has(.react-aria-OverlayArrow) { margin-left: 6px; }
+    .react-aria-OverlayArrow svg { transform: rotate(90deg); }
+  }
+  &[data-placement='left'] {
+    --origin: translateX(8px); &:has(.react-aria-OverlayArrow) { margin-right: 6px; }
+    .react-aria-OverlayArrow svg { transform: rotate(-90deg); }
+  }
+}
