@@ -68,7 +68,7 @@ model Track {
   title            String
   albumId          String?
   authorId         String?
-  album            Album?              @relation(fields: [albumId], references: [id])
+  album            Album?             @relation(fields: [albumId], references: [id])
   author           Artist?            @relation(name: "ArtistToTrack", fields: [authorId], references: [id])
   audioFilePath    String?            @unique
   users            User[]
@@ -79,8 +79,9 @@ model Track {
   Lyric            Lyric[]
   coverUrl         String?
   duration         Int?
-  externalId String?
-  source     String?
+  externalId       String?
+  source           String?
+  
   @@index([externalId, source])
 }
 
@@ -93,7 +94,7 @@ model Album {
   artist      Artist    @relation(fields: [artistId], references: [id])
   tracks      Track[]
   genreId     String?
-  genre       Genre?     @relation(fields: [genreId], references: [id])
+  genre       Genre?    @relation(fields: [genreId], references: [id])
   coverUrl    String?
   type        AlbumType @default(ALBUM)
 }

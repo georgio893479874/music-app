@@ -16,6 +16,13 @@ export class TrackService {
         authorId: createTrackDto.authorId,
         coverUrl: createTrackDto.coverUrl,
         duration: createTrackDto.duration,
+        users: createTrackDto.userId
+          ? {
+              connect: {
+                id: createTrackDto.userId,
+              },
+            }
+          : undefined,
       },
     });
     return track;
@@ -28,6 +35,32 @@ export class TrackService {
           contains: query,
           mode: 'insensitive',
         },
+      },
+    });
+  }
+
+  async findByUser(userId: string) {
+    return this.prisma.track.findMany({
+      where: {
+        users: {
+          some: {
+            id: userId,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: 'desc',
+      },
+      include: {
+        album: {
+          include: {
+            artist: true,
+          },
+        },
+        users: true,
+        playlists: true,
+        favorites: true,
+        ListeningHistory: true,
       },
     });
   }

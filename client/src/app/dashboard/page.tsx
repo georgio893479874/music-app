@@ -5,6 +5,7 @@ import axios from 'axios';
 import Link from 'next/link';
 import { API_URL } from '@/constants';
 import { Artist } from '@/types';
+import { usePlayerContext } from '@/contexts/PlayerContext';
 
 
 type Album = {
@@ -24,6 +25,7 @@ type Track = {
   id: string;
   title: string;
   duration: number;
+  audioFilePath?: string;
   album: Album;
   coverImagePath?: string;
   author?: Artist;
@@ -34,17 +36,26 @@ export default function DashboardPage() {
   const [recommendedAlbums, setRecommendedAlbums] = useState<Album[]>([]);
   const [popularPlaylists, setPopularPlaylists] = useState<Playlist[]>([]);
   const [popularArtists, setPopularArtists] = useState<Artist[]>([]);
+  const { setSelectedSong, setSongs } = usePlayerContext();
 
   useEffect(() => {
     async function fetchAll() {
       const userId = localStorage.getItem('userId');
+      if (!userId) {
+        setLatestTracks([]);
+        setRecommendedAlbums([]);
+        setPopularPlaylists([]);
+        setPopularArtists([]);
+        return;
+      }
+
       const [
         latestTracksRes,
         albumsRes,
         playlistsRes,
         artistsRes,
       ] = await Promise.all([
-        axios.get<Track[]>(`${API_URL}/recommendation/user/${userId}?type=NEW_MUSIC`),
+        axios.get<Track[]>(`${API_URL}/recommendation/user/${userId}/latest-tracks`),
         axios.get<Album[]>(`${API_URL}/recommendation/user/${userId}/recommended-albums`),
         axios.get<Playlist[]>(`${API_URL}/recommendation/user/${userId}/popular-playlists`),
         axios.get<Artist[]>(`${API_URL}/recommendation/user/${userId}/popular-artists`),
@@ -111,9 +122,18 @@ export default function DashboardPage() {
           <table style={{ width: '100%', borderCollapse: 'separate', borderSpacing: '0 10px' }}>
             <tbody>
               {latestTracks.map((track, i) => (
-                <tr key={track.id} style={{ background: i % 2 === 0 ? '#f8fbff' : '#fff', borderRadius: 10, boxShadow: '0 1px 3px 0 rgba(43,143,229,0.04)' }}>
+                <tr
+                  key={track.id}
+                  onClick={() => {}}
+                  style={{
+                    background: i % 2 === 0 ? '#f8fbff' : '#fff',
+                    borderRadius: 10,
+                    boxShadow: '0 1px 3px 0 rgba(43,143,229,0.04)',
+                    cursor: 'pointer',
+                  }}
+                >
                   <td style={{ width: 44, textAlign: 'center' }}>
-                    <button style={{
+                    <button type="button" style={{
                       background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: '#2b8fe5'
                     }}>▶</button>
                   </td>
@@ -128,7 +148,7 @@ export default function DashboardPage() {
                   </td>
                   <td style={{ color: '#888', fontSize: 14 }}>{Math.floor(track.duration / 60)}:{(track.duration % 60).toString().padStart(2, '0')}</td>
                   <td style={{ textAlign: 'center' }}>
-                    <button style={{ background: 'none', border: 'none', fontSize: 20, color: '#2b8fe5', cursor: 'pointer' }}>♡</button>
+                    <button type="button" style={{ background: 'none', border: 'none', fontSize: 20, color: '#2b8fe5', cursor: 'pointer' }}>♡</button>
                   </td>
                 </tr>
               ))}

@@ -240,6 +240,59 @@ export class ImportService {
     };
   }
 
+  private async fetchLyricsForTrack(title: string, artist: string) {
+    const cleanTitle = (title || '').trim();
+    const cleanArtist = (artist || '').trim();
+
+    if (!cleanTitle || !cleanArtist) {
+      return null;
+    }
+
+    const candidates = [
+      `https://api.lyrics.ovh/v1/${encodeURIComponent(cleanArtist)}/${encodeURIComponent(cleanTitle)}`,
+      `https://api.lyrics.ovh/v1/${encodeURIComponent(cleanTitle)}/${encodeURIComponent(cleanArtist)}`,
+    ];
+
+    for (const url of candidates) {
+      try {
+        const { data } = await axios.get(url, { timeout: 6000 });
+        const lyricText = typeof data === 'string' ? data : data?.lyrics || data?.lyric;
+
+        if (typeof lyricText === 'string' && lyricText.trim().length > 10) {
+          return lyricText.trim();
+        }
+      } catch (e) {
+        // Ignore and try next provider
+      }
+    }
+
+    return null;
+  }
+
+  private async importLyricsForTrack(trackId: string, title: string, artist: string) {
+    if (!trackId) {
+      return null;
+    }
+
+    const existingLyric = await this.prisma.lyric.findFirst({ where: { trackId } });
+    if (existingLyric) {
+      return existingLyric;
+    }
+
+    const lyrics = await this.fetchLyricsForTrack(title, artist);
+    if (!lyrics) {
+      return null;
+    }
+
+    return this.prisma.lyric.create({
+      data: {
+        text: lyrics,
+        timestamp: 0,
+        trackId,
+      },
+    });
+  }
+
   async importTrack(track: {
     id: string;
     title: string;
@@ -261,7 +314,10 @@ export class ImportService {
       },
     });
 
-    if (existing) return existing;
+    if (existing) {
+      await this.importLyricsForTrack(existing.id, track.title, track.artist);
+      return existing;
+    }
 
     const artist = await this.prisma.artist.upsert({
       where: { name: track.artist },
@@ -285,7 +341,7 @@ export class ImportService {
 
     const audioPath = track.audioFilePath;
 
-    return this.prisma.track.create({
+    const createdTrack = await this.prisma.track.create({
       data: {
         title: track.title,
         duration: track.duration,
@@ -297,6 +353,10 @@ export class ImportService {
         ...(albumConnect ? { album: albumConnect } : {}),
       },
     });
+
+    await this.importLyricsForTrack(createdTrack.id, track.title, track.artist);
+
+    return createdTrack;
   }
 
   async importFromSearch(query: string) {

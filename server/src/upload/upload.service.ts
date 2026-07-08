@@ -7,7 +7,7 @@ export class UploadService {
 
   async uploadImage(file: Express.Multer.File): Promise<UploadApiResponse> {
     return new Promise((resolve, reject) => {
-      this.cloudinary.uploader.upload_stream({ resource_type: 'image' }, (error, result) => {
+      this.cloudinary.uploader.upload_stream({ resource_type: 'auto' }, (error, result) => {
         if (error) return reject(error);
         resolve(result);
       }).end(file.buffer);

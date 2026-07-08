@@ -6,11 +6,12 @@ export interface Track {
   audioFilePath: string;
   isPreview?: boolean;
 	authorId?: string;
-	coverImagePath: string;
+	coverImagePath?: string;
+	coverUrl?: string;
 	album?: Album;
 	artistName?: string;
   listens?: number;
-  duration: number;
+  duration?: number;
   type?: 'yt' | 'db';
 }
 

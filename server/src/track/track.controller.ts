@@ -17,6 +17,11 @@ export class TrackController {
     return this.trackService.findAll(query);
   }
 
+  @Get('user/:userId')
+  findByUser(@Param('userId') userId: string) {
+    return this.trackService.findByUser(userId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.trackService.findOne(id);
