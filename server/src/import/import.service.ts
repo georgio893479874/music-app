@@ -261,9 +261,7 @@ export class ImportService {
         if (typeof lyricText === 'string' && lyricText.trim().length > 10) {
           return lyricText.trim();
         }
-      } catch (e) {
-        // Ignore and try next provider
-      }
+      } catch (e) {}
     }
 
     return null;

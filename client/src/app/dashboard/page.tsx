@@ -5,8 +5,6 @@ import axios from 'axios';
 import Link from 'next/link';
 import { API_URL } from '@/constants';
 import { Artist } from '@/types';
-import { usePlayerContext } from '@/contexts/PlayerContext';
-
 
 type Album = {
   id: string;
@@ -36,7 +34,6 @@ export default function DashboardPage() {
   const [recommendedAlbums, setRecommendedAlbums] = useState<Album[]>([]);
   const [popularPlaylists, setPopularPlaylists] = useState<Playlist[]>([]);
   const [popularArtists, setPopularArtists] = useState<Artist[]>([]);
-  const { setSelectedSong, setSongs } = usePlayerContext();
 
   useEffect(() => {
     async function fetchAll() {
