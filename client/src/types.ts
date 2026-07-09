@@ -7,7 +7,6 @@ export interface Track {
   isPreview?: boolean;
 	authorId?: string;
 	coverImagePath?: string;
-	coverUrl?: string;
 	album?: Album;
 	artistName?: string;
   listens?: number;
