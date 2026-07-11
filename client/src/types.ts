@@ -46,7 +46,9 @@ export interface Artist {
 export interface Genre {
   id: string;
   name: string;
+  albums?: Album[];
 }
+
 
 export interface AuthFormProps {
   title: string;

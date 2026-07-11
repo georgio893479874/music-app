@@ -6,7 +6,7 @@ export class CreateAlbumDto {
   title: string;
 
   @IsDateString()
-  releaseDate: string; // <-- має бути string
+  releaseDate: string;
 
   @IsString()
   @IsNotEmpty()

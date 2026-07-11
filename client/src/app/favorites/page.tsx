@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { Track } from "@/types";
-import ListOfSongs from "@/components/ListOfSongs";
+import ListOfSongs from "@/components/ListOfSongs/ListOfSongs";
 import { usePlayerContext } from "@/contexts/PlayerContext";
 import { API_URL } from "@/constants";
 

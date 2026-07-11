@@ -1,6 +1,6 @@
 "use client";
 
-import AuthForm from "@/components/AuthForm";
+import AuthForm from "@/components/AuthForm/AuthForm";
 import { useRouter } from "next/navigation";
 import { LoginFormValues } from "@/types";
 import { login } from "@/api";

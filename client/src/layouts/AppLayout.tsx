@@ -1,9 +1,9 @@
 "use client";
 
-import Header from "@/components/Header";
-import Player from "@/components/Player";
-import Sidebar from "@/components/Sidebar";
-import Queue from "@/components/Queue";
+import Header from "@/components/Header/Header";
+import Player from "@/components/Player/Player";
+import Sidebar from "@/components/Sidebar/Sidebar";
+import Queue from "@/components/Queue/Queue";
 import { usePathname } from "next/navigation";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useState, useEffect } from "react";

@@ -245,7 +245,6 @@ function SearchPageContent() {
   });
 
   function playSong(track: Track) {
-    // If clicked track is a preview, try to find a full version in current results
     const fullVersion = searchResults.find((r) => {
       if (!isTrack(r)) return false;
       const candidate = r as Track;
@@ -316,18 +315,19 @@ function SearchPageContent() {
             </h2>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-5xl mx-auto">
               {genres.map((genre, index) => (
-                <div
-                  key={index}
-                  className="relative cursor-pointer overflow-hidden rounded-xl shadow-lg transition-transform transform hover:scale-105"
-                >
-                  <Image
-                    src={genre.image}
-                    alt="genre cover"
-                    className="object-cover"
-                    width={275}
-                    height={275}
-                  />
-                </div>
+                <Link key={index} href={`/genre/${genre.id}`}>
+                  <div
+                    className="relative cursor-pointer overflow-hidden rounded-xl shadow-lg transition-transform transform hover:scale-105"
+                  >
+                    <Image
+                      src={genre.image}
+                      alt="genre cover"
+                      className="object-cover"
+                      width={275}
+                      height={275}
+                    />
+                  </div>
+                </Link>
               ))}
             </div>
           </>

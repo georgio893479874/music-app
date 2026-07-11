@@ -4,7 +4,7 @@ import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import axios from 'axios';
 import { Playlist } from '@/types';
-import ListOfSongs from '@/components/ListOfSongs';
+import ListOfSongs from '@/components/ListOfSongs/ListOfSongs';
 import { usePlayerContext } from '@/contexts/PlayerContext';
 import { API_URL, getUserId } from '@/constants';
 

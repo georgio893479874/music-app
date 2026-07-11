@@ -51,8 +51,8 @@ export default function Sidebar({
           <SidebarItem
             icon={<Album className="w-5 h-5" />}
             label="Albums"
-            href="/albums"
-            active={isActive("/albums")}
+            href="/albums-recommended"
+            active={isActive("/albums-recommended")}
             collapsed={collapsed}
           />
           <SidebarItem

@@ -1,6 +1,6 @@
 'use client'
 
-import AuthForm from '@/components/AuthForm';
+import AuthForm from '@/components/AuthForm/AuthForm';
 import { SignUpFormValues } from '@/types';
 import { signup } from '@/api';
 

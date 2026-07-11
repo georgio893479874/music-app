@@ -124,17 +124,17 @@ export const tracks = [
 ];
 
 export const genres = [
-  { image: "/pop.webp" },
-  { image: "/jazz.webp" },
-  { image: "/electronic.webp" },
-  { image: "/funk.webp" },
-  { image: "/country.webp" },
-  { image: "/rock.webp" },
-  { image: "/classical.webp" },
-  { image: "/RnB.webp" },
-  { image: "/soul.webp" },
-  { image: "/blues.webp" },
-  { image: "/hip-hop.webp" },
+  { image: "/pop.webp", id: 1 },
+  { image: "/jazz.webp", id: 2 },
+  { image: "/electronic.webp", id: 3 },
+  { image: "/funk.webp", id: 4 },
+  { image: "/country.webp", id: 5 },
+  { image: "/rock.webp", id: 6 },
+  { image: "/classical.webp", id: 7 },
+  { image: "/RnB.webp", id: 8 },
+  { image: "/soul.webp", id: 9 },
+  { image: "/blues.webp", id: 10 },
+  { image: "/hip-hop.webp", id: 11 },
 ];
 
 export const mobileActions = [

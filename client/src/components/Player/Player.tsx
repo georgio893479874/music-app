@@ -23,7 +23,7 @@ import {
   Shuffle,
 } from "lucide-react";
 import Image from "next/image";
-import FullscreenPlayer from "./FullscreenPlayer";
+import FullscreenPlayer from "../FullscreenPlayer/FullscreenPlayer";
 import { API_URL } from "@/constants";
 import { fetchSongsByAlbumId } from "@/api";
 
