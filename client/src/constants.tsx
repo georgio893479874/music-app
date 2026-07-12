@@ -134,7 +134,10 @@ export const genres = [
   { image: "/RnB.webp", id: 8 },
   { image: "/soul.webp", id: 9 },
   { image: "/blues.webp", id: 10 },
-  { image: "/hip-hop.webp", id: 11 },
+  { image: "/latino.webp", id: 11 },
+  { image: "/metal.webp", id: 12 },
+  { image: "/k-pop.webp", id: 13 },
+  { image: "/indie.webp", id: 14 },
 ];
 
 export const mobileActions = [
