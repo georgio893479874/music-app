@@ -144,6 +144,9 @@ export const genres = [
   { image: "/karaoke.webp", id: 18 },
   { image: "/dance.webp", id: 19 },
   { image: "/punk.webp", id: 20 },
+  { image: "/fitness&workout.webp", id: 21 },
+  { image: "/folk.webp", id: 22 },
+  { image: "/industrial.webp", id: 23 },
 ];
 
 export const mobileActions = [
