@@ -152,11 +152,12 @@ export const genres = [
   { image: "/opera.webp", id: 26 },
   { image: "/90s.webp", id: 27 },
   { image: "/2000s.webp", id: 28 },
-  { image: "/focus.webp", id: 29 },
-  { image: "/sleep.webp", id: 30 },
-  { image: "/hits.webp", id: 31 },
-  { image: "/essentials.webp", id: 32 },
-  { image: "/charts.webp", id: 33 },
+  { image: "/2010s.webp", id: 29 },
+  { image: "/focus.webp", id: 30 },
+  { image: "/sleep.webp", id: 31 },
+  { image: "/hits.webp", id: 32 },
+  { image: "/essentials.webp", id: 33 },
+  { image: "/charts.webp", id: 34 },
 ];
 
 export const mobileActions = [
